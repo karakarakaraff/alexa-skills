@@ -2,13 +2,6 @@
 /* eslint-disable  dot-notation */
 /* eslint-disable  new-cap */
 /* eslint quote-props: ['error', 'consistent']*/
-/**
- * This sample demonstrates a simple skill built with the Amazon Alexa Skills
- * nodejs skill development kit.
- * This sample supports en-US lauguage.
- * The Intent Schema, Custom Slots and Sample Utterances for this skill, as well
- * as testing instructions are located at https://github.com/alexa/skill-sample-nodejs-trivia
- **/
 
 'use strict';
 
@@ -22,17 +15,13 @@ const GAME_STATES = {
     START: '_STARTMODE', // Entry point, start the game.
     HELP: '_HELPMODE', // The user is asking for help.
 };
-const APP_ID = undefined; // TODO replace with your app ID (OPTIONAL)
+const APP_ID = 'amzn1.ask.skill.767c4b14-472d-41b5-92fa-499f851d409e';
 
-/**
- * When editing your questions pay attention to your punctuation. Make sure you use question marks or periods.
- * Make sure the first answer is the correct one. Set at least ANSWER_COUNT answers, any extras will be shuffled in.
- */
 const languageString = {
     'en': {
         'translation': {
             'QUESTIONS': questions['QUESTIONS_EN_US'],
-            'GAME_NAME': 'Reindeer Trivia', // Be sure to change this for your skill.
+            'GAME_NAME': 'Stranger Things Trivia',
             'HELP_MESSAGE': 'I will ask you %s multiple choice questions. Respond with the number of the answer. ' +
                 'For example, say one, two, three, or four. To start a new game at any time, say, start game. ',
             'REPEAT_QUESTION_MESSAGE': 'To repeat the last question, say, repeat. ',
@@ -59,40 +48,7 @@ const languageString = {
     'en-US': {
         'translation': {
             'QUESTIONS': questions['QUESTIONS_EN_US'],
-            'GAME_NAME': 'American Reindeer Trivia', // Be sure to change this for your skill.
-        },
-    },
-    'en-GB': {
-        'translation': {
-            'QUESTIONS': questions['QUESTIONS_EN_GB'],
-            'GAME_NAME': 'British Reindeer Trivia', // Be sure to change this for your skill.
-        },
-    },
-    'de': {
-        'translation': {
-            'QUESTIONS': questions['QUESTIONS_DE_DE'],
-            'GAME_NAME': 'Wissenswertes über Rentiere in Deutsch', // Be sure to change this for your skill.
-            'HELP_MESSAGE': 'Ich stelle dir %s Multiple-Choice-Fragen. Antworte mit der Zahl, die zur richtigen Antwort gehört. ' +
-                'Sage beispielsweise eins, zwei, drei oder vier. Du kannst jederzeit ein neues Spiel beginnen, sage einfach „Spiel starten“. ',
-            'REPEAT_QUESTION_MESSAGE': 'Wenn die letzte Frage wiederholt werden soll, sage „Wiederholen“ ',
-            'ASK_MESSAGE_START': 'Möchten Sie beginnen?',
-            'HELP_REPROMPT': 'Wenn du eine Frage beantworten willst, antworte mit der Zahl, die zur richtigen Antwort gehört. ',
-            'STOP_MESSAGE': 'Möchtest du weiterspielen?',
-            'CANCEL_MESSAGE': 'OK, dann lass uns bald mal wieder spielen.',
-            'NO_MESSAGE': 'OK, spielen wir ein andermal. Auf Wiedersehen!',
-            'TRIVIA_UNHANDLED': 'Sagt eine Zahl beispielsweise zwischen 1 und %s',
-            'HELP_UNHANDLED': 'Sage ja, um fortzufahren, oder nein, um das Spiel zu beenden.',
-            'START_UNHANDLED': 'Du kannst jederzeit ein neues Spiel beginnen, sage einfach „Spiel starten“.',
-            'NEW_GAME_MESSAGE': 'Willkommen bei %s. ',
-            'WELCOME_MESSAGE': 'Ich stelle dir %s Fragen und du versuchst, so viele wie möglich richtig zu beantworten. ' +
-            'Sage einfach die Zahl, die zur richtigen Antwort passt. Fangen wir an. ',
-            'ANSWER_CORRECT_MESSAGE': 'Richtig. ',
-            'ANSWER_WRONG_MESSAGE': 'Falsch. ',
-            'CORRECT_ANSWER_MESSAGE': 'Die richtige Antwort ist %s: %s. ',
-            'ANSWER_IS_MESSAGE': 'Diese Antwort ist ',
-            'TELL_QUESTION_MESSAGE': 'Frage %s. %s ',
-            'GAME_OVER_MESSAGE': 'Du hast %s von %s richtig beantwortet. Danke fürs Mitspielen!',
-            'SCORE_IS_MESSAGE': 'Dein Ergebnis ist %s. ',
+            'GAME_NAME': 'Stranger Things Trivia',
         },
     },
 };

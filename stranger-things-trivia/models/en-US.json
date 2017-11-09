@@ -42,7 +42,10 @@
             "skip",
             "i don't know that",
             "who knows",
-            "i don't know this question"
+            "i don't know this question",
+            "i have no idea",
+            "no idea",
+            "next"
           ],
           "slots": []
         }

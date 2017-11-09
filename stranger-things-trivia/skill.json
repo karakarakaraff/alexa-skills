@@ -3,18 +3,18 @@
     "publishingInformation": {
       "locales": {
         "en-US": {
-          "summary": "Sample Short Description",
+          "summary": "Prove you're not a mouthbreather with your Stranger Things knowledge.",
           "examplePhrases": [
-            "Alexa open reindeer trivia",
-            "Alexa tell reindeer trivia to start a game",
-            "Alexa tell reindeer trivia I want to play"
+            "Alexa open Stranger Things Trivia",
+            "Alexa tell Stranger Things Trivia to start a game",
+            "Alexa tell Stranger Things Trivia I want to play"
           ],
-          "name": "reindeer trivia",
-          "description": "Sample Full Description"
+          "name": "Stranger Things Trivia",
+          "description": "Do you believe you're a Stranger Things expert? See if you've got what it takes to join the party and defeat the evil of the upsidedown."
         }
       },
       "isAvailableWorldwide": true,
-      "testingInstructions": "Sample Testing Instructions.",
+      "testingInstructions": "This was built using the Trivia Sample.",
       "category": "KNOWLEDGE_AND_TRIVIA",
       "distributionCountries": []
     },
