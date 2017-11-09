@@ -1,0 +1,46 @@
+{
+  "skillManifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "Kurt Vonnegut once said, \"And so it goes.\" And so it goes.",
+          "examplePhrases": [
+            "Alexa, open Kurt Vonnegut Quotes.",
+            "Alexa, ask Kurt Vonnegut Quotes for a quote.",
+            "Alexa, tell Kurt Vonnegut Quotes to give me a quote."
+          ],
+          "keywords": [
+            "kurt",
+            "vonnegut",
+            "quote",
+            "literature",
+            "humor",
+            "philosophy"
+          ],
+          "name": "Kurt Vonnegut Quotes",
+          "description": "Kurt Vonnegut Quotes brings all of your favorite thoughts, musings, and excerpts from the famous author to your fingertips. Fart around, learn something, and maybe laugh a little as you gain insight from the mind who wrote such classics as \"Slaughter-House Five\" and \"Cat's Cradle\" in addition to numerous essays, short stories, plays, and more. It's a dose of dark humor mixed with philosophy and a bit of absurdity — it's everything and nothing, with a twist."
+        }
+      },
+      "isAvailableWorldwide": true,
+      "testingInstructions": "This was built using the Fact Sample.",
+      "category": "NOVELTY_AND_HUMOR",
+      "distributionCountries": []
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sourceDir": "lambda/custom"
+        }
+      }
+    },
+    "manifestVersion": "1.0",
+    "permissions": [],
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "isChildDirected": false,
+      "usesPersonalInfo": false
+    }
+  }
+}

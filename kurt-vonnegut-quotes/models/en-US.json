@@ -1,0 +1,34 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "kurt vonnegut quotes",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "GetNewQuoteIntent",
+          "samples": [
+            "tell me a kurt vonnegut quote",
+            "give me a kurt vonnegut quote",
+            "tell me what kurt vonnegut said",
+            "what did kurt vonnegut say",
+            "tell me a quote",
+            "give me a quote",
+            "a quote"
+          ],
+          "slots": []
+        }
+      ]
+    }
+  }
+}
