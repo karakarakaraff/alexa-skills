@@ -3,7 +3,7 @@
 module.exports = {
     QUESTIONS_EN_US: [
         {
-          'Before getting the title \'Stranger Things,\' what was the series originally going to be called?': [
+          'Before getting the title \"Stranger Things,\" what was the series originally going to be called?': [
             'Montauk',
             'The Nether',
             '<phoneme alphabet="ipa" ph="dɛm ə gȯr gən">Demogorgon</phoneme> Darkness',
@@ -25,7 +25,7 @@ module.exports = {
           ],
         },
         {
-            'What is Will\'s mom\s name?': [
+            'What is Will\'s mom\'s name?': [
               'Joyce',
               'Susan',
               'Karen',
@@ -108,7 +108,7 @@ module.exports = {
         },
         {
             'What is the name of the first episode in season one?': [
-              'The Vanishing of Will Byars',
+              'The Vanishing of Will Byers',
               'The Flea and the Acrobat',
               'The Monster',
               'The Weirdo on Maple Street',
@@ -145,9 +145,9 @@ module.exports = {
               'Eleven',
               'Dr. Brenner',
               'A <phoneme alphabet="ipa" ph="dɛm ə gȯr gən">demogorgon</phoneme>',
-              'The four boys and their Dungeons and Dragons game',
+              'The four boys with their Dungeons and Dragons game',
               'The shadow monster',
-              'Workers are the laboratory',
+              'Workers in the laboratory',
             ],
         },
         {
@@ -421,7 +421,7 @@ module.exports = {
             ],
         },
         {
-            'In season two, Eleven\'s mom mumbles several things in a loop. What is not included in that loop?': [
+            'In season two, Eleven\'s mom mumbles several things in a loop. What is <emphasis level="strong">not</emphasis> included in that loop?': [
               'Butterfly',
               'Breathe',
               'Sunflower',
@@ -458,7 +458,7 @@ module.exports = {
             ],
         },
         {
-            'How many people watched \'Stranger Things 2\' in its first three days?': [
+            'How many people watched \"Stranger Things 2\" in its first three days?': [
               '8,000,000',
               '2,000,000',
               '300,000',
