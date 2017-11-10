@@ -6,7 +6,7 @@ module.exports = {
           'Before getting the title \'Stranger Things,\' what was the series originally going to be called?': [
             'Montauk',
             'The Nether',
-            'Demogorgon Darkness',
+            '<phoneme alphabet="ipa" ph="dɛm ə gȯr gən">Demogorgon</phoneme> Darkness',
             'Time Skip',
             'The Party and the Mage',
             'The Flea and the Acrobat',
@@ -144,9 +144,9 @@ module.exports = {
             'In season one, who opened the gate to the Upside Down?': [
               'Eleven',
               'Dr. Brenner',
-              'A demogorgon',
+              'A <phoneme alphabet="ipa" ph="dɛm ə gȯr gən">demogorgon</phoneme>',
               'The four boys and their Dungeons and Dragons game',
-              'Will\'s mom',
+              'The shadow monster',
               'Workers are the laboratory',
             ],
         },
@@ -199,7 +199,7 @@ module.exports = {
             ],
         },
         {
-            'In season one, who gives Eleven the nickname El?': [
+            'In season one, who gives Eleven the nickname \"El?\"': [
               'Mike',
               'Dustin',
               'Lucas',
@@ -216,7 +216,7 @@ module.exports = {
             ],
         },
         {
-            'In season one, what was Barb sitting on when she was taken by the demogorgon?': [
+            'In season one, what was Barb sitting on when she was taken by the <phoneme alphabet="ipa" ph="dɛm ə gȯr gən">demogorgon</phoneme>?': [
               'A diving board',
               'A pool chair',
               'The hood of her car',
@@ -337,7 +337,7 @@ module.exports = {
             ],
         },
         {
-            'In season two, how can Dustin tell which demodog is Dart?': [
+            'In season two, how can Dustin tell which <phoneme alphabet="ipa" ph="dɛm ə dɑg">demodog</phoneme> is Dart?': [
               'The yellow stripe on his back',
               'The yellow spot on his head',
               'The red stripe on his head',
