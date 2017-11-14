@@ -56,7 +56,7 @@ module.exports = {
         },
         {
             'Which club do the boys belong to at school?': [
-              'The AV club',
+              'The <say-as interpret-as="spell-out">AV</say-as> club',
               'The chess club',
               'The science club',
               'The literature club',
