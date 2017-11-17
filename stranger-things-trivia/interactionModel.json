@@ -18,6 +18,10 @@
         "samples": []
       },
       {
+        "name": "AMAZON.StartOverIntent",
+        "samples": []
+      },
+      {
         "name": "AMAZON.StopIntent",
         "samples": []
       },
