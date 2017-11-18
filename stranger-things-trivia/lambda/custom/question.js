@@ -120,7 +120,7 @@ module.exports = {
               'The Bathtub',
               'The Monster',
               'The Body',
-              'Holy, Jolly',
+              'Holly, Jolly',
               'The Flea and the Acrobat',
             ],
         },

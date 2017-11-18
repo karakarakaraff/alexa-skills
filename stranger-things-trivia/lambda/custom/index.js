@@ -45,12 +45,6 @@ const languageString = {
             'SCORE_IS_MESSAGE': 'Your score is %s. ',
         },
     },
-    'en-US': {
-        'translation': {
-            'QUESTIONS': questions['QUESTIONS_EN_US'],
-            'GAME_NAME': 'Stranger Things Trivia',
-        },
-    },
 };
 
 const newSessionHandlers = {
@@ -177,6 +171,8 @@ function handleUserGuess(userGaveUp) {
         const spokenQuestion = Object.keys(translatedQuestions[gameQuestions[currentQuestionIndex]])[0];
         const roundAnswers = populateRoundAnswers.call(this, gameQuestions, currentQuestionIndex, correctAnswerIndex, translatedQuestions);
         const questionIndexForSpeech = currentQuestionIndex + 1;
+        // Strip SSML tags from card
+        var regex = /(<([^>]+)>)/ig;
         let repromptText = this.t('TELL_QUESTION_MESSAGE', questionIndexForSpeech.toString(), spokenQuestion);
 
         for (let i = 0; i < ANSWER_COUNT; i++) {
@@ -197,7 +193,7 @@ function handleUserGuess(userGaveUp) {
         });
 
         this.response.speak(speechOutput).listen(repromptText);
-        this.response.cardRenderer(this.t('GAME_NAME', repromptText));
+        this.response.cardRenderer(this.t('GAME_NAME'), repromptText.replace(regex, ""));
         this.emit(':responseReady');
     }
 }
@@ -214,6 +210,8 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         const roundAnswers = populateRoundAnswers(gameQuestions, 0, correctAnswerIndex, translatedQuestions);
         const currentQuestionIndex = 0;
         const spokenQuestion = Object.keys(translatedQuestions[gameQuestions[currentQuestionIndex]])[0];
+        // Strip SSML tags from card
+        var regex = /(<([^>]+)>)/ig;
         let repromptText = this.t('TELL_QUESTION_MESSAGE', '1', spokenQuestion);
 
         for (let i = 0; i < ANSWER_COUNT; i++) {
@@ -236,13 +234,13 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
         this.handler.state = GAME_STATES.TRIVIA;
 
         this.response.speak(speechOutput).listen(repromptText);
-        this.response.cardRenderer(this.t('GAME_NAME'), repromptText);
+        this.response.cardRenderer(this.t('GAME_NAME'), repromptText.replace(regex, ""));
         this.emit(':responseReady');
     },
 });
 
 const triviaStateHandlers = Alexa.CreateStateHandler(GAME_STATES.TRIVIA, {
-    'AnswerIntent': function () {
+    'GetAnswerIntent': function () {
         handleUserGuess.call(this, false);
     },
     'DontKnowIntent': function () {
