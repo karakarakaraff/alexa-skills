@@ -8,4 +8,4 @@
 ## Stranger Things Trivia
 **Prove you're not a mouthbreather with your Stranger Things knowledge.** Do you believe you're a Stranger Things expert? See if you've got what it takes to join the party and defeat the evil of the Upside Down. Answer 11 questions, and if you get them all correct, congratulations! You have the truest of sight.
 
-*Status: certification*
+*Status: live* --> [Alexa Skills Store: Stranger Things Trivia](https://www.amazon.com/dp/B077BGK6M6)
