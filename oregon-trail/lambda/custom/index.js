@@ -175,6 +175,7 @@ var crossRiver = function(depth, sinkChance, cost) {
 var goShopping = function() {
   days++;
   trailDays++;
+  food -= (peopleHealthy.length + peopleSick.length);
   var toBuy = prompt("What do you want to buy? Type 'food', 'oxen', or 'parts'.");
   if (toBuy == "food") {
     var pounds = +prompt("Pound of food: 50 cents\nHow many pounds of food do you want to buy?");
@@ -219,6 +220,7 @@ var tradeItems = function(tradeChances) {
     if (tradeAttempts < tradeChances) {
       days++;
       trailDays++;
+      food -= (peopleHealthy.length + peopleSick.length);
       tradeAttempts++
       var tradeDeal = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
       if (tradeDeal === 1) {
@@ -330,6 +332,7 @@ var tradeItems = function(tradeChances) {
 var goHunting = function() {
   days++;
   trailDays++;
+  food -= (peopleHealthy.length + peopleSick.length);
   var randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
   var guess = +prompt("Guess a number between 1 and 10. If you guess within 3 integers of the correct number, you will shoot an animal. The closer you are to the number, the larger your animal. Your number:");
   var shootMessage;
@@ -373,24 +376,29 @@ var rest = function(restDays) {
   if (restDays >= 7) {
     days += restDays;
     trailDays += restDays;
+    food -= restDays*(peopleHealthy.length + peopleSick.length);
     recovery(5);
   } else if (restDays >= 5) {
     days += restDays;
     trailDays += restDays;
+    food -= restDays*(peopleHealthy.length + peopleSick.length);
     recovery(2);
   } else if (restDays >= 2) {
     days += restDays;
     trailDays += restDays;
+    food -= restDays*(peopleHealthy.length + peopleSick.length);
     recovery(1);
   } else {
     days++;
     trailDays++;
+    food -= (peopleHealthy.length + peopleSick.length);
   }
 };
 
 var snow = function(lostDays) {
   days += lostDays;
   trailDays += lostDays;
+  food -= lostDays*(peopleHealthy.length + peopleSick.length);
   if (lostDays === 1) {
     alert("You got stuck in some late spring snow. You have lost 1 day.");
   } else {
@@ -401,6 +409,7 @@ var snow = function(lostDays) {
 var storm = function(lostDays) {
   days += lostDays;
   trailDays += lostDays;
+  food -= lostDays*(peopleHealthy.length + peopleSick.length);
   if (lostDays >= 3) {
     oxen -= 1;
     alert("You got caught in a thunderstorm and an ox ran away. You lost " + lostDays + " days.");
@@ -483,6 +492,7 @@ var brokenWagon = function() {
     parts -= 1;
     days++;
     trailDays++;
+    food -= (peopleHealthy.length + peopleSick.length);
     alert("Your wagon broke, but you repaired it.");
   } else {
     alert("Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
@@ -494,6 +504,7 @@ var getLost = function() {
   howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
   days += howLong;
   trailDays += howLong;
+  food -= howLong*(peopleHealthy.length + peopleSick.length);
   if (howLong === 1) {
     alert("You lost the trail. You wasted 1 day.");
   } else {
