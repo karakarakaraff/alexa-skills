@@ -14,3 +14,4 @@
 
 ## Oregon Trail
 *Status: work in progress*
+Try playing the game in vanilla JavaScript --> [repl.it/@karakarakaraff/theOregonTrail](https://repl.it/@karakarakaraff/theOregonTrail)

@@ -46,26 +46,29 @@ var gameSetup = function() {
   peopleHealthy.push(mainPlayer, person2, person3, person4, person5);
 
   // PROFESSION
-  alert("You can be a banker, carpenter or farmer. A banker starts with more money, a carpenter starts with more tools and supplies, and a farmer starts with more food and a few oxen.");
-  profession = prompt("What do you want to be? Type 'banker', 'carpenter', or 'farmer'.");
+  profession = prompt("You can be a banker, carpenter or farmer. A banker starts with more money, a carpenter starts with more tools and supplies, and a farmer starts with more food and a few oxen. At the end of the game, a banker earns no bonus points, a carpenter earns some, and a farmer earns a lot.\n\nWhat do you want to be? Type 'banker', 'carpenter' or 'farmer'.").toLowerCase();
   if (profession == "banker") {
     money += 1500;
     alert("You have $" + money + ".");
   } else if (profession == "carpenter") {
-    money += 1000;
+    money += 800;
     parts += 4;
     alert("You have $" + money + " and " + parts + " spare parts.");
   } else if (profession == "farmer") {
-    money += 800;
+    money += 400;
     food += 500;
-    oxen += 3;
-    alert("You have $" + money + ", " + food + " pounds of food, and " + oxen + " oxen.");
+    oxen += 4;
+    alert("You have $" + money + ", " + food + " pounds of food and " + oxen + " oxen.");
+  } else {
+    profession = "carpenter";
+    money += 800;
+    parts += 4;
+    alert("Sorry, your didn't enter your desired profession correctly. By default, you are a carpenter. You have $" + money + " and " + parts + " spare parts.");
   }
 
   // GENERAL STORE
   alert("Before leaving, you need to stock up on supplies. Let's go to the general store.");
-  alert("Let's start with food. I recommend 200 pounds of food per person, a total of 1000 pounds. You currently have " + food + " pounds of food. Food costs 50 cents a pound.");
-  var pounds = +prompt("Pound of food: 50 cents\nHow many pounds of food do you want to buy?");
+  var pounds = +prompt("Let's start with food. I recommend 200 pounds of food per person, a total of 1000 pounds. You currently have " + food + " pounds of food. Food costs 50 cents a pound.\n\nMoney: $" + money + "\nPound of food: 50 cents\nHow many pounds of food do you want to buy?");
   if (pounds * 0.5 > money) {
     pounds = +prompt("Sorry, you only have $ " + money + ". Each pound of food costs 50 cents. How many pounds of food do you want to buy?");
   } else {
@@ -74,8 +77,7 @@ var gameSetup = function() {
     alert("You have $" + money + " left.");
   }
 
-  alert("Now let's buy oxen. You will need these oxen to pull your wagon. I recommend at least six oxen. Each ox costs $50.");
-  var beasts = +prompt("Ox: $50\nHow many oxen do you want to buy?");
+  var beasts = +prompt("Now let's buy oxen. You will need these oxen to pull your wagon. I recommend at least six oxen. Each ox costs $50.\n\nMoney: $" + money + "\nOx: $50\nHow many oxen do you want to buy?");
   if (beasts * 50 > money) {
     beasts = +prompt("Sorry, you only have $" + money + ". Each ox costs $50. How many oxen do you want to buy?");
   } else {
@@ -84,8 +86,7 @@ var gameSetup = function() {
     alert("You have $" + money + " left.");
   }
 
-  alert("Now let's buy parts. You will need these parts in case your wagon breaks down along the trail. I recommend at least three spare parts. You currently have " + parts + " spare parts. One spare part costs $100.");
-  var spares = +prompt("Spare part: $100\nHow many spare parts do you want to buy?");
+  var spares = +prompt("Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. I recommend at least three spare parts. You currently have " + parts + " spare parts. One spare part costs $100.\n\nMoney: $" + money + "\nSpare part: $100\nHow many spare parts do you want to buy?");
   if (spares * 100 > money) {
     spares = +prompt("Sorry, you only have $" + money + ". Each spare part costs $100. How many spare parts do you want to buy?");
   } else {
@@ -99,11 +100,10 @@ var gameSetup = function() {
   }
 
   // READY TO GO
-  alert("Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare parts with $" + money + " leftover. " + person2 + ", " + person3 + ", " + person4 + ", and " + person5 + " are ready to go.");
+  alert("Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare parts with $" + money + " leftover. " + person2 + ", " + person3 + ", " + person4 + " and " + person5 + " are ready to go.");
 
   // WHEN TO LEAVE
-  alert("It's time to choose when to start your journey. If you start too soon, there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. If you leave too late, you won't make it to Oregon before winter. Please choose a month between March and August.");
-  var month = prompt("Do you want to leave in March, April, May, June, July or August?").toLowerCase();;
+  var month = prompt("It's time to choose when to start your journey. If you start too soon, there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. If you leave too late, you won't make it to Oregon before winter. Please choose a month between March and August.\n\nType 'March', 'April', 'May', 'June', 'July' or 'August'.").toLowerCase();
   if (month === "march") {
     days = 61;
   } else if (month == "april") {
@@ -323,7 +323,7 @@ var tradeItems = function(tradeChances) {
     }
   };
   makeADeal();
-  var goShoppingInstead = prompt("Instead of trading, do you want to buy anything?");
+  var goShoppingInstead = prompt("Instead of trading, do you want to buy anything? Type 'yes' or 'no'.");
   if (goShoppingInstead == "yes") {
     goShopping();
   }
@@ -348,11 +348,11 @@ var goHunting = function() {
       food += 50;
       shootMessage = "You shot a deer and brought back 50 pounds of food.";
     } else if (guess == randomNumber) {
-      food += 200;
+      food += 100;
       if (mapLocation == "Independence" || mapLocation == "Kansas River" || mapLocation == "Fort Kearney" || mapLocation == "Chimney Rock" || mapLocation == "Fort Laramie") {
-        shootMessage = "You shot a buffalo and brought back 150 pounds of food.";
+        shootMessage = "You shot a buffalo and brought back 100 pounds of food.";
       } else {
-        shootMessage = "You shot a bear and brought back 150 pounds of food.";
+        shootMessage = "You shot a bear and brought back 100 pounds of food.";
       }
     } else {
       shootMessage = "Sorry, you didn't get anything on this hunting round."
@@ -432,9 +432,9 @@ var oxProblem = function() {
   var allOxProblems = ["An ox has wandered off.", "An ox has died."];
   var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
   alert(randomOxProblem);
-  if (oxen > 0) {
+  if (oxen > 1) {
     oxen -= 1;
-  } else {
+  } else if (oxen === 1) {
     alert("That was your last ox. This is as far as you can go. Good luck homesteading!");
     throw new gameOver();
   }
@@ -591,12 +591,14 @@ var death = function(array) {
 var gameOver = function(status) {
   if (status == "winner") {
     var bonus;
-    if (profession = "farmer") {
-      bonus = 400;
+    if (profession = "banker") {
+      bonus = 1;
     } else if (profession = "carpenter") {
-      bonus = 200;
+      bonus = 2;
+    } else if (profession = "farmer") {
+      bonus = 3;
     }
-    var points = (peopleHealthy.length * 100) + (peopleSick.length * 50) + (oxen * 20) + (food * 2) + (parts * 2) + money + bonus - trailDays;
+    var points = bonus*((peopleHealthy.length * 100) + (peopleSick.length * 50) + (oxen * 20) + (food * 2) + (parts * 2) + money - trailDays);
     alert("Congratulations, you reached the end of the trail! You finished the game with a score of " + points + ".");
   } else {
     alert("THE END");
@@ -792,6 +794,7 @@ var travel = function(distance) {
     if (mapLocation !== "Fort Bridger" && mapLocation !== "Soda Springs") {
       alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Bridger.");
       mapLocation === "Fort Bridger";
+      miles -= 105;
     }
     if (mapLocation == "Fort Bridger") {
       miles -= 105;
@@ -836,7 +839,8 @@ var travel = function(distance) {
 // THE OREGON TRAIL ----------------------------------------------------------------------
 var theOregonTrail = function() {
   gameSetup();
-  for (miles = 0; miles <= 1845; miles += 15) {
+  days--;
+  for (miles = 15; miles <= 1845; miles += 15) {
     // DAILY CHANGES
     days++;
     trailDays++;
@@ -936,7 +940,7 @@ var theOregonTrail = function() {
     }
 
     // BAD THINGS
-    if (fate === 6 && days % 2 === 1) {
+    if (fate === 6) {
       var badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
       if (badThing === 1) {
         oxProblem();
