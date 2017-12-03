@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "reindeer trivia",
+      "invocationName": "stranger things trivia",
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
@@ -12,11 +12,32 @@
           "samples": []
         },
         {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StartOverIntent",
+          "samples": [
+            "start game",
+            "new game",
+            "start",
+            "start new game"
+          ]
+        },
+        {
           "name": "AMAZON.StopIntent",
           "samples": []
         },
         {
-          "name": "AnswerIntent",
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "GetAnswerIntent",
           "samples": [
             "the answer is {Answer}",
             "my answer is {Answer}",

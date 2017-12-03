@@ -19,7 +19,12 @@
       },
       {
         "name": "AMAZON.StartOverIntent",
-        "samples": []
+        "samples": [
+          "start game",
+          "new game",
+          "start",
+          "start new game"
+        ]
       },
       {
         "name": "AMAZON.StopIntent",
