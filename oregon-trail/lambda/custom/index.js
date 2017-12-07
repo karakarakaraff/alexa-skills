@@ -1,11 +1,7 @@
-/* eslint-disable  func-names */
-/* eslint-disable  dot-notation */
-/* eslint-disable  new-cap */
-/* eslint quote-props: ['error', 'consistent']*/
-
 'use strict';
 
 const Alexa = require('alexa-sdk');
+const APP_ID = "amzn1.ask.skill.9608708c-a9ff-441b-9659-0958592879e5";
 
 var peopleHealthy = [];
 var peopleSick = [];
@@ -17,15 +13,15 @@ var money = 0;
 var food = 0;
 var oxen = 0;
 var parts = 0;
-var miles = 0; // used to track distance traveled on map
-var extraMiles = 255; // used to track shortcuts
-var days = 0; // used to track calendar
-var trailDays = 0; // used to track usage of supplies
+var miles = 0; // tracks distance traveled on map
+var extraMiles = 255; // tracks shortcuts
+var days = 0; // tracks calendar
+var trailDays = 0; // tracks daily usage of supplies
 var daysWithoutFood = 0; // tracks how many days in a row there is no food -- could lead to starvation
 var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lead to oxen dying or wandering off
 var mapLocation; // follows map choices at split trails
-var alreadyTradedAtThisFort = false; // keeps track of trading at each fort
-var fate; // fate adds randomness to the game and changes every day
+var alreadyTradedAtThisFort = false; // tracks trading at each fort
+var fate; // adds randomness to the game and changes every day
 
 // 1836 CALENDAR
 function dateFrom1836(day){
@@ -35,9 +31,11 @@ function dateFrom1836(day){
 
 
 
-// SET UP THE BEGINNING VARIABLES --------------------------------------------------------
+// ==============================
+// SET UP THE BEGINNING VARIABLES
+// ==============================
 var gameSetup = function() {
-  mapLocation = "Independence"
+  mapLocation = "Independence";
   // PEOPLE
   alert("It's 1836 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail. Let's set up your five-person party.");
   mainPlayer = prompt("What is your name?");
@@ -125,7 +123,9 @@ var gameSetup = function() {
 
 
 
-// EVENTS --------------------------------------------------------------------------------
+// ======================
+// EVENTS ALONG THE TRAIL
+// ======================
 var crossRiver = function(depth, sinkChance, cost) {
   var cross = prompt(
     "You must cross the river. It is " + depth + " feet deep. Do you want to ferry for $" + cost + " or try to float across? Type 'ferry' or 'float'."
@@ -175,6 +175,7 @@ var crossRiver = function(depth, sinkChance, cost) {
 };
 
 var goShopping = function() {
+  var tradeInstead;
   if (money > 0) {
     if (mapLocation !== "Independence") {
       days++;
@@ -214,14 +215,14 @@ var goShopping = function() {
       goShopping();
     }
     if (alreadyTradedAtThisFort === false && mapLocation !== "Independence") {
-      var tradeInstead = prompt("Instead of buying suplies, do you want to try trading? Type 'yes' or 'no'.");
+      tradeInstead = prompt("Instead of buying suplies, do you want to try trading? Type 'yes' or 'no'.");
       if (tradeInstead === "yes") {
         tradeItems(1);
       }
     }
   } else {
     if (alreadyTradedAtThisFort === false) {
-      var tradeInstead = prompt("Sorry, you don't have any money to buy supplies. Do you want to try trading instead? Type 'yes' or 'no'.");
+      tradeInstead = prompt("Sorry, you don't have any money to buy supplies. Do you want to try trading instead? Type 'yes' or 'no'.");
       if (tradeInstead === "yes" && mapLocation !== "Independence") {
         if (mapLocation === "Fort Bridger") {
           tradeItems(3);
@@ -247,10 +248,11 @@ var tradeItems = function(tradeChances) {
         trailDays++;
         food -= (peopleHealthy.length + peopleSick.length);
       }
-      tradeAttempts++
+      tradeAttempts++;
       var tradeDeal = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+      var yeahOrNah;
       if (tradeDeal === 1) {
-        var yeahOrNah = prompt("An old settler will give you a spare part for 50 pounds of food. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("An old settler will give you a spare part for 50 pounds of food. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && food >= 50) {
           parts++;
           food -= 50;
@@ -259,7 +261,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you don't have enough food to make the trade.");
         }
       } else if (tradeDeal === 2) {
-        var yeahOrNah = prompt("A woman at the fort will give you 100 pounds of food for an ox. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("A woman at the fort will give you 100 pounds of food for an ox. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && oxen > 1) {
           food += 100;
           oxen--;
@@ -268,7 +270,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you only have one ox. You must keep him to continue on the trail.");
         }
       } else if (tradeDeal === 3) {
-        var yeahOrNah = prompt("The general store owner will give you $15 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("The general store owner will give you $15 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && parts >= 1) {
           money += 15;
           parts--;
@@ -277,7 +279,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you don't have any spare parts to make the trade.");
         }
       } else if (tradeDeal === 4) {
-        var yeahOrNah = prompt("A man at the fort will give you an ox for $25. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("A man at the fort will give you an ox for $25. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && money >= 25) {
           oxen++;
           money -= 25;
@@ -286,7 +288,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you don't have enough money to make the trade.");
         }
       } else if (tradeDeal === 5) {
-        var yeahOrNah = prompt("A man at the fort will give you $30 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("A man at the fort will give you $30 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && parts >= 1) {
           money += 30;
           parts --;
@@ -295,7 +297,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you don't have any spare parts to make the trade.");
         }
       } else if (tradeDeal === 6) {
-        var yeahOrNah = prompt("A Native American at the fort will give you 200 pounds of food for two oxen. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("A Native American at the fort will give you 200 pounds of food for two oxen. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && oxen > 2) {
           food += 200;
           oxen -= 2;
@@ -304,7 +306,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you only have two oxen. If you trade them both away, you won't be able to continue on the trail.");
         }
       } else if (tradeDeal === 7) {
-        var yeahOrNah = prompt("A woman at the fort will give you a spare part for $50. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("A woman at the fort will give you a spare part for $50. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && money >= 50) {
           parts++;
           money -= 50;
@@ -313,7 +315,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you don't have enough money to make the trade.");
         }
       } else if (tradeDeal === 8) {
-        var yeahOrNah = prompt("A man at the fort will give you $100 for an ox. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("A man at the fort will give you $100 for an ox. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && oxen > 1) {
           money += 100;
           oxen--;
@@ -322,7 +324,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you only have one ox. You must keep him to continue on the trail.");
         }
       } else if (tradeDeal === 9) {
-        var yeahOrNah = prompt("An old settler will give you $20 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("An old settler will give you $20 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && parts >= 1) {
           money += 20;
           parts--;
@@ -331,7 +333,7 @@ var tradeItems = function(tradeChances) {
           alert("Sorry, you don't have any spare parts to make the trade.");
         }
       } else if (tradeDeal === 10) {
-        var yeahOrNah = prompt("A man at the fort will give you a spare part for 75 pounds of food. Do you accept this trade? Type 'yes' or 'no'.");
+        yeahOrNah = prompt("A man at the fort will give you a spare part for 75 pounds of food. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && food >= 50) {
           parts++;
           food -= 75;
@@ -381,19 +383,17 @@ var goHunting = function() {
         shootMessage = "You shot a bear and brought back 100 pounds of food.";
       }
     } else {
-      shootMessage = "Sorry, you didn't get anything on this hunting round."
+      shootMessage = "Sorry, you didn't get anything on this hunting round.";
     }
     alert("You guessed " + guess + ". The random number was " + randomNumber + ". " + shootMessage);
-  }
+  };
 
   if (guess > 0 && guess <= 10) {
     shootAnimal();
   } else {
     var guessAgain = +prompt("You must guess a number between 1 and 10. Your number:");
-    if (guess > 0 && guess <= 10) {
+    if (guessAgain > 0 && guessAgain <= 10) {
       shootAnimal();
-    } else {
-      return
     }
   }
 };
@@ -478,7 +478,7 @@ var oxProblem = function() {
 };
 
 var fire = function() {
-  var destroyedItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]]
+  var destroyedItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
   var itemIndex = Math.floor(Math.random() * destroyedItems.length);
   if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
     window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
@@ -495,7 +495,7 @@ var fire = function() {
 };
 
 var thief = function() {
-  var stolenItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]]
+  var stolenItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
   var itemIndex = Math.floor(Math.random() * stolenItems.length);
   if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
     window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
@@ -512,7 +512,7 @@ var thief = function() {
 };
 
 var findItems = function() {
-  var foundItems = [["food", 50, "pounds of food"],["oxen", 2, "oxen"],["money", 50, "dollars"],["parts", 1, "spare part"],["money", 100, "dollars"]]
+  var foundItems = [["food", 50, "pounds of food"],["oxen", 2, "oxen"],["money", 50, "dollars"],["parts", 1, "spare part"],["money", 100, "dollars"]];
   var itemIndex = Math.floor(Math.random() * foundItems.length);
   window[foundItems[itemIndex][0]] += foundItems[itemIndex][1];
   alert("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " " + foundItems[itemIndex][2] + ".");
@@ -538,7 +538,7 @@ var brokenWagon = function() {
 };
 
 var getLost = function() {
-  howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
+  var howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
   days += howLong;
   trailDays += howLong;
   food -= howLong*(peopleHealthy.length + peopleSick.length);
@@ -590,7 +590,7 @@ var recovery = function(howManyToHeal) {
       peopleHealthy.unshift(mainPlayer);
       alert("You are feeling much better.");
     } else {
-      recoveredPerson = peopleSick[recoveredIndex];
+      var recoveredPerson = peopleSick[recoveredIndex];
       peopleSick.splice(recoveredIndex, 1);
       peopleHealthy.push(recoveredPerson);
       alert(recoveredPerson + " is feeling much better.");
@@ -631,11 +631,11 @@ var death = function(array) {
 var gameOver = function(status) {
   if (status === "winner") {
     var bonus;
-    if (profession = "banker") {
+    if (profession === "banker") {
       bonus = 1;
-    } else if (profession = "carpenter") {
+    } else if (profession === "carpenter") {
       bonus = 2;
-    } else if (profession = "farmer") {
+    } else if (profession === "farmer") {
       bonus = 3;
     }
     var points = bonus*((peopleHealthy.length * 100) + (peopleSick.length * 50) + (oxen * 20) + (food * 2) + (parts * 2) + money - trailDays);
@@ -647,7 +647,9 @@ var gameOver = function(status) {
 
 
 
-// LANDMARKS -----------------------------------------------------------------------------
+// =========================
+// LANDMARKS ALONG THE TRAIL
+// =========================
 var kansasRiver = function() {
   var depth;
   if (days < 92) {
@@ -816,7 +818,9 @@ var oregonCity = function() {
 
 
 
-// MAP -----------------------------------------------------------------------------------
+// =============
+// THE TRAIL MAP
+// =============
 var travel = function(distance) {
   if (distance === 105) {
     mapLocation = "Kansas River";
@@ -842,7 +846,7 @@ var travel = function(distance) {
     mapLocation = prompt("Do you want to stay on the trail to Fort Bridger or take the shortcut through Soda Springs?\n\nType 'Fort Bridger' or 'Soda Springs'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Bridger" && mapLocation !== "Soda Springs") {
       alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Bridger.");
-      mapLocation === "Fort Bridger";
+      mapLocation = "Fort Bridger";
     }
     if (mapLocation === "Soda Springs") {
       extraMiles -= 105;
@@ -865,7 +869,7 @@ var travel = function(distance) {
     mapLocation = prompt("Do you want to stay on the trail to Fort Walla Walla or take the shortcut through The Dalles?\n\nType 'Fort Walla Walla' or 'The Dalles'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Walla Walla" && mapLocation !== "The Dalles") {
       alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Walla Walla.");
-      mapLocation === "Fort Walla Walla";
+      mapLocation = "Fort Walla Walla";
     }
     if (mapLocation === "The Dalles") {
       extraMiles -= 150;
@@ -884,7 +888,9 @@ var travel = function(distance) {
 
 
 
-// THE OREGON TRAIL ----------------------------------------------------------------------
+// =====================
+// THE OREGON TRAIL GAME
+// =====================
 var theOregonTrail = function() {
   gameSetup();
   days--;
@@ -922,11 +928,12 @@ var theOregonTrail = function() {
         var healthIssues = ["the flu", "cholera", "exhaustion", "typhoid fever", "a snake bite", "a broken arm", "a broken leg"];
         var issue = healthIssues[Math.floor(Math.random() * healthIssues.length)];
         var daysOfRest;
+        var restOption;
 
         if (peopleHealthy.length > 1) {
           sickness();
           alert(invalid + " has " + issue + ".");
-          var restOption = prompt("Do you want to rest to see if "+ invalid + " feels better? Type 'yes' or 'no'.");
+          restOption = prompt("Do you want to rest to see if "+ invalid + " feels better? Type 'yes' or 'no'.");
           if (restOption === "yes" ) {
             daysOfRest = +prompt("How many days would you like to rest? Type a number.");
             rest(daysOfRest);
@@ -934,7 +941,7 @@ var theOregonTrail = function() {
         } else {
           sickness();
           alert("You have " + issue + ".");
-          var restOption = prompt("Do you want to rest to see if you feel better? Type 'yes' or 'no'.");
+          restOption = prompt("Do you want to rest to see if you feel better? Type 'yes' or 'no'.");
           if (restOption === "yes" ) {
             daysOfRest = +prompt("How many days would you like to rest? Type a number.");
             rest(daysOfRest);
