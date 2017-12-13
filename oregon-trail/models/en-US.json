@@ -1,0 +1,416 @@
+{
+  "languageModel": {
+    "types": [
+      {
+        "name": "BUY_OR_TRADE",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "buy",
+              "synonyms": [
+                "buy something",
+                "go shopping"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "trade",
+              "synonyms": [
+                "trade something",
+                "go trading"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "ITEMS",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "oxen",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "food",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "parts",
+              "synonyms": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "PROFESSIONS",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "banker",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "carpenter",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "farmer",
+              "synonyms": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "RIVER_CROSSINGS",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "float",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "ferry",
+              "synonyms": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "SPLIT_CHOICE_FIRST",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "Fort Bridger",
+              "synonyms": [
+                "bridger",
+                "the fort",
+                "stay on the trail",
+                "fort"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Soda Springs",
+              "synonyms": [
+                "springs",
+                "the springs",
+                "shortcut",
+                "not the fort",
+                "the shortcut"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "SPLIT_CHOICE_SECOND",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "Fort Walla Walla",
+              "synonyms": [
+                "walla walla",
+                "walla",
+                "the fort",
+                "stay on the trail",
+                "fort"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "The Dalles",
+              "synonyms": [
+                "dalles",
+                "shortcut",
+                "not the fort",
+                "the shortcut"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "START_MONTHS",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "april",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "may",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "june",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "july",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "august",
+              "synonyms": []
+            }
+          }
+        ]
+      }
+    ],
+    "intents": [
+      {
+        "name": "AMAZON.CancelIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.HelpIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.NoIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.StartOverIntent",
+        "samples": [
+          "start game",
+          "new game",
+          "start new game",
+          "start",
+          "start over"
+        ]
+      },
+      {
+        "name": "AMAZON.StopIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.YesIntent",
+        "samples": []
+      },
+      {
+        "name": "GetBuyOrTrade",
+        "samples": [
+          "{buy_or_trade}",
+          "I want to {buy_or_trade}",
+          "Let's {buy_or_trade}",
+          "I would like to {buy_or_trade}",
+          "Do {buy_or_trade}",
+          "How about {buy_or_trade}"
+        ],
+        "slots": [
+          {
+            "name": "buy_or_trade",
+            "type": "BUY_OR_TRADE"
+          }
+        ]
+      },
+      {
+        "name": "GetHowLong",
+        "samples": [
+          "{how_long}",
+          "{how_long} days",
+          "Rest for {how_long}",
+          "Rest for {how_long} days",
+          "Let's do {how_long}",
+          "Let's do {how_long} days",
+          "How about {how_long}",
+          "How about {how_long} days",
+          "Let me rest for {how_long} days",
+          "Give me {how_long}",
+          "Give me {how_long} days",
+          "I want {how_long}",
+          "I want {how_long} days",
+          "I need {how_long}",
+          "I need {how_long} days"
+        ],
+        "slots": [
+          {
+            "name": "how_long",
+            "type": "AMAZON.NUMBER"
+          }
+        ]
+      },
+      {
+        "name": "GetHowManyItems",
+        "samples": [
+          "{how_many}",
+          "Give me {how_many}",
+          "I want {how_many}",
+          "I need {how_many}",
+          "How about {how_many}",
+          "Let's do {how_many}",
+          "I'll buy {how_many}"
+        ],
+        "slots": [
+          {
+            "name": "how_many",
+            "type": "AMAZON.NUMBER"
+          }
+        ]
+      },
+      {
+        "name": "GetItem",
+        "samples": [
+          "{item}",
+          "I want {item}",
+          "I need {item}",
+          "I want to buy {item}",
+          "I'm going to buy {item}",
+          "Buy {item}",
+          "I'm gonna buy {item}",
+          "{item} please",
+          "Get {item}",
+          "I'm going to get {item}",
+          "I must buy {item}",
+          "I must get {item}"
+        ],
+        "slots": [
+          {
+            "name": "item",
+            "type": "ITEMS"
+          }
+        ]
+      },
+      {
+        "name": "GetName",
+        "samples": [
+          "{name}",
+          "It's {name}",
+          "How about {name}",
+          "Let's do {name}",
+          "I am {name}",
+          "My name is {name}",
+          "He is {name}",
+          "His name is {name}",
+          "She is {name}",
+          "Her name is {name}",
+          "They are {name}",
+          "Their name is {name}"
+        ],
+        "slots": [
+          {
+            "name": "name",
+            "type": "AMAZON.US_FIRST_NAME"
+          }
+        ]
+      },
+      {
+        "name": "GetProfession",
+        "samples": [
+          "{profession}",
+          "I'll be a {profession}",
+          "I want to be a {profession}",
+          "I'm a {profession}",
+          "How about a {profession}",
+          "How about {profession}",
+          "A {profession}",
+          "I will be a {profession}"
+        ],
+        "slots": [
+          {
+            "name": "profession",
+            "type": "PROFESSIONS"
+          }
+        ]
+      },
+      {
+        "name": "GetRandomNumber",
+        "samples": [
+          "I pick {random_number}",
+          "{random_number}",
+          "Give me {random_number}",
+          "Let's do {random_number}",
+          "How about {random_number}"
+        ],
+        "slots": [
+          {
+            "name": "random_number",
+            "type": "AMAZON.NUMBER"
+          }
+        ]
+      },
+      {
+        "name": "GetRiverCrossing",
+        "samples": [
+          "{crossing}",
+          "I'll {crossing}",
+          "Let's {crossing}",
+          "How about {crossing}",
+          "I want to {crossing}",
+          "Give me the {crossing}",
+          "Give me {crossing}",
+          "I'm going to {crossing}",
+          "I'm gonna {crossing}",
+          "I wanna {crossing}"
+        ],
+        "slots": [
+          {
+            "name": "crossing",
+            "type": "RIVER_CROSSINGS"
+          }
+        ]
+      },
+      {
+        "name": "GetStartingMonth",
+        "samples": [
+          "{month}",
+          "Let's do {month}",
+          "How about {month}",
+          "Start in {month}",
+          "Let's start in {month}",
+          "I want {month}",
+          "Do {month}"
+        ],
+        "slots": [
+          {
+            "name": "month",
+            "type": "START_MONTHS"
+          }
+        ]
+      }
+    ],
+    "invocationName": "oregon trail"
+  }
+}
