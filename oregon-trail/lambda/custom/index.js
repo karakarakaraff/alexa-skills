@@ -78,34 +78,70 @@ function dateFrom1836(day){
 // =============================
 // SET UP THE STARTING VARIABLES
 // =============================
-var gameSetup = function() {
-  mapLocation = "Independence";
-  this.response.speak("Let's begin by setting up your five-person party.");
 
-  // PEOPLE
-  mainPlayer = prompt("What is your name?");
-  var person2 = prompt("Name the second person in your party.");
-  var person3 = prompt("Name the third person in your party.");
-  var person4 = prompt("Name the fourth person in your party.");
-  var person5 = prompt("Name the fifth person in your party.");
-  peopleHealthy.push(mainPlayer, person2, person3, person4, person5);
+// MAIN PLAYER
+var gameIntro = function() {
+  mapLocation = "Independence";
+  mainPlayer = "Main Player"; //this.event.request.intent.slots.name.value;
+  peopleHealthy.push(mainPlayer);
+  this.response.speak(WELCOME_MESSAGE + " " + START_GAME_MESSAGE + " Let's begin by setting up your five-person party." + " " + "What is your name?").listen("What is your name?");
+  this.response.cardRenderer(WELCOME_MESSAGE);
+  this.emit(':responseReady');
+};
+
+// PARTY
+var setupParty = function() {
+  if (peopleHealthy.length === 1) {
+    var person2 = "Player 2";
+    peopleHealthy.push(person2);
+    this.response.speak("The main player's name is " + mainPlayer + ". Name the second person in your party.").listen("Name the second person in your party.");
+    this.emit(':responseReady');
+  } else if (peopleHealthy.length === 2) {
+    var person3 = "Player 3";
+    peopleHealthy.push(person3);
+    this.response.speak("Name the third person in your party.").listen("Name the third person in your party.");
+    this.emit(':responseReady');
+  } else if (peopleHealthy.length === 3) {
+    var person4 = "Player 4";
+    peopleHealthy.push(person4);
+    this.response.speak("Name the fourth person in your party.").listen("Name the fourth person in your party.");
+    this.emit(':responseReady');
+  } else if (peopleHealthy.length === 4) {
+    var person5 = "Player 5";
+    peopleHealthy.push(person5);
+    this.response.speak("Name the fifth person in your party.").listen("Name the fifth person in your party.");
+    this.emit(':responseReady');
+  } else {
+    // change to startStateHandlers > 'GetProfession'
+  }
+};
 
   // PROFESSION
-  profession = prompt("You can be a banker, carpenter or farmer. A banker starts with more money, a carpenter starts with more tools and supplies, and a farmer starts with more food and a few oxen. At the end of the game, a banker earns no bonus points, a carpenter earns some, and a farmer earns a lot.\n\nWhat do you want to be? Type 'banker', 'carpenter' or 'farmer'.").toLowerCase();
-  if (profession === "banker") {
-    money += 1200;
-    this.response.speak("You have $" + money + ".");
-  } else if (profession === "carpenter") {
-    money += 800;
-    parts += 4;
-    this.response.speak("You have $" + money + " and " + parts + " spare parts.");
-  } else if (profession === "farmer") {
-    money += 400;
-    food += 500;
-    oxen += 4;
-    this.response.speak("You have $" + money + ", " + food + " pounds of food and " + oxen + " oxen.");
+var setupProfession = function() {
+  if (profession === undefined) {
+    profession = "carpenter";
+    this.response.speak("You can be a banker, carpenter or farmer. A banker starts with more money, a carpenter starts with more tools and supplies, and a farmer starts with more food and a few oxen. At the end of the game, a banker earns zero bonus points, a carpenter earns some bonus points, and a farmer earns a lot of bonus points. What do you want to be?").listen("You must choose to be a banker, carpenter or farmer. What do you want to be?");
+    this.response.cardRenderer("Banker (easy mode): Start with a lot of money, but receive zero bonus points.\nCarpenter (intermediate mode): Start with tools, supplies and some money, plus receive a few bonus points.\nFarmer (hard mode): Start with food, a few oxen and a little bit of money, and earn high bonus points.");
+    this.emit(':responseReady');
+  } else {
+      if (profession === "banker") {
+      money += 1200;
+      this.response.speak("You have $" + money + ".");
+    } else if (profession === "carpenter") {
+      money += 800;
+      parts += 4;
+      this.response.speak("You have $" + money + " and " + parts + " spare parts.");
+    } else if (profession === "farmer") {
+      money += 400;
+      food += 500;
+      oxen += 4;
+      this.response.speak("You have $" + money + ", " + food + " pounds of food and " + oxen + " oxen.");
+    }
   }
+};
 
+/*
+var gameSetup = function() {
   // GENERAL STORE
   this.response.speak("Before leaving, you need to stock up on supplies. Let's go to the general store.");
   var pounds = +prompt("Let's start with food. I recommend 200 pounds of food per person, a total of 1000 pounds. You currently have " + food + " pounds of food. Food costs 50 cents a pound.\n\nMoney: $" + money + "\nPound of food: 50 cents\nHow many pounds of food do you want to buy?");
@@ -159,14 +195,20 @@ var gameSetup = function() {
   }
 
   this.response.speak("Alright, let's hit the trail!");
-};
 
+};
+*/
 
 
 const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
   'StartGame': function() {
-    this.response.speak(WELCOME_MESSAGE + " " + START_GAME_MESSAGE);
-    this.emit(":responseReady");
+    gameIntro.call(this);
+  },
+  'GetName': function() {
+    setupParty.call(this);
+  },
+  'GetProfession': function() {
+    setupProfession.call(this);
   },
   'AMAZON.HelpIntent': function() {
     this.handler.state = GAME_STATES.HELP;
@@ -1096,12 +1138,14 @@ var theOregonTrail = function() {
   }
 };
 
+
+/*
 // PLAY THE GAME!
 theOregonTrail();
+*/
 
 
-
-exports.handler = function(event, context) {
+exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
   alexa.registerHandlers(newSessionHandlers, startStateHandlers);
