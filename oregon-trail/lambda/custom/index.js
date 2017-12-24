@@ -18,11 +18,11 @@ const CANCEL_MESSAGE = "Ok, let\'s play again soon.";
 const newSessionHandlers = {
   'LaunchRequest': function() {
     this.handler.state = GAME_STATES.START;
-    this.emitWithState('StartGame', true);
+    this.emitWithState('StartGame'); // TEST >> CHANGE TO LAUNCH FROM A DIFFERENT HANDLER >> default StartGame
   },
   'AMAZON.StartOverIntent': function() {
     this.handler.state = GAME_STATES.START;
-    this.emitWithState('StartGame', true);
+    this.emitWithState('StartGame'); // TEST >> CHANGE TO LAUNCH FROM A DIFFERENT HANDLER >> default StartGame
   },
   'AMAZON.HelpIntent': function() {
     this.handler.state = GAME_STATES.HELP;
@@ -38,7 +38,7 @@ const newSessionHandlers = {
   },
   'Unhandled': function() {
     this.handler.state = GAME_STATES.START;
-    this.emitWithState('StartGame', true);
+    this.emitWithState('StartGame');
   },
 };
 
@@ -53,12 +53,13 @@ var mainPlayer; // tracks the main player
 var profession; // main player's profession -- used for setup and final score bonus
 var invalid; // tracks people as they get sick
 var victim; // tracks people as they die
-var money = 0;
-var food = 0;
-var oxen = 0;
-var parts = 0;
+var money = 0; // tracks player's total money
+var food = 0; // tracks player's total food
+var oxen = 0; // tracks player's total oxen
+var parts = 0; // tracks player's total parts
 var miles = 0; // tracks distance traveled on map
 var extraMiles = 255; // tracks shortcuts
+var month; // tracks starting month
 var days = 0; // tracks calendar
 var trailDays = 0; // tracks daily usage of supplies
 var daysWithoutFood = 0; // tracks how many days in a row there is no food -- could lead to starvation
@@ -82,7 +83,7 @@ function dateFrom1836(day){
 // MAIN PLAYER
 var gameIntro = function() {
   mapLocation = "Independence";
-  mainPlayer = "Main Player"; //this.event.request.intent.slots.name.value;
+  mainPlayer = "Main Player"; //this.event.request.intent.slots.name.value; // TODO change value to user's input
   peopleHealthy.push(mainPlayer);
   this.response.speak(WELCOME_MESSAGE + " " + START_GAME_MESSAGE + " Let's begin by setting up your five-person party." + " " + "What is your name?").listen("What is your name?");
   this.response.cardRenderer(WELCOME_MESSAGE);
@@ -92,112 +93,179 @@ var gameIntro = function() {
 // PARTY
 var setupParty = function() {
   if (peopleHealthy.length === 1) {
-    var person2 = "Player 2";
+    var person2 = "Player 2"; // TODO change value to user's input
     peopleHealthy.push(person2);
     this.response.speak("The main player's name is " + mainPlayer + ". Name the second person in your party.").listen("Name the second person in your party.");
     this.emit(':responseReady');
   } else if (peopleHealthy.length === 2) {
-    var person3 = "Player 3";
+    var person3 = "Player 3"; // TODO change value to user's input
     peopleHealthy.push(person3);
     this.response.speak("Name the third person in your party.").listen("Name the third person in your party.");
     this.emit(':responseReady');
   } else if (peopleHealthy.length === 3) {
-    var person4 = "Player 4";
+    var person4 = "Player 4"; // TODO change value to user's input
     peopleHealthy.push(person4);
     this.response.speak("Name the fourth person in your party.").listen("Name the fourth person in your party.");
     this.emit(':responseReady');
   } else if (peopleHealthy.length === 4) {
-    var person5 = "Player 5";
+    var person5 = "Player 5"; // TODO change value to user's input
     peopleHealthy.push(person5);
     this.response.speak("Name the fifth person in your party.").listen("Name the fifth person in your party.");
     this.emit(':responseReady');
   } else {
-    // change to startStateHandlers > 'GetProfession'
+    this.emitWithState('GetProfession');
   }
 };
 
-  // PROFESSION
+// PROFESSION
+var askAgain = true;
 var setupProfession = function() {
   if (profession === undefined) {
-    profession = "carpenter";
-    this.response.speak("You can be a banker, carpenter or farmer. A banker starts with more money, a carpenter starts with more tools and supplies, and a farmer starts with more food and a few oxen. At the end of the game, a banker earns zero bonus points, a carpenter earns some bonus points, and a farmer earns a lot of bonus points. What do you want to be?").listen("You must choose to be a banker, carpenter or farmer. What do you want to be?");
+    profession = "carpenter"; // TODO change value to user's input
+    this.response.speak("Great! Now let's choose your profession. You can be a banker, a carpenter, or a farmer. What do you want to be?").listen("You must choose to be a banker, a carpenter, or a farmer. What do you want to be?");
     this.response.cardRenderer("Banker (easy mode): Start with a lot of money, but receive zero bonus points.\nCarpenter (intermediate mode): Start with tools, supplies and some money, plus receive a few bonus points.\nFarmer (hard mode): Start with food, a few oxen and a little bit of money, and earn high bonus points.");
     this.emit(':responseReady');
+  } else if (profession !== "banker" && profession !== "carpenter" && profession !== "farmer") {
+    if (askAgain === true) {
+      askAgain = false;
+      profession = "carpenter"; // TODO change value to user's input
+      this.response.speak("Sorry, you can only be a banker, a carpenter, or a farmer. What do you want to be?").listen("You must choose to be a banker, a carpenter, or a farmer. What do you want to be?");
+      this.response.cardRenderer("Banker (easy mode): Start with a lot of money, but receive zero bonus points.\nCarpenter (intermediate mode): Start with tools, supplies and some money, plus receive a few bonus points.\nFarmer (hard mode): Start with food, a few oxen and a little bit of money, and earn high bonus points.");
+      this.emit(':responseReady');
+    } else {
+      profession = "carpenter";
+    }
   } else {
-      if (profession === "banker") {
+    this.emitWithState('GetHowManyItems');
+  }
+};
+
+// =============
+// GENERAL STORE
+// =============
+const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store.";
+const FOOD_REPROMPT = "Food costs 50 cents per pound. How many pounds of food do you want to buy?";
+const OXEN_REPROMPT = "Each ox costs $50. How many oxen do you want to buy?";
+const PARTS_REPROMPT = "Each spare part costs $30. How many spare parts do you want to buy?";
+var TRY_BUYING_AGAIN;
+
+var currentlyBuying;
+var itemPrice = 0;
+var boughtFood = false;
+var boughtOxen = false;
+var boughtParts = false;
+var amountToBuy = 0;
+
+var generalStore = function () {
+  var buyFood = function() {
+    currentlyBuying = "food";
+    boughtFood = true;
+    itemPrice = 0.5;
+    TRY_BUYING_AGAIN = FOOD_REPROMPT;
+    if (profession === "banker") {
       money += 1200;
-      this.response.speak("You have $" + money + ".");
+      amountToBuy = 1000; // TODO change value to user's input
+      this.response.speak("You are a banker. You have $" + money + ". " + GENERAL_STORE_MESSAGE + " Let's start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + "pounds of food. It is recommend to start with at least 1,000 pounds.");
+      this.emit(':responseReady');
     } else if (profession === "carpenter") {
       money += 800;
       parts += 4;
-      this.response.speak("You have $" + money + " and " + parts + " spare parts.");
+      amountToBuy = 1000; // TODO change value to user's input
+      this.response.speak("You are a carpenter. You have $" + money + " and " + parts + " spare parts. " + GENERAL_STORE_MESSAGE + " Let's start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + "pounds of food. It is recommend to start with at least 1,000 pounds.");
+      this.emit(':responseReady');
     } else if (profession === "farmer") {
       money += 400;
       food += 500;
       oxen += 4;
-      this.response.speak("You have $" + money + ", " + food + " pounds of food and " + oxen + " oxen.");
+      amountToBuy = 500; // TODO change value to user's input
+      this.response.speak("You are a farmer. You have $" + money + ", " + food + " pounds of food, and " + oxen + " oxen. " + GENERAL_STORE_MESSAGE + " Let's start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + " pounds of food. It is recommend to start with at least 1,000 pounds.");
+      this.emit(':responseReady');
     }
+  };
+
+  var buyOxen = function() {
+    currentlyBuying = "oxen";
+    boughtOxen = true;
+    itemPrice = 50;
+    amountToBuy = 4; // TODO change value to user's input
+    TRY_BUYING_AGAIN = OXEN_REPROMPT;
+    this.response.speak("You have $" + money + " left. Now let's buy oxen. You will need these oxen to pull your wagon. I recommend at least six oxen. Each ox costs $50. You currently have " + oxen + " oxen. How many oxen do you want to buy?").listen(OXEN_REPROMPT);
+    this.response.cardRenderer("Your total money: $" + money + "\nOne ox: $50" + "\n\nYou current have " + oxen + "oxen. It is recommend to have at least 6 oxen.");
+    this.emit(':responseReady');
+  };
+
+  var buyParts = function() {
+    currentlyBuying = "parts";
+    boughtParts = true;
+    itemPrice = 30;
+    amountToBuy = 2; // TODO change value to user's input
+    TRY_BUYING_AGAIN = PARTS_REPROMPT;
+    this.response.speak("You have $" + money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. I recommend at least three spare parts. You currently have " + parts + " spare parts. Each spare part costs $30. How many spare parts do you want to buy?").listen(PARTS_REPROMPT);
+    this.response.cardRenderer("Your total money: $" + money + "\nOne spare part: $30" + "\n\nYou current have " + parts + "spare parts. It is recommend to have 3 spare parts.");
+    this.emit(':responseReady');
+  };
+
+  if (boughtFood === false) {
+    buyFood.call(this);
+  } else if (boughtOxen === false) {
+    buyOxen.call(this);
+  } else if (boughtParts === false) {
+    buyParts.call(this);
+  } else {
+     this.emitWithState('GetStartingMonth');
   }
 };
 
+var notEnoughMoney = function() {
+  amountToBuy = 1; // TODO change value to user's input
+  this.response.speak("Sorry, you only have $ " + money + ". " + TRY_BUYING_AGAIN).listen(TRY_BUYING_AGAIN);
+  this.emit(':responseReady');
+};
+
 /*
-var gameSetup = function() {
-  // GENERAL STORE
-  this.response.speak("Before leaving, you need to stock up on supplies. Let's go to the general store.");
-  var pounds = +prompt("Let's start with food. I recommend 200 pounds of food per person, a total of 1000 pounds. You currently have " + food + " pounds of food. Food costs 50 cents a pound.\n\nMoney: $" + money + "\nPound of food: 50 cents\nHow many pounds of food do you want to buy?");
-  if (pounds * 0.5 > money) {
-    pounds = +prompt("Sorry, you only have $ " + money + ". Each pound of food costs 50 cents. How many pounds of food do you want to buy?");
-  } else {
-    food += pounds;
-    money -= pounds * 0.5;
-    this.response.speak("You have $" + money + " left.");
-  }
-
-  var beasts = +prompt("Now let's buy oxen. You will need these oxen to pull your wagon. I recommend at least six oxen. Each ox costs $50.\n\nMoney: $" + money + "\nOx: $50\nHow many oxen do you want to buy?");
-  if (beasts * 50 > money) {
-    beasts = +prompt("Sorry, you only have $" + money + ". Each ox costs $50. How many oxen do you want to buy?");
-  } else {
-    oxen += beasts;
-    money -= beasts * 50;
-    this.response.speak("You have $" + money + " left.");
-  }
-
-  var spares = +prompt("Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. I recommend at least three spare parts. You currently have " + parts + " spare parts. One spare part costs $30.\n\nMoney: $" + money + "\nSpare part: $30\nHow many spare parts do you want to buy?");
-  if (spares * 30 > money) {
-    spares = +prompt("Sorry, you only have $" + money + ". Each spare part costs $30. How many spare parts do you want to buy?");
-  } else {
-    parts += spares;
-    money -= spares * 30;
-  }
-
   var buyMore = prompt("Money: $" + money + "\nFood: " + food + "\nOxen: " + oxen + "\nSpare parts: " + parts + "\n\nDo you want to buy anything else? Type 'yes' or 'no'.");
   if (buyMore === "yes") {
     goShopping();
   }
+*/
 
-  // READY TO GO
-  this.response.speak("Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare parts with $" + money + " leftover. " + person2 + ", " + person3 + ", " + person4 + " and " + person5 + " are ready to go.");
+// =============
+// WHEN TO LEAVE
+// =============
+var chooseMonth = function() {
+  month = "june"; // TODO change value to user's input
+  this.response.speak("Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare parts. You also have $" + money + " left in your pocket. " + peopleHealthy[1] + ", " + peopleHealthy[2] + ", " + peopleHealthy[3] + ", and " + peopleHealthy[4] + " are ready to go. When do you want to start your journey? Choose a month between March and August.").listen("You can start your journey in March, April, May, June, July, or August. Which month do you want?");
+  this.response.cardRenderer("It's time to start your journey. You can begin anytime between March and August. If you start too soon, there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. If you leave too late, you won't make it to Oregon before winter. Choose wisely!");
+  this.emit(':responseReady');
+};
 
-  // WHEN TO LEAVE
-  var month = prompt("It's time to choose when to start your journey. If you start too soon, there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. If you leave too late, you won't make it to Oregon before winter. Please choose a month between March and August.\n\nType 'March', 'April', 'May', 'June', 'July' or 'August'.").toLowerCase();
+var setDays = function() {
   if (month === "march") {
     days = 61;
+    // TODO emit with state to begin game play
   } else if (month === "april") {
     days = 92;
+    // TODO emit with state to begin game play
   } else if (month === "may") {
     days = 122;
+    // TODO emit with state to begin game play
   } else if (month === "june") {
     days = 153;
+    this.response.speak("Okay, let's go!"); // TODO delete this after deleting default month value
+    this.emit(':responseReady'); // TODO delete this after deleting default month value
+    // TODO emit with state to begin game play
   } else if (month === "july") {
     days = 183;
+    // TODO emit with state to begin game play
   } else if (month === "august") {
     days = 214;
+    // TODO emit with state to begin game play
   }
-
-  this.response.speak("Alright, let's hit the trail!");
-
 };
-*/
+
 
 
 const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
@@ -209,6 +277,35 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
   },
   'GetProfession': function() {
     setupProfession.call(this);
+  },
+  'GetHowManyItems': function() {
+    if (currentlyBuying !== undefined && (amountToBuy * itemPrice > money)) {
+      notEnoughMoney.call(this);
+    } else {
+      money -= (amountToBuy * itemPrice);
+      if (currentlyBuying === "food") {
+        food += amountToBuy;
+        amountToBuy = 0;
+        generalStore.call(this);
+      } else if (currentlyBuying === "oxen") {
+        oxen += amountToBuy;
+        amountToBuy = 0;
+        generalStore.call(this);
+      } else if (currentlyBuying === "parts") {
+        parts += amountToBuy;
+        amountToBuy = 0;
+        generalStore.call(this);
+      } else {
+        generalStore.call(this);
+      }
+    }
+  },
+  'GetStartingMonth': function() {
+    if (month === undefined) {
+    chooseMonth.call(this);
+    } else {
+      setDays.call(this);
+    }
   },
   'AMAZON.HelpIntent': function() {
     this.handler.state = GAME_STATES.HELP;
@@ -223,8 +320,24 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.handler.state = GAME_STATES.START;
-    this.emitWithState('StartGame', true);
+    // TODO maybe change unhandled to just ask the player to repeat?
+    // this is the plan while the default variable values exist
+    if (mainPlayer === undefined) {
+      this.handler.state = GAME_STATES.START;
+      this.emitWithState('StartGame');
+    } else if (peopleHealthy.length < 5) {
+      this.handler.state = GAME_STATES.START;
+      this.emitWithState('GetName');
+    } else if (profession === undefined) {
+      this.handler.state = GAME_STATES.START;
+      this.emitWithState('GetProfession');
+    } else if (boughtFood === false || boughtOxen === false || boughtParts === false) {
+      this.handler.state = GAME_STATES.START;
+      this.emitWithState('GetHowManyItems');
+    } else if (days === 0) {
+      this.handler.state = GAME_STATES.START;
+      this.emitWithState('GetStartingMonth');
+    }
   },
 });
 
