@@ -95,7 +95,7 @@ var setupParty = function() {
   if (peopleHealthy.length === 1) {
     var person2 = "Player 2"; // TODO change value to user's input
     peopleHealthy.push(person2);
-    this.response.speak("The main player's name is " + mainPlayer + ". Name the second person in your party.").listen("Name the second person in your party.");
+    this.response.speak("Hello, " + mainPlayer + "! Name the second person in your party.").listen("Name the second person in your party.");
     this.emit(':responseReady');
   } else if (peopleHealthy.length === 2) {
     var person3 = "Player 3"; // TODO change value to user's input
@@ -143,7 +143,7 @@ var setupProfession = function() {
 // =============
 // GENERAL STORE
 // =============
-const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store.";
+const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store and buy food, oxen, and spare parts.";
 const FOOD_REPROMPT = "Food costs 50 cents per pound. How many pounds of food do you want to buy?";
 const OXEN_REPROMPT = "Each ox costs $50. How many oxen do you want to buy?";
 const PARTS_REPROMPT = "Each spare part costs $30. How many spare parts do you want to buy?";
@@ -159,20 +159,19 @@ var amountToBuy = 0;
 var generalStore = function () {
   var buyFood = function() {
     currentlyBuying = "food";
-    boughtFood = true;
     itemPrice = 0.5;
     TRY_BUYING_AGAIN = FOOD_REPROMPT;
     if (profession === "banker") {
       money += 1200;
       amountToBuy = 1000; // TODO change value to user's input
-      this.response.speak("You are a banker. You have $" + money + ". " + GENERAL_STORE_MESSAGE + " Let's start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.speak("You are a banker. You have $" + money + ". " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend at least 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
       this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + "pounds of food. It is recommend to start with at least 1,000 pounds.");
       this.emit(':responseReady');
     } else if (profession === "carpenter") {
       money += 800;
       parts += 4;
       amountToBuy = 1000; // TODO change value to user's input
-      this.response.speak("You are a carpenter. You have $" + money + " and " + parts + " spare parts. " + GENERAL_STORE_MESSAGE + " Let's start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.speak("You are a carpenter. You have $" + money + " and " + parts + " spare parts. " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
       this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + "pounds of food. It is recommend to start with at least 1,000 pounds.");
       this.emit(':responseReady');
     } else if (profession === "farmer") {
@@ -180,7 +179,7 @@ var generalStore = function () {
       food += 500;
       oxen += 4;
       amountToBuy = 500; // TODO change value to user's input
-      this.response.speak("You are a farmer. You have $" + money + ", " + food + " pounds of food, and " + oxen + " oxen. " + GENERAL_STORE_MESSAGE + " Let's start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.speak("You are a farmer. You have $" + money + ", " + food + " pounds of food, and " + oxen + " oxen. " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend 200 pounds of food per person, a total of 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
       this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + " pounds of food. It is recommend to start with at least 1,000 pounds.");
       this.emit(':responseReady');
     }
@@ -188,7 +187,6 @@ var generalStore = function () {
 
   var buyOxen = function() {
     currentlyBuying = "oxen";
-    boughtOxen = true;
     itemPrice = 50;
     amountToBuy = 4; // TODO change value to user's input
     TRY_BUYING_AGAIN = OXEN_REPROMPT;
@@ -199,7 +197,6 @@ var generalStore = function () {
 
   var buyParts = function() {
     currentlyBuying = "parts";
-    boughtParts = true;
     itemPrice = 30;
     amountToBuy = 2; // TODO change value to user's input
     TRY_BUYING_AGAIN = PARTS_REPROMPT;
@@ -286,14 +283,17 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
       if (currentlyBuying === "food") {
         food += amountToBuy;
         amountToBuy = 0;
+        boughtFood = true;
         generalStore.call(this);
       } else if (currentlyBuying === "oxen") {
         oxen += amountToBuy;
         amountToBuy = 0;
+        boughtOxen = true;
         generalStore.call(this);
       } else if (currentlyBuying === "parts") {
         parts += amountToBuy;
         amountToBuy = 0;
+        boughtParts = true;
         generalStore.call(this);
       } else {
         generalStore.call(this);
@@ -1112,7 +1112,6 @@ var travel = function(distance) {
 // THE OREGON TRAIL GAME
 // =====================
 var theOregonTrail = function() {
-  gameSetup();
   days--;
   for (miles = 15; miles <= 1845 + extraMiles; miles += 15) {
     // DAILY CHANGES
