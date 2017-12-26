@@ -10,19 +10,21 @@ const GAME_STATES = {
 
 const GAME_NAME = "Oregon Trail";
 const WELCOME_MESSAGE = "Welcome to the Oregon Trail Game!";
-const START_GAME_MESSAGE = "It\'s 1836 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail.";
-const EXIT_SKILL_MESSAGE = "Thanks for joining me on the Oregon Trail. Let\'s play again soon!";
+const START_GAME_MESSAGE = "It's 1836 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail.";
+const EXIT_SKILL_MESSAGE = "Thanks for joining me on the Oregon Trail. Let's play again soon!";
 const STOP_MESSAGE =  "Would you like to keep playing?";
-const CANCEL_MESSAGE = "Ok, let\'s play again soon.";
+const CANCEL_MESSAGE = "Ok, let's play again soon.";
 
 const newSessionHandlers = {
   'LaunchRequest': function() {
+    resetVariables.call(this); // ensure all variables have default, empty values to start
     this.handler.state = GAME_STATES.START;
     this.emitWithState('StartGame'); // TEST >> CHANGE TO LAUNCH FROM A DIFFERENT HANDLER >> default StartGame
   },
   'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables to default empty values
     this.handler.state = GAME_STATES.START;
-    this.emitWithState('StartGame'); // TEST >> CHANGE TO LAUNCH FROM A DIFFERENT HANDLER >> default StartGame
+    this.emitWithState('StartGame');
   },
   'AMAZON.HelpIntent': function() {
     this.handler.state = GAME_STATES.HELP;
@@ -47,12 +49,10 @@ const newSessionHandlers = {
 // ==============
 // GAME VARIABLES
 // ==============
-var peopleHealthy = [];
-var peopleSick = [];
 var mainPlayer; // tracks the main player
+var peopleHealthy = []; // tracks healthy people -- games starts with everyone in the party being healthy
+var peopleSick = []; // tracks sick people as the game progresses
 var profession; // main player's profession -- used for setup and final score bonus
-var invalid; // tracks people as they get sick
-var victim; // tracks people as they die
 var money = 0; // tracks player's total money
 var food = 0; // tracks player's total food
 var oxen = 0; // tracks player's total oxen
@@ -62,6 +62,8 @@ var extraMiles = 255; // tracks shortcuts
 var month; // tracks starting month
 var days = 0; // tracks calendar
 var trailDays = 0; // tracks daily usage of supplies
+var invalid; // tracks people as they get sick
+var victim; // tracks people as they die
 var daysWithoutFood = 0; // tracks how many days in a row there is no food -- could lead to starvation
 var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lead to oxen dying or wandering off
 var mapLocation; // follows map choices at split trails
@@ -74,6 +76,30 @@ function dateFrom1836(day){
   return new Date(date.setDate(day));
 }
 
+// override Alexa's default persistence
+var resetVariables = function () {
+  mainPlayer = undefined;
+  peopleHealthy.length = 0;
+  peopleSick.length = 0;
+  profession = undefined;
+  money = 0;
+  food = 0;
+  oxen = 0;
+  parts = 0;
+  miles = 0;
+  extraMiles = 255;
+  month = undefined;
+  days = 0;
+  trailDays = 0;
+  invalid = undefined;
+  victim = undefined;
+  daysWithoutFood = 0;
+  daysWithoutGrass = 0;
+  mapLocation = undefined;
+  alreadyTradedAtThisFort = false;
+  fate = 0;
+};
+
 
 
 // =============================
@@ -83,8 +109,6 @@ function dateFrom1836(day){
 // MAIN PLAYER
 var gameIntro = function() {
   mapLocation = "Independence";
-  mainPlayer = "Main Player"; //this.event.request.intent.slots.name.value; // TODO change value to user's input
-  peopleHealthy.push(mainPlayer);
   this.response.speak(WELCOME_MESSAGE + " " + START_GAME_MESSAGE + " Let's begin by setting up your five-person party." + " " + "What is your name?").listen("What is your name?");
   this.response.cardRenderer(WELCOME_MESSAGE);
   this.emit(':responseReady');
@@ -93,23 +117,15 @@ var gameIntro = function() {
 // PARTY
 var setupParty = function() {
   if (peopleHealthy.length === 1) {
-    var person2 = "Player 2"; // TODO change value to user's input
-    peopleHealthy.push(person2);
     this.response.speak("Hello, " + mainPlayer + "! Name the second person in your party.").listen("Name the second person in your party.");
     this.emit(':responseReady');
   } else if (peopleHealthy.length === 2) {
-    var person3 = "Player 3"; // TODO change value to user's input
-    peopleHealthy.push(person3);
     this.response.speak("Name the third person in your party.").listen("Name the third person in your party.");
     this.emit(':responseReady');
   } else if (peopleHealthy.length === 3) {
-    var person4 = "Player 4"; // TODO change value to user's input
-    peopleHealthy.push(person4);
     this.response.speak("Name the fourth person in your party.").listen("Name the fourth person in your party.");
     this.emit(':responseReady');
   } else if (peopleHealthy.length === 4) {
-    var person5 = "Player 5"; // TODO change value to user's input
-    peopleHealthy.push(person5);
     this.response.speak("Name the fifth person in your party.").listen("Name the fifth person in your party.");
     this.emit(':responseReady');
   } else {
@@ -270,7 +286,29 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
     gameIntro.call(this);
   },
   'GetName': function() {
-    setupParty.call(this);
+    if (peopleHealthy.length === 0) {
+      mainPlayer = this.event.request.intent.slots.name.value;
+      peopleHealthy.push(mainPlayer);
+      setupParty.call(this);
+    } else if (peopleHealthy.length === 1) {
+      var person2 = this.event.request.intent.slots.name.value;
+      peopleHealthy.push(person2);
+      setupParty.call(this);
+    } else if (peopleHealthy.length === 2) {
+      var person3 = this.event.request.intent.slots.name.value;
+      peopleHealthy.push(person3);
+      setupParty.call(this);
+    } else if (peopleHealthy.length === 3) {
+      var person4 = this.event.request.intent.slots.name.value;
+      peopleHealthy.push(person4);
+      setupParty.call(this);
+    } else if (peopleHealthy.length === 4) {
+      var person5 = this.event.request.intent.slots.name.value;
+      peopleHealthy.push(person5);
+      setupParty.call(this);
+    } else {
+      setupParty.call(this);
+    }
   },
   'GetProfession': function() {
     setupProfession.call(this);
@@ -310,6 +348,11 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
   'AMAZON.HelpIntent': function() {
     this.handler.state = GAME_STATES.HELP;
     this.emitWithState('helpTheUser', true);
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.START;
+    this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
