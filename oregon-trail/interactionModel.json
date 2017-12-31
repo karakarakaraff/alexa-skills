@@ -2,6 +2,25 @@
   "languageModel": {
     "types": [
       {
+        "name": "AMAZON.US_FIRST_NAME",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "Atticus",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Finn",
+              "synonyms": []
+            }
+          }
+        ]
+      },
+      {
         "name": "BUY_OR_TRADE",
         "values": [
           {
@@ -47,32 +66,6 @@
             "id": null,
             "name": {
               "value": "parts",
-              "synonyms": []
-            }
-          }
-        ]
-      },
-      {
-        "name": "PROFESSIONS",
-        "values": [
-          {
-            "id": null,
-            "name": {
-              "value": "banker",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "carpenter",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "farmer",
               "synonyms": []
             }
           }
@@ -156,46 +149,6 @@
             }
           }
         ]
-      },
-      {
-        "name": "START_MONTHS",
-        "values": [
-          {
-            "id": null,
-            "name": {
-              "value": "april",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "may",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "june",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "july",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "august",
-              "synonyms": []
-            }
-          }
-        ]
       }
     ],
     "intents": [
@@ -247,32 +200,6 @@
         ]
       },
       {
-        "name": "GetHowLong",
-        "samples": [
-          "{how_long}",
-          "{how_long} days",
-          "Rest for {how_long}",
-          "Rest for {how_long} days",
-          "Let's do {how_long}",
-          "Let's do {how_long} days",
-          "How about {how_long}",
-          "How about {how_long} days",
-          "Let me rest for {how_long} days",
-          "Give me {how_long}",
-          "Give me {how_long} days",
-          "I want {how_long}",
-          "I want {how_long} days",
-          "I need {how_long}",
-          "I need {how_long} days"
-        ],
-        "slots": [
-          {
-            "name": "how_long",
-            "type": "AMAZON.NUMBER"
-          }
-        ]
-      },
-      {
         "name": "GetHowManyItems",
         "samples": [
           "{how_many}",
@@ -281,7 +208,49 @@
           "I need {how_many}",
           "How about {how_many}",
           "Let's do {how_many}",
-          "I'll buy {how_many}"
+          "I'll buy {how_many}",
+          "I'll buy {how_many} oxen",
+          "I'll buy {how_many}  ox",
+          "I'll buy {how_many} spare parts",
+          "I'll buy {how_many} parts",
+          "I'll buy {how_many} pounds",
+          "I'll buy {how_many} pounds of food",
+          "Let's do {how_many} ox",
+          "Let's do {how_many} oxen",
+          "Let's do {how_many} spare parts",
+          "Let's do {how_many} parts",
+          "Let's do {how_many} pounds",
+          "Let's do {how_many} pounds of food",
+          "How about {how_many} ox",
+          "How about {how_many} oxen",
+          "How about {how_many} spare parts",
+          "How about {how_many} parts",
+          "How about {how_many} pounds of food",
+          "How about {how_many} pounds",
+          "I need {how_many} ox",
+          "I need {how_many} oxen",
+          "I need {how_many} spare parts",
+          "I need {how_many} parts",
+          "I need {how_many} pounds",
+          "I need {how_many} pounds of food",
+          "I want {how_many} ox",
+          "I want {how_many} oxen",
+          "I want {how_many} parts",
+          "I want {how_many} spare parts",
+          "I want {how_many} pounds",
+          "I want {how_many} pounds of food",
+          "Give me {how_many} ox",
+          "Give me {how_many} oxen",
+          "Give me {how_many} parts",
+          "Give me {how_many} spare parts",
+          "Give me {how_many} pounds",
+          "Give me {how_many} pounds of food",
+          "{how_many} ox",
+          "{how_many} oxen",
+          "{how_many} spare parts",
+          "{how_many} parts",
+          "{how_many} pounds",
+          "{how_many} pounds of food"
         ],
         "slots": [
           {
@@ -351,23 +320,7 @@
         "slots": [
           {
             "name": "profession",
-            "type": "PROFESSIONS"
-          }
-        ]
-      },
-      {
-        "name": "GetRandomNumber",
-        "samples": [
-          "I pick {random_number}",
-          "{random_number}",
-          "Give me {random_number}",
-          "Let's do {random_number}",
-          "How about {random_number}"
-        ],
-        "slots": [
-          {
-            "name": "random_number",
-            "type": "AMAZON.NUMBER"
+            "type": "AMAZON.ProfessionalType"
           }
         ]
       },
@@ -401,12 +354,16 @@
           "Start in {month}",
           "Let's start in {month}",
           "I want {month}",
-          "Do {month}"
+          "Do {month}",
+          "Leave in {month}",
+          "I want to start in {month}",
+          "I want to leave in {month}",
+          "Let's leave in {month}"
         ],
         "slots": [
           {
             "name": "month",
-            "type": "START_MONTHS"
+            "type": "AMAZON.Month"
           }
         ]
       }
