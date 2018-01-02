@@ -3,9 +3,12 @@
 const Alexa = require('alexa-sdk');
 const APP_ID = "amzn1.ask.skill.9608708c-a9ff-441b-9659-0958592879e5";
 const GAME_STATES = {
-  START: '_STARTMODE', // entry point, setting up the game
+  USER_SETUP: '_USERSETUPMODE', // entry point, setting up main player's name and party members' names
+  PROFESSION_SETUP: '_PROFESSIONSETUPMODE', // setting up user's profession and starting money/food/oxen/parts
+  SUPPLIES_SETUP: '_SUPPLIESSETUP', // setting up user's first purchases at general store
+  MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
   PLAY: '_PLAYMODE', // playing the game
-  HELP: '_HELPMODE', // help the user
+  HELP: '_HELPMODE', // help the user // TODO still need to set this up and register it below
 };
 
 const GAME_NAME = "Oregon Trail";
@@ -18,12 +21,12 @@ const CANCEL_MESSAGE = "Ok, let's play again soon.";
 const newSessionHandlers = {
   'LaunchRequest': function() {
     resetVariables.call(this); // ensure all variables have default, empty values to start
-    this.handler.state = GAME_STATES.START;
-    this.emitWithState('StartGame'); // TEST >> CHANGE TO LAUNCH FROM A DIFFERENT HANDLER >> default StartGame
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables to default empty values
-    this.handler.state = GAME_STATES.START;
+    this.handler.state = GAME_STATES.USER_SETUP;
     this.emitWithState('StartGame');
   },
   'AMAZON.HelpIntent': function() {
@@ -39,7 +42,7 @@ const newSessionHandlers = {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.handler.state = GAME_STATES.START;
+    this.handler.state = GAME_STATES.USER_SETUP;
     this.emitWithState('StartGame');
   },
 };
@@ -138,6 +141,7 @@ var setupParty = function() {
     this.response.speak("What is the name of the fifth person in your party?").listen("Please name the fifth person in your party.");
     this.emit(':responseReady');
   } else {
+    this.handler.state = GAME_STATES.PROFESSION_SETUP;
     this.emitWithState('GetProfession');
   }
 };
@@ -151,6 +155,7 @@ var chooseProfession = function() {
     this.response.cardRenderer("Banker (easy mode): Start with a lot of money, but receive zero bonus points.\nCarpenter (intermediate mode): Start with tools, supplies and some money, plus receive a few bonus points.\nFarmer (hard mode): Start with food, a few oxen and a little bit of money, and earn high bonus points.");
     this.emit(':responseReady');
   } else {
+    this.handler.state = GAME_STATES.SUPPLIES_SETUP;
     this.emitWithState('GetHowManyItems');
   }
 };
@@ -229,7 +234,8 @@ var generalStore = function () {
   } else if (boughtParts === false) {
     buyParts.call(this);
   } else {
-     this.emitWithState('GetStartingMonth');
+    this.handler.state = GAME_STATES.MONTH_SETUP;
+    this.emitWithState('GetStartingMonth');
   }
 };
 
@@ -239,10 +245,11 @@ var notEnoughMoney = function() {
 };
 
 /*
-  var buyMore = prompt("Money: $" + money + "\nFood: " + food + "\nOxen: " + oxen + "\nSpare parts: " + parts + "\n\nDo you want to buy anything else? Type 'yes' or 'no'.");
-  if (buyMore === "yes") {
-    goShopping();
-  }
+TODO give user the option to buy more
+var buyMore = prompt("Do you want to buy anything else?");
+if (buyMore === "yes") {
+  goShopping();
+}
 */
 
 // =============
@@ -262,32 +269,32 @@ var chooseMonthAgain = function() {
 };
 
 var setDays = function() {
-  if (month === "march") {
+  if (month === "march" || month === "March") {
     days = 61;
     this.response.speak("Okay, it's March. Let's go!");
     this.emit(':responseReady');
     // TODO delete response above, emit with state to begin game play
-  } else if (month === "april") {
+  } else if (month === "april" || month === "April") {
     days = 92;
     this.response.speak("Okay, it's April. Let's go!");
     this.emit(':responseReady');
     // TODO delete response above, emit with state to begin game play
-  } else if (month === "may") {
+  } else if (month === "may" || month === "May") {
     days = 122;
     this.response.speak("Okay, it's May. Let's go!");
     this.emit(':responseReady');
     // TODO delete response above, emit with state to begin game play
-  } else if (month === "june") {
+  } else if (month === "june" || month === "June") {
     days = 153;
     this.response.speak("Okay, it's June. Let's go!");
     this.emit(':responseReady');
     // TODO delete response above, emit with state to begin game play
-  } else if (month === "july") {
+  } else if (month === "july" || month === "July") {
     days = 183;
     this.response.speak("Okay, it's July. Let's go!");
     this.emit(':responseReady');
     // TODO delete response above, emit with state to begin game play
-  } else if (month === "august") {
+  } else if (month === "august" || month === "August") {
     days = 214;
     this.response.speak("Okay, it's August. Let's go!");
     this.emit(':responseReady');
@@ -297,7 +304,7 @@ var setDays = function() {
 
 
 
-const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
+const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
   'StartGame': function() {
     gameIntro.call(this);
   },
@@ -326,6 +333,36 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
       setupParty.call(this);
     }
   },
+  'AMAZON.HelpIntent': function() {
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    if (this.event.request.intent.name !== "GetName") {
+      this.response.speak("I'm sorry, but that's not a name I understand. Please choose another name.").listen("Please choose another name.");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("That is not a name.");
+      this.emit(":responseReady");
+    }
+  },
+});
+
+
+const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_SETUP, {
   'GetProfession': function() {
     if (hasChosenProfession === false) {
       chooseProfession.call(this);
@@ -338,6 +375,32 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
       }
     }
   },
+  'AMAZON.HelpIntent': function() {
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    if (this.event.request.intent.name !== "GetProfession") {
+      this.response.speak("I'm sorry, but that's not a profession I understand. Please choose to be a banker, a carpenter, or a farmer.").listen("Please choose to be a banker, a carpenter, or a farmer.");
+      this.emit(":responseReady");
+    }
+  },
+});
+
+const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETUP, {
   'GetHowManyItems': function() {
     if (hasBeenToGeneralStore === false) {
       generalStore.call(this);
@@ -365,6 +428,32 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
       }
     }
   },
+  'AMAZON.HelpIntent': function() {
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    if (this.event.request.intent.name !== "GetHowManyItems") {
+      this.response.speak("I'm sorry, I didn't understand how many you want to buy. Please say a number.").listen("Please say a number.");
+      this.emit(":responseReady");
+    }
+  },
+});
+
+const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
   'GetStartingMonth': function() {
     if (hasChosenMonth === false) {
       chooseMonth.call(this);
@@ -383,7 +472,7 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
-    this.handler.state = GAME_STATES.START;
+    this.handler.state = GAME_STATES.USER_SETUP;
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
@@ -395,29 +484,9 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    // TODO add error handling for when the user says something unexpected OR something that maps to several intents (example: "April" can be name or month)
-    if (mainPlayer === undefined) {
-      console.log("=====>>>>> UNHANDLED: mainPlayer === undefined");
-      this.handler.state = GAME_STATES.START;
-      this.emitWithState('StartGame');
-    } else if (peopleHealthy.length < 5) {
-      console.log("=====>>>>> UNHANDLED: peopleHealthy.length < 5");
-      this.handler.state = GAME_STATES.START;
-      this.emitWithState('GetName');
-    } else if (profession === undefined) {
-      console.log("=====>>>>> UNHANDLED: profession === undefined");
-      this.handler.state = GAME_STATES.START;
-      this.emitWithState('GetProfession');
-    } else if (boughtFood === false || boughtOxen === false || boughtParts === false) {
-      console.log("=====>>>>> UNHANDLED: boughtFood === false || boughtOxen === false || boughtParts === false");
-      this.handler.state = GAME_STATES.START;
-      this.emitWithState('GetHowManyItems');
-    } else if (days === 0) {
-      console.log("=====>>>>> UNHANDLED: days === 0");
-      this.handler.state = GAME_STATES.START;
-      this.emitWithState('GetStartingMonth');
-    } else {
-      console.log("=====>>>>> UNHANDLED: else");
+    if (this.event.request.intent.name !== "GetStartingMonth") {
+      this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
+      this.emit(":responseReady");
     }
   },
 });
@@ -1341,6 +1410,6 @@ theOregonTrail();
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, startStateHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers);
   alexa.execute();
 };
