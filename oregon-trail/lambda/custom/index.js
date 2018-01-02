@@ -565,37 +565,37 @@ var crossRiver = function(depth, sinkChance, cost) {
     if (fate <= sinkChance && depth > 6) {
       food -= fate * 10;
       if (peopleHealthy.length + peopleSick.length === 1) {
-        this.response.speak("Your wagon was overtaken by water, and you drowned.");
+        alert("Your wagon was overtaken by water, and you drowned.");
         throw new gameOver();
       } else if (peopleSick.length >= 1) {
         death(peopleSick);
-        this.response.speak("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food.");
+        alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food.");
       } else {
         death(peopleHealthy);
-        this.response.speak("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food."
+        alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food."
         );
       }
     } else if (fate <= sinkChance && depth > 4) {
       food -= fate * 3;
-      this.response.speak("You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food."
+      alert("You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food."
       );
     } else {
-      this.response.speak("Congratulations! You safely crossed the river.");
+      alert("Congratulations! You safely crossed the river.");
     }
   };
 
   if (cross === "ferry") {
     if (money >= cost) {
       money -= cost;
-      this.response.speak("Congratulations! You safely crossed the river.");
+      alert("Congratulations! You safely crossed the river.");
     } else if (food >= cost * 3) {
       var choice = prompt(
         "You don't have $" + cost + ", but the ferry will accept " + cost * 3 + " pounds of food as your payment. Will you accept? Type 'yes' or 'no'.");
       if (choice === "yes") {
         food -= cost * 3;
-        this.response.speak("Congratulations! You safely crossed the river.");
+        alert("Congratulations! You safely crossed the river.");
       } else {
-        this.response.speak("You will have to try to float across.");
+        alert("You will have to try to float across.");
         float();
       }
     }
@@ -620,7 +620,7 @@ var goShopping = function() {
       } else {
         food += pounds;
         money -= pounds * 0.5;
-        this.response.speak("You have $" + money + " left.");
+        alert("You have $" + money + " left.");
       }
     } else if (toBuy === "oxen") {
       var beasts = +prompt("Ox: $50\nHow many oxen do you want to buy?");
@@ -629,7 +629,7 @@ var goShopping = function() {
       } else {
         oxen += beasts;
         money -= beasts * 50;
-        this.response.speak("You have $" + money + " left.");
+        alert("You have $" + money + " left.");
       }
     } else if (toBuy === "parts") {
       var spares = +prompt("Spare part: $30\nHow many spare parts do you want to buy?");
@@ -663,7 +663,7 @@ var goShopping = function() {
         }
       }
     } else {
-      this.response.speak("Sorry, you don't have any money to buy items, and you already tried trading at this fort. It's time to move on.");
+      alert("Sorry, you don't have any money to buy items, and you already tried trading at this fort. It's time to move on.");
     }
   }
 };
@@ -686,90 +686,90 @@ var tradeItems = function(tradeChances) {
         if (yeahOrNah === "yes" && food >= 50) {
           parts++;
           food -= 50;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && food < 50) {
-          this.response.speak("Sorry, you don't have enough food to make the trade.");
+          alert("Sorry, you don't have enough food to make the trade.");
         }
       } else if (tradeDeal === 2) {
         yeahOrNah = prompt("A woman at the fort will give you 100 pounds of food for an ox. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && oxen > 1) {
           food += 100;
           oxen--;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && oxen === 1) {
-          this.response.speak("Sorry, you only have one ox. You must keep him to continue on the trail.");
+          alert("Sorry, you only have one ox. You must keep him to continue on the trail.");
         }
       } else if (tradeDeal === 3) {
         yeahOrNah = prompt("The general store owner will give you $15 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && parts >= 1) {
           money += 15;
           parts--;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && parts < 1) {
-          this.response.speak("Sorry, you don't have any spare parts to make the trade.");
+          alert("Sorry, you don't have any spare parts to make the trade.");
         }
       } else if (tradeDeal === 4) {
         yeahOrNah = prompt("A man at the fort will give you an ox for $25. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && money >= 25) {
           oxen++;
           money -= 25;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && money < 25) {
-          this.response.speak("Sorry, you don't have enough money to make the trade.");
+          alert("Sorry, you don't have enough money to make the trade.");
         }
       } else if (tradeDeal === 5) {
         yeahOrNah = prompt("A man at the fort will give you $30 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && parts >= 1) {
           money += 30;
           parts --;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && parts < 1) {
-          this.response.speak("Sorry, you don't have any spare parts to make the trade.");
+          alert("Sorry, you don't have any spare parts to make the trade.");
         }
       } else if (tradeDeal === 6) {
         yeahOrNah = prompt("A Native American at the fort will give you 200 pounds of food for two oxen. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && oxen > 2) {
           food += 200;
           oxen -= 2;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && oxen > 2) {
-          this.response.speak("Sorry, you only have two oxen. If you trade them both away, you won't be able to continue on the trail.");
+          alert("Sorry, you only have two oxen. If you trade them both away, you won't be able to continue on the trail.");
         }
       } else if (tradeDeal === 7) {
         yeahOrNah = prompt("A woman at the fort will give you a spare part for $50. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && money >= 50) {
           parts++;
           money -= 50;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && money < 50) {
-          this.response.speak("Sorry, you don't have enough money to make the trade.");
+          alert("Sorry, you don't have enough money to make the trade.");
         }
       } else if (tradeDeal === 8) {
         yeahOrNah = prompt("A man at the fort will give you $100 for an ox. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && oxen > 1) {
           money += 100;
           oxen--;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && oxen === 1) {
-          this.response.speak("Sorry, you only have one ox. You must keep him to continue on the trail.");
+          alert("Sorry, you only have one ox. You must keep him to continue on the trail.");
         }
       } else if (tradeDeal === 9) {
         yeahOrNah = prompt("An old settler will give you $20 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && parts >= 1) {
           money += 20;
           parts--;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && parts < 1) {
-          this.response.speak("Sorry, you don't have any spare parts to make the trade.");
+          alert("Sorry, you don't have any spare parts to make the trade.");
         }
       } else if (tradeDeal === 10) {
         yeahOrNah = prompt("A man at the fort will give you a spare part for 75 pounds of food. Do you accept this trade? Type 'yes' or 'no'.");
         if (yeahOrNah === "yes" && food >= 50) {
           parts++;
           food -= 75;
-          this.response.speak("It's a deal!");
+          alert("It's a deal!");
         } else if (yeahOrNah === "yes" && food < 50) {
-          this.response.speak("Sorry, you don't have enough food to make the trade.");
+          alert("Sorry, you don't have enough food to make the trade.");
         }
       }
       var tradeAgain = prompt("Do you want to try again? Type 'yes' or 'no'.");
@@ -777,7 +777,7 @@ var tradeItems = function(tradeChances) {
         makeADeal();
       }
     } else {
-      this.response.speak("No one else at this fort wants to trade with you.");
+      alert("No one else at this fort wants to trade with you.");
     }
   };
   makeADeal();
@@ -815,7 +815,7 @@ var goHunting = function() {
     } else {
       shootMessage = "Sorry, you didn't get anything on this hunting round.";
     }
-    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + ". " + shootMessage);
+    alert("You guessed " + guess + ". The random number was " + randomNumber + ". " + shootMessage);
   };
 
   if (guess > 0 && guess <= 10) {
@@ -857,19 +857,19 @@ var snow = function(lostDays) {
   trailDays += lostDays;
   food -= lostDays*(peopleHealthy.length + peopleSick.length);
   if (lostDays === 1) {
-    this.response.speak("You got stuck in some snow. You have lost 1 day.");
+    alert("You got stuck in some snow. You have lost 1 day.");
   } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length > 1) {
     if (peopleSick.length > 0) {
       death(peopleSick);
-      this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death.");
+      alert("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death.");
     } else {
       death(peopleHealthy);
-      this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death.");
+      alert("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death.");
     }
   } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length === 1) {
-    this.response.speak("You got stuck in a large snow storm for " + lostDays + " days and froze to death.");
+    alert("You got stuck in a large snow storm for " + lostDays + " days and froze to death.");
   } else {
-    this.response.speak("You got stuck in some snow. You have lost " + lostDays + " days.");
+    alert("You got stuck in some snow. You have lost " + lostDays + " days.");
   }
 };
 
@@ -879,17 +879,17 @@ var storm = function(lostDays) {
   food -= lostDays*(peopleHealthy.length + peopleSick.length);
   if (lostDays >= 3) {
     oxen -= 1;
-    this.response.speak("You got caught in a thunderstorm and an ox ran away. You lost " + lostDays + " days.");
+    alert("You got caught in a thunderstorm and an ox ran away. You lost " + lostDays + " days.");
   } else if (lostDays === 1) {
-    this.response.speak("You got caught in a thunderstorm. You lost 1 day.");
+    alert("You got caught in a thunderstorm. You lost 1 day.");
   } else {
-    this.response.speak("You got caught in a thunderstorm. You lost " + lostDays + " days.");
+    alert("You got caught in a thunderstorm. You lost " + lostDays + " days.");
   }
 };
 
 var noGrass = function() {
   daysWithoutGrass++;
-  this.response.speak("There's no grass for the oxen.");
+  alert("There's no grass for the oxen.");
   if (daysWithoutGrass % 3 === 0) {
     oxProblem();
   }
@@ -898,11 +898,11 @@ var noGrass = function() {
 var oxProblem = function() {
   var allOxProblems = ["An ox has wandered off.", "An ox has died."];
   var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
-  this.response.speak(randomOxProblem);
+  alert(randomOxProblem);
   if (oxen > 1) {
     oxen -= 1;
   } else if (oxen === 1) {
-    this.response.speak("That was your last ox. This is as far as you can go. Good luck homesteading!");
+    alert("That was your last ox. This is as far as you can go. Good luck homesteading!");
     throw new gameOver();
   }
 };
@@ -912,14 +912,14 @@ var fire = function() {
   var itemIndex = Math.floor(Math.random() * destroyedItems.length);
   if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
     window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
-    this.response.speak("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ".");
+    alert("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ".");
   } else if (window[destroyedItems[itemIndex][0]] > 0) {
     window[destroyedItems[itemIndex][0]] = 0;
-    this.response.speak("A fire broke out in your wagon and destroyed your remaining " + destroyedItems[itemIndex][2] + ".");
+    alert("A fire broke out in your wagon and destroyed your remaining " + destroyedItems[itemIndex][2] + ".");
   }
 
   if (oxen === 0) {
-    this.response.speak("That was your last ox. This is as far as you can go. Good luck homesteading!");
+    alert("That was your last ox. This is as far as you can go. Good luck homesteading!");
     throw new gameOver();
   }
 };
@@ -929,14 +929,14 @@ var thief = function() {
   var itemIndex = Math.floor(Math.random() * stolenItems.length);
   if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
     window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
-    this.response.speak("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ".");
+    alert("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ".");
   } else {
     window[stolenItems[itemIndex][0]] = 0;
-    this.response.speak("A thief broke into your wagon and stole your remaining " + stolenItems[itemIndex][2] + ".");
+    alert("A thief broke into your wagon and stole your remaining " + stolenItems[itemIndex][2] + ".");
   }
 
   if (oxen === 0) {
-    this.response.speak("That was your last ox. This is as far as you can go. Good luck homesteading!");
+    alert("That was your last ox. This is as far as you can go. Good luck homesteading!");
     throw new gameOver();
   }
 };
@@ -945,13 +945,13 @@ var findItems = function() {
   var foundItems = [["food", 50, "pounds of food"],["oxen", 2, "oxen"],["money", 50, "dollars"],["parts", 1, "spare part"],["money", 100, "dollars"]];
   var itemIndex = Math.floor(Math.random() * foundItems.length);
   window[foundItems[itemIndex][0]] += foundItems[itemIndex][1];
-  this.response.speak("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " " + foundItems[itemIndex][2] + ".");
+  alert("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " " + foundItems[itemIndex][2] + ".");
 };
 
 var findBerries = function() {
   daysWithoutFood = 0;
   food += 3*(Math.floor(Math.random() * (10 - 1 + 1)) + 1);
-  this.response.speak("You found wild berries.");
+  alert("You found wild berries.");
 };
 
 var brokenWagon = function() {
@@ -960,9 +960,9 @@ var brokenWagon = function() {
     days++;
     trailDays++;
     food -= (peopleHealthy.length + peopleSick.length);
-    this.response.speak("Your wagon broke, but you repaired it.");
+    alert("Your wagon broke, but you repaired it.");
   } else {
-    this.response.speak("Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
+    alert("Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
     throw new gameOver();
   }
 };
@@ -973,37 +973,37 @@ var getLost = function() {
   trailDays += howLong;
   food -= howLong*(peopleHealthy.length + peopleSick.length);
   if (howLong === 1) {
-    this.response.speak("You lost the trail. You wasted 1 day.");
+    alert("You lost the trail. You wasted 1 day.");
   } else {
-    this.response.speak("You lost the trail. You wasted " + howLong + " days.");
+    alert("You lost the trail. You wasted " + howLong + " days.");
   }
 };
 
 var starve = function() {
   if (daysWithoutFood === 1) {
-    this.response.speak("You have run out of food.");
+    alert("You have run out of food.");
   } else if (daysWithoutFood % 2 === 0 && peopleHealthy.length > 0) {
     if (peopleHealthy.length === 1) {
       if (fate % 2 === 0) {
         sickness();
-        this.response.speak("You are starving and are very weak.");
+        alert("You are starving and are very weak.");
       }
     } else {
       if (fate % 2 === 0) {
         sickness();
-        this.response.speak(invalid + " is starving and is very weak.");
+        alert(invalid + " is starving and is very weak.");
       }
     }
   } else if (daysWithoutFood % 3 === 0 && fate % 2 === 0) {
     if (peopleHealthy.length + peopleSick.length === 1) {
-      this.response.speak("You have died of starvation.");
+      alert("You have died of starvation.");
       throw new gameOver();
     } else if (peopleSick.length > 0){
       death(peopleSick);
-      this.response.speak(victim + " has died of starvation.");
+      alert(victim + " has died of starvation.");
     } else if (peopleHealthy.length > 0) {
       death(peopleHealthy);
-      this.response.speak(victim + " has died of starvation.");
+      alert(victim + " has died of starvation.");
     }
   }
 };
@@ -1018,12 +1018,12 @@ var recovery = function(howManyToHeal) {
     if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
       peopleSick.shift();
       peopleHealthy.unshift(mainPlayer);
-      this.response.speak("You are feeling much better.");
+      alert("You are feeling much better.");
     } else {
       var recoveredPerson = peopleSick[recoveredIndex];
       peopleSick.splice(recoveredIndex, 1);
       peopleHealthy.push(recoveredPerson);
-      this.response.speak(recoveredPerson + " is feeling much better.");
+      alert(recoveredPerson + " is feeling much better.");
     }
 
     if (peopleCured < howManyToHeal && peopleSick.length > 0) {
@@ -1069,9 +1069,9 @@ var gameOver = function(status) {
       bonus = 3;
     }
     var points = bonus*((peopleHealthy.length * 100) + (peopleSick.length * 50) + (oxen * 20) + (food * 2) + (parts * 2) + money - trailDays);
-    this.response.speak("Congratulations, you reached the end of the trail! You finished the game with a score of " + points + ".");
+    alert("Congratulations, you reached the end of the trail! You finished the game with a score of " + points + ".");
   } else {
-    this.response.speak("THE END");
+    alert("THE END");
   }
 };
 
@@ -1087,18 +1087,18 @@ var kansasRiver = function() {
   } else {
     depth = 4;
   }
-  this.response.speak("Kansas River");
+  alert("Kansas River");
   crossRiver(depth, 2, 5);
 };
 
 var fortKearny = function() {
-  this.response.speak("Fort Kearny");
+  alert("Fort Kearny");
 
   alreadyTradedAtThisFort = false;
   var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
   if (getStuff === "yes") {
     if (money <= 0) {
-      this.response.speak("You don't have any money, but you can try trading.");
+      alert("You don't have any money, but you can try trading.");
       tradeItems(1);
     } else {
       var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading instead? Type 'buy' or 'trade'.");
@@ -1112,17 +1112,17 @@ var fortKearny = function() {
 };
 
 var chimneyRock = function() {
-  this.response.speak("Chimney Rock");
+  alert("Chimney Rock");
 };
 
 var fortLaramie = function() {
-  this.response.speak("Fort Laramie");
+  alert("Fort Laramie");
 
   alreadyTradedAtThisFort = false;
   var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
   if (getStuff === "yes") {
     if (money <= 0) {
-      this.response.speak("You don't have any money, but you can try trading.");
+      alert("You don't have any money, but you can try trading.");
       tradeItems(2);
     } else {
       var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
@@ -1136,26 +1136,26 @@ var fortLaramie = function() {
 };
 
 var independenceRock = function() {
-  this.response.speak("Independence Rock");
+  alert("Independence Rock");
 };
 
 var southPass = function() {
-  this.response.speak("South Pass");
+  alert("South Pass");
 };
 
 var greenRiver = function() {
-  this.response.speak("Green River");
+  alert("Green River");
   crossRiver(8, 8, 12);
 };
 
 var fortBridger = function() {
-  this.response.speak("Fort Bridger");
+  alert("Fort Bridger");
 
   alreadyTradedAtThisFort = false;
   var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
   if (getStuff === "yes") {
     if (money <= 0) {
-      this.response.speak("You don't have any money, but you can try trading.");
+      alert("You don't have any money, but you can try trading.");
       tradeItems(3);
     } else {
       var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
@@ -1169,17 +1169,17 @@ var fortBridger = function() {
 };
 
 var sodaSprings = function() {
-  this.response.speak("Soda Springs");
+  alert("Soda Springs");
 };
 
 var fortHall = function() {
-  this.response.speak("Fort Hall");
+  alert("Fort Hall");
 
   alreadyTradedAtThisFort = false;
   var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
   if (getStuff === "yes") {
     if (money <= 0) {
-      this.response.speak("You don't have any money, but you can try trading.");
+      alert("You don't have any money, but you can try trading.");
       tradeItems(2);
     } else {
       var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
@@ -1193,18 +1193,18 @@ var fortHall = function() {
 };
 
 var snakeRiver = function() {
-  this.response.speak("Snake River");
+  alert("Snake River");
   crossRiver(5, 5, 7);
 };
 
 var fortBoise = function() {
-  this.response.speak("Fort Boise");
+  alert("Fort Boise");
 
   alreadyTradedAtThisFort = false;
   var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
   if (getStuff === "yes") {
     if (money <= 0) {
-      this.response.speak("You don't have any money, but you can try trading.");
+      alert("You don't have any money, but you can try trading.");
       tradeItems(1);
     } else {
       var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
@@ -1218,13 +1218,13 @@ var fortBoise = function() {
 };
 
 var fortWallaWalla = function() {
-  this.response.speak("Fort Walla Walla");
+  alert("Fort Walla Walla");
 
   alreadyTradedAtThisFort = false;
   var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
   if (getStuff === "yes") {
     if (money <= 0) {
-      this.response.speak("You don't have any money, but you can try trading.");
+      alert("You don't have any money, but you can try trading.");
       tradeItems(1);
     } else {
       var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
@@ -1238,11 +1238,11 @@ var fortWallaWalla = function() {
 };
 
 var theDalles = function() {
-  this.response.speak("The Dalles");
+  alert("The Dalles");
 };
 
 var oregonCity = function() {
-  this.response.speak("Oregon City");
+  alert("Oregon City");
   throw new gameOver("winner");
 };
 
@@ -1275,7 +1275,7 @@ var travel = function(distance) {
     greenRiver();
     mapLocation = prompt("Do you want to stay on the trail to Fort Bridger or take the shortcut through Soda Springs?\n\nType 'Fort Bridger' or 'Soda Springs'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Bridger" && mapLocation !== "Soda Springs") {
-      this.response.speak("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Bridger.");
+      alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Bridger.");
       mapLocation = "Fort Bridger";
     }
     if (mapLocation === "Soda Springs") {
@@ -1298,7 +1298,7 @@ var travel = function(distance) {
     fortBoise();
     mapLocation = prompt("Do you want to stay on the trail to Fort Walla Walla or take the shortcut through The Dalles?\n\nType 'Fort Walla Walla' or 'The Dalles'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Walla Walla" && mapLocation !== "The Dalles") {
-      this.response.speak("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Walla Walla.");
+      alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Walla Walla.");
       mapLocation = "Fort Walla Walla";
     }
     if (mapLocation === "The Dalles") {
@@ -1361,7 +1361,7 @@ var theOregonTrail = function() {
 
         if (peopleHealthy.length > 1) {
           sickness();
-          this.response.speak(invalid + " has " + issue + ".");
+          alert(invalid + " has " + issue + ".");
           restOption = prompt("Do you want to rest to see if "+ invalid + " feels better? Type 'yes' or 'no'.");
           if (restOption === "yes" ) {
             daysOfRest = +prompt("How many days would you like to rest? Type a number.");
@@ -1369,7 +1369,7 @@ var theOregonTrail = function() {
           }
         } else {
           sickness();
-          this.response.speak("You have " + issue + ".");
+          alert("You have " + issue + ".");
           restOption = prompt("Do you want to rest to see if you feel better? Type 'yes' or 'no'.");
           if (restOption === "yes" ) {
             daysOfRest = +prompt("How many days would you like to rest? Type a number.");
@@ -1382,11 +1382,11 @@ var theOregonTrail = function() {
         var fatality = diseases[Math.floor(Math.random() * diseases.length)];
 
         if (peopleHealthy.length + peopleSick.length === 1 && peopleSick.indexOf(mainPlayer) === 0) {
-          this.response.speak("You have died of " + fatality);
+          alert("You have died of " + fatality);
           throw new gameOver();
         } else if (peopleSick.length > 0) {
           death(peopleSick);
-          this.response.speak(victim + " has died of " + fatality + ".");
+          alert(victim + " has died of " + fatality + ".");
         }
       // WEATHER
       } else if (fate === 3 && trailDays % 2 === 0) {
@@ -1408,10 +1408,10 @@ var theOregonTrail = function() {
             if (stampedeChance === 9 && peopleSick.length + peopleHealthy.length > 1) {
               if (peopleHealthy.length > 1) {
                 death(peopleHealthy);
-                this.response.speak("Buffalo stampede! " + victim + " got trampled.");
+                alert("Buffalo stampede! " + victim + " got trampled.");
               } else if (peopleSick.length > 0) {
                 death(peopleSick);
-                this.response.speak("Buffalo stampede! " + victim + " got trampled.");
+                alert("Buffalo stampede! " + victim + " got trampled.");
               }
             }
           }
@@ -1445,8 +1445,8 @@ var theOregonTrail = function() {
       }
     }
 
-    // DAILY STATUS UPDATE
-    this.response.speak(dateFrom1836(days).toDateString()
+    // STATUS UPDATE FOR CARD RENDERER
+    var statusCard = dateFrom1836(days).toDateString()
     + "\n-----------------"
     + "\nDays on the trail: " + trailDays
     + "\nMiles: " + miles + "/" + (1845 + extraMiles)
@@ -1456,7 +1456,7 @@ var theOregonTrail = function() {
     + "\nParts: " + parts
     + "\nPeople healthy: " + peopleHealthy
     + "\nPeople sick: " + peopleSick
-    );
+    ;
   }
 };
 
