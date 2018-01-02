@@ -2,6 +2,32 @@
   "languageModel": {
     "types": [
       {
+        "name": "AMAZON.ProfessionalType",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "banker",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "carpenter",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "farmer",
+              "synonyms": []
+            }
+          }
+        ]
+      },
+      {
         "name": "AMAZON.US_FIRST_NAME",
         "values": [
           {
@@ -17,7 +43,7 @@
               "value": "Finn",
               "synonyms": []
             }
-          }
+          },
         ]
       },
       {
