@@ -51,7 +51,7 @@ const newSessionHandlers = {
   },
 };
 
-// HANDLE MAIN PLAYER AND PARTY MEMBER NAMES
+// HANDLE NAMES FOR MAIN PLAYER AND PARTY MEMBERS
 const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
   'StartGame': function() {
     gameIntro.call(this);
@@ -324,7 +324,7 @@ var invalid; // tracks people as they get sick
 var victim; // tracks people as they die
 var daysWithoutFood = 0; // tracks how many days in a row there is no food -- could lead to starvation
 var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lead to oxen dying or wandering off
-var mapLocation; // follows map choices at split trails
+var mapLocation; // follows map, remembers choices at split trails
 var alreadyTradedAtThisFort = false; // tracks trading at each fort
 var fate; // adds randomness to the game and changes every day
 
@@ -369,9 +369,9 @@ var resetVariables = function () {
 
 
 
-// ===============
-// SETUP FUNCTIONS
-// ===============
+// ==========
+// GAME SETUP
+// ==========
 // MAIN PLAYER
 var gameIntro = function() {
   mapLocation = "Independence";
@@ -565,8 +565,7 @@ var crossRiver = function(depth, sinkChance, cost) {
     if (fate <= sinkChance && depth > 6) {
       food -= fate * 10;
       if (peopleHealthy.length + peopleSick.length === 1) {
-        alert("Your wagon was overtaken by water, and you drowned.");
-        throw new gameOver();
+        throw new gameOver("you drowned");
       } else if (peopleSick.length >= 1) {
         death(peopleSick);
         alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food.");
@@ -895,6 +894,19 @@ var noGrass = function() {
   }
 };
 
+var buffaloStampede = function() {
+  var stampedeChance = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+  if (stampedeChance === 9 && peopleSick.length + peopleHealthy.length > 1) {
+    if (peopleHealthy.length > 1) {
+      death(peopleHealthy);
+      alert("Buffalo stampede! " + victim + " got trampled.");
+    } else if (peopleSick.length > 0) {
+      death(peopleSick);
+      alert("Buffalo stampede! " + victim + " got trampled.");
+    }
+  }
+};
+
 var oxProblem = function() {
   var allOxProblems = ["An ox has wandered off.", "An ox has died."];
   var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
@@ -902,42 +914,37 @@ var oxProblem = function() {
   if (oxen > 1) {
     oxen -= 1;
   } else if (oxen === 1) {
-    alert("That was your last ox. This is as far as you can go. Good luck homesteading!");
-    throw new gameOver();
+    throw new gameOver("no more oxen");
   }
 };
 
 var fire = function() {
   var destroyedItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
   var itemIndex = Math.floor(Math.random() * destroyedItems.length);
-  if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
+  if (oxen === 1 && window[destroyedItems[itemIndex][0]] === "oxen") {
+    alert("A fire broke out on your wagon and killed your last ox. This is as far as you can go. Good luck homesteading!");
+    throw new gameOver("no more oxen");
+  } else if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
     window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
     alert("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ".");
   } else if (window[destroyedItems[itemIndex][0]] > 0) {
     window[destroyedItems[itemIndex][0]] = 0;
     alert("A fire broke out in your wagon and destroyed your remaining " + destroyedItems[itemIndex][2] + ".");
   }
-
-  if (oxen === 0) {
-    alert("That was your last ox. This is as far as you can go. Good luck homesteading!");
-    throw new gameOver();
-  }
 };
 
 var thief = function() {
   var stolenItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
   var itemIndex = Math.floor(Math.random() * stolenItems.length);
-  if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
+  if (oxen === 1 && window[stolenItems[itemIndex][0]] === "oxen") {
+    alert("A theif stole your last ox. This is as far as you can go. Good luck homesteading!");
+    throw new gameOver("no more oxen");
+  } else if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
     window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
     alert("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ".");
   } else {
     window[stolenItems[itemIndex][0]] = 0;
     alert("A thief broke into your wagon and stole your remaining " + stolenItems[itemIndex][2] + ".");
-  }
-
-  if (oxen === 0) {
-    alert("That was your last ox. This is as far as you can go. Good luck homesteading!");
-    throw new gameOver();
   }
 };
 
@@ -962,8 +969,7 @@ var brokenWagon = function() {
     food -= (peopleHealthy.length + peopleSick.length);
     alert("Your wagon broke, but you repaired it.");
   } else {
-    alert("Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
-    throw new gameOver();
+    throw new gameOver("broken wagon");
   }
 };
 
@@ -996,8 +1002,7 @@ var starve = function() {
     }
   } else if (daysWithoutFood % 3 === 0 && fate % 2 === 0) {
     if (peopleHealthy.length + peopleSick.length === 1) {
-      alert("You have died of starvation.");
-      throw new gameOver();
+      throw new gameOver("you starved");
     } else if (peopleSick.length > 0){
       death(peopleSick);
       alert(victim + " has died of starvation.");
@@ -1069,9 +1074,36 @@ var gameOver = function(status) {
       bonus = 3;
     }
     var points = bonus*((peopleHealthy.length * 100) + (peopleSick.length * 50) + (oxen * 20) + (food * 2) + (parts * 2) + money - trailDays);
-    alert("Congratulations, you reached the end of the trail! You finished the game with a score of " + points + ".");
+    this.response.speak("Congratulations, you reached Oregon City! You finished the game with a score of " + points + " points.");
+    this.response.cardRenderer("Congratulations, you reach Oregon City! FINAL SCORE: " + points);
+    this.emit(':responseReady');
+  } else if (status === "you died") {
+    var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
+    var fatality = diseases[Math.floor(Math.random() * diseases.length)];
+    this.response.speak("You have died of " + fatality + ". Game over!");
+    this.response.cardRenderer("Game over! You have died of " + fatality);
+    this.emit(':responseReady');
+  } else if (status === "you drowned") {
+    this.response.speak("Your wagon was overtaken by water, and you drowned. Game over!");
+    this.response.cardRenderer("Game over! You drowned trying to cross the " + mapLocation + ".");
+    this.emit(':responseReady');
+    alert("Your wagon was overtaken by water, and you drowned.");
+  } else if (status === "you starved") {
+    this.response.speak("You have died of starvation. Game over!");
+    this.response.cardRenderer("Game over! You have died of starvation.");
+    this.emit(':responseReady');
+  } else if (status === "no more oxen") {
+    this.response.speak("That was your last ox. This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+    this.emit(':responseReady');
+  } else if (status === "broken wagon") {
+    this.response.speak("Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over! Your wagon broke, and you don't have any spare parts to fix it.");
+    this.emit(':responseReady');
   } else {
-    alert("THE END");
+    this.response.speak("Game over!");
+    this.response.cardRenderer("Game over!");
+    this.emit(':responseReady');
   }
 };
 
@@ -1382,8 +1414,7 @@ var theOregonTrail = function() {
         var fatality = diseases[Math.floor(Math.random() * diseases.length)];
 
         if (peopleHealthy.length + peopleSick.length === 1 && peopleSick.indexOf(mainPlayer) === 0) {
-          alert("You have died of " + fatality);
-          throw new gameOver();
+          throw new gameOver("you died");
         } else if (peopleSick.length > 0) {
           death(peopleSick);
           alert(victim + " has died of " + fatality + ".");
@@ -1404,16 +1435,7 @@ var theOregonTrail = function() {
           if (days < 122 || (days > 365 && days < 487)) {
             noGrass();
           } else if (days > 183 && days < 214) {
-            var stampedeChance = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-            if (stampedeChance === 9 && peopleSick.length + peopleHealthy.length > 1) {
-              if (peopleHealthy.length > 1) {
-                death(peopleHealthy);
-                alert("Buffalo stampede! " + victim + " got trampled.");
-              } else if (peopleSick.length > 0) {
-                death(peopleSick);
-                alert("Buffalo stampede! " + victim + " got trampled.");
-              }
-            }
+            buffaloStampede();
           }
         }
       // GOOD THINGS
