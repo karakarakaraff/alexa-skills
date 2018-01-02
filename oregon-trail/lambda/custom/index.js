@@ -8,6 +8,7 @@ const GAME_STATES = {
   SUPPLIES_SETUP: '_SUPPLIESSETUP', // setting up user's first purchases at general store
   MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
   PLAY: '_PLAYMODE', // playing the game
+  HUNT: '_HUNTMODE', // hunting within the game
   HELP: '_HELPMODE', // help the user // TODO still need to set this up and register it below
 };
 
@@ -176,16 +177,16 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
 
 // HANDLE SUPPLIES
 const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETUP, {
-  'GetHowManyItems': function() {
+  'GetNumber': function() {
     if (hasBeenToGeneralStore === false) {
       generalStore.call(this);
     } else {
-      amountToBuy = +this.event.request.intent.slots.how_many.value;
+      amountToBuy = +this.event.request.intent.slots.number.value;
       if (currentlyBuying !== undefined && (amountToBuy * itemPrice > money)) {
         notEnoughMoney.call(this);
       } else {
         money -= (amountToBuy * itemPrice);
-        if (currentlyBuying === "food") {
+        if (currentlyBuying === "pounds of food") {
           food += amountToBuy;
           boughtFood = true;
           generalStore.call(this);
@@ -197,7 +198,7 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
           } else {
             mustBuyOxen.call(this);
           }
-        } else if (currentlyBuying === "parts") {
+        } else if (currentlyBuying === "spare parts") {
           parts += amountToBuy;
           boughtParts = true;
           generalStore.call(this);
@@ -226,8 +227,8 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    if (this.event.request.intent.name !== "GetHowManyItems") {
-      this.response.speak("I'm sorry, I didn't understand how many you want to buy. Please say a number.").listen("Please say a number.");
+    if (this.event.request.intent.name !== "GetNumber") {
+      this.response.speak("I'm sorry, I didn't understand how many " + currentlyBuying + " you want to buy. Please say a number.").listen("Please say a number.");
       this.emit(":responseReady");
     }
   },
@@ -276,9 +277,9 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
 // HANDLE GAMEPLAY
 const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
   'PlayGame': function() {
-    this.response.speak("The game is playing now.");
+    this.response.speak("The game is playing.");
     this.emit(":responseReady");
-    // theOregonTrail();
+    // theOregonTrail.call(this);
   },
   'AMAZON.HelpIntent': function() {
     // TODO setup help state and function
@@ -299,6 +300,56 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
+    // TODO what kind of unhandled responses would go here?
+  },
+});
+
+// HANDLE HUNTING
+const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
+  'ChooseToHunt': function() {
+    this.response.speak("You're in an area with a lot of wildlife. You currently have " + food + " pounds of food, which will last about " + Math.floor(food/(peopleHealthy.length + peopleSick.length)) + " days. Do you want to go hunting for more food?").listen("Do you want to go hunting for more food?");
+    this.response.cardRenderer(statusCard);
+    this.emit(":responseReady");
+  },
+  'AMAZON.YesIntent': function() {
+    goHunting.call(this);
+  },
+  'AMAZON.NoIntent': function() {
+    this.handler.state = GAME_STATES.PLAY;
+    this.emitWithState('PlayGame');
+  },
+  'GetNumber': function() {
+    guess = +this.event.request.intent.slots.number.value;
+    if (guess >= 1 && guess <= 10) {
+      shootAnimal.call(this);
+    } else {
+      guessAgain.call(this);
+    }
+  },
+  'ContinueGame': function() {
+    this.handler.state = GAME_STATES.PLAY;
+    this.emitWithState('PlayGame');
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    // TODO handle if user does NOT say yes, no, number, continue; if they say a number instead of yes/no, etc.
   },
 });
 
@@ -333,6 +384,19 @@ function dateFrom1836(day){
   var date = new Date(1836, 0);
   return new Date(date.setDate(day));
 }
+
+// STATUS UPDATE FOR CARD RENDERER
+var statusCard = dateFrom1836(days).toDateString()
+  + "\n-----------------"
+  + "\nDays on the trail: " + trailDays
+  + "\nMiles: " + miles + "/" + (1845 + extraMiles)
+  + "\nMoney: " + money
+  + "\nFood: " + food
+  + "\nOxen: " + oxen
+  + "\nParts: " + parts
+  + "\nPeople healthy: " + peopleHealthy
+  + "\nPeople sick: " + peopleSick
+;
 
 // RESET ALL STARTING VARIABLES TO OVERRIDE ALEXA'S DEFAULT PERSISTENCE
 var resetVariables = function () {
@@ -410,7 +474,7 @@ var chooseProfession = function() {
     this.emit(':responseReady');
   } else {
     this.handler.state = GAME_STATES.SUPPLIES_SETUP;
-    this.emitWithState('GetHowManyItems');
+    this.emitWithState('GetNumber');
   }
 };
 
@@ -437,7 +501,7 @@ var amountToBuy = 0;
 var generalStore = function () {
   hasBeenToGeneralStore = true;
   var buyFood = function() {
-    currentlyBuying = "food";
+    currentlyBuying = "pounds of food";
     itemPrice = 0.5;
     TRY_BUYING_AGAIN = FOOD_REPROMPT;
     if (profession.toLowerCase() === "banker") {
@@ -471,7 +535,7 @@ var generalStore = function () {
   };
 
   var buyParts = function() {
-    currentlyBuying = "parts";
+    currentlyBuying = "spare parts";
     itemPrice = 30;
     TRY_BUYING_AGAIN = PARTS_REPROMPT;
     this.response.speak("You bought " + amountToBuy + " oxen and have $" + money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. Each spare part costs $30. I recommend at least three spare parts. You currently have " + parts + " spare parts. How many spare parts do you want to buy?").listen(PARTS_REPROMPT);
@@ -786,46 +850,57 @@ var tradeItems = function(tradeChances) {
   }
 };
 
+// HUNTING
 var goHunting = function() {
   days++;
   trailDays++;
   food -= (peopleHealthy.length + peopleSick.length);
+  this.response.speak("You will guess a number between 1 and 10. If you guess within 3 integers of the correct number, you will shoot an animal. The closer you are to the number, the larger your animal. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
+  this.emit(':responseReady');
+};
+
+var guess = 0;
+var shootAnimal = function() {
   var randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-  var guess = +prompt("Guess a number between 1 and 10. If you guess within 3 integers of the correct number, you will shoot an animal. The closer you are to the number, the larger your animal. Your number:");
-  var shootMessage;
-
-  var shootAnimal = function() {
-    if (guess === randomNumber - 3 || guess === randomNumber + 3) {
-      food += 2;
-      shootMessage = "You shot a squirrel and brought back 2 pounds of food.";
-    } else if (guess === randomNumber - 2 || guess === randomNumber + 2) {
-      food += 5;
-      shootMessage = "You shot a rabbit and brought back 5 pounds of food.";
-    } else if (guess === randomNumber - 1 || guess === randomNumber + 1) {
-      food += 50;
-      shootMessage = "You shot a deer and brought back 50 pounds of food.";
-    } else if (guess === randomNumber) {
-      food += 100;
-      if (mapLocation === "Independence" || mapLocation === "Kansas River" || mapLocation === "Fort Kearney" || mapLocation === "Chimney Rock" || mapLocation === "Fort Laramie") {
-        shootMessage = "You shot a buffalo and brought back 100 pounds of food.";
-      } else {
-        shootMessage = "You shot a bear and brought back 100 pounds of food.";
-      }
+  if (guess === randomNumber - 3 || guess === randomNumber + 3) {
+    food += 2;
+    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a squirrel and brought back 2 pounds of food. Congratulations! Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(':responseReady');
+  } else if (guess === randomNumber - 2 || guess === randomNumber + 2) {
+    food += 5;
+    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a rabbit and brought back 5 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(':responseReady');
+  } else if (guess === randomNumber - 1 || guess === randomNumber + 1) {
+    food += 50;
+    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a deer and brought back 50 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(':responseReady');
+  } else if (guess === randomNumber) {
+    food += 100;
+    if (mapLocation === "Independence" || mapLocation === "Kansas River" || mapLocation === "Fort Kearney" || mapLocation === "Chimney Rock" || mapLocation === "Fort Laramie") {
+      this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a buffalo and brought back 100 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.cardRenderer(statusCard);
+      this.emit(':responseReady');
     } else {
-      shootMessage = "Sorry, you didn't get anything on this hunting round.";
+      this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a bear and brought back 100 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.cardRenderer(statusCard);
+      this.emit(':responseReady');
     }
-    alert("You guessed " + guess + ". The random number was " + randomNumber + ". " + shootMessage);
-  };
-
-  if (guess > 0 && guess <= 10) {
-    shootAnimal();
   } else {
-    var guessAgain = +prompt("You must guess a number between 1 and 10. Your number:");
-    if (guessAgain > 0 && guessAgain <= 10) {
-      shootAnimal();
-    }
+    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "Sorry, you didn't get anything on this hunting round. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(':responseReady');
   }
 };
+
+var guessAgain = function() {
+  this.response.speak("Sorry, you must guess a number between 1 and 10. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
+  this.emit(':responseReady');
+};
+
+
 
 var rest = function(restDays) {
   var chanceOfRecovery = (Math.floor(Math.random() * (10 - 1 + 1)) + 1);
@@ -1380,10 +1455,8 @@ var theOregonTrail = function() {
     if (trailDays > 2) {
       // HUNTING
       if (fate < 3 && trailDays % 4 === 0) {
-        var hunt = prompt("You're in an area with a lot of wildlife. You currently have " + food + " pounds of food, which will last about " + Math.floor(food/(peopleHealthy.length + peopleSick.length)) + " days. Do you want to go hunting for more food? Type 'yes' or 'no'.");
-        if (hunt === "yes") {
-          goHunting();
-        }
+        this.handler.state = GAME_STATES.HUNT;
+        this.emitWithState('ChooseToHunt');
       // SICKNESS/INJURY
       } else if (fate % 4 === 0 && trailDays % 4 === 0) {
         var healthIssues = ["the flu", "cholera", "exhaustion", "typhoid fever", "a snake bite", "a broken arm", "a broken leg"];
@@ -1466,19 +1539,6 @@ var theOregonTrail = function() {
         }
       }
     }
-
-    // STATUS UPDATE FOR CARD RENDERER
-    var statusCard = dateFrom1836(days).toDateString()
-    + "\n-----------------"
-    + "\nDays on the trail: " + trailDays
-    + "\nMiles: " + miles + "/" + (1845 + extraMiles)
-    + "\nMoney: " + money
-    + "\nFood: " + food
-    + "\nOxen: " + oxen
-    + "\nParts: " + parts
-    + "\nPeople healthy: " + peopleHealthy
-    + "\nPeople sick: " + peopleSick
-    ;
   }
 };
 
@@ -1486,6 +1546,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, playHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, playHandlers, huntingHandlers);
   alexa.execute();
 };

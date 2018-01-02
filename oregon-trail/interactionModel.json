@@ -43,7 +43,7 @@
               "value": "Finn",
               "synonyms": []
             }
-          },
+          }
         ]
       },
       {
@@ -67,6 +67,44 @@
                 "trade something",
                 "go trading"
               ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "continuation_confirmation",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "OK",
+              "synonyms": [
+                "okay"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "continue",
+              "synonyms": [
+                "keep going",
+                "go"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "alright",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "fine",
+              "synonyms": []
             }
           }
         ]
@@ -209,6 +247,25 @@
         "samples": []
       },
       {
+        "name": "ContinueGame",
+        "samples": [
+          "{continue}",
+          "Let's {continue}",
+          "OK {continue}",
+          "Go ahead and {continue}",
+          "{continue} please",
+          "{continue} fine",
+          "{continue} then",
+          "Let's {continue} then"
+        ],
+        "slots": [
+          {
+            "name": "continue",
+            "type": "continuation_confirmation"
+          }
+        ]
+      },
+      {
         "name": "GetBuyOrTrade",
         "samples": [
           "{buy_or_trade}",
@@ -222,66 +279,6 @@
           {
             "name": "buy_or_trade",
             "type": "BUY_OR_TRADE"
-          }
-        ]
-      },
-      {
-        "name": "GetHowManyItems",
-        "samples": [
-          "{how_many}",
-          "Give me {how_many}",
-          "I want {how_many}",
-          "I need {how_many}",
-          "How about {how_many}",
-          "Let's do {how_many}",
-          "I'll buy {how_many}",
-          "I'll buy {how_many} oxen",
-          "I'll buy {how_many}  ox",
-          "I'll buy {how_many} spare parts",
-          "I'll buy {how_many} parts",
-          "I'll buy {how_many} pounds",
-          "I'll buy {how_many} pounds of food",
-          "Let's do {how_many} ox",
-          "Let's do {how_many} oxen",
-          "Let's do {how_many} spare parts",
-          "Let's do {how_many} parts",
-          "Let's do {how_many} pounds",
-          "Let's do {how_many} pounds of food",
-          "How about {how_many} ox",
-          "How about {how_many} oxen",
-          "How about {how_many} spare parts",
-          "How about {how_many} parts",
-          "How about {how_many} pounds of food",
-          "How about {how_many} pounds",
-          "I need {how_many} ox",
-          "I need {how_many} oxen",
-          "I need {how_many} spare parts",
-          "I need {how_many} parts",
-          "I need {how_many} pounds",
-          "I need {how_many} pounds of food",
-          "I want {how_many} ox",
-          "I want {how_many} oxen",
-          "I want {how_many} parts",
-          "I want {how_many} spare parts",
-          "I want {how_many} pounds",
-          "I want {how_many} pounds of food",
-          "Give me {how_many} ox",
-          "Give me {how_many} oxen",
-          "Give me {how_many} parts",
-          "Give me {how_many} spare parts",
-          "Give me {how_many} pounds",
-          "Give me {how_many} pounds of food",
-          "{how_many} ox",
-          "{how_many} oxen",
-          "{how_many} spare parts",
-          "{how_many} parts",
-          "{how_many} pounds",
-          "{how_many} pounds of food"
-        ],
-        "slots": [
-          {
-            "name": "how_many",
-            "type": "AMAZON.NUMBER"
           }
         ]
       },
@@ -328,6 +325,66 @@
           {
             "name": "name",
             "type": "AMAZON.US_FIRST_NAME"
+          }
+        ]
+      },
+      {
+        "name": "GetNumber",
+        "samples": [
+          "{number}",
+          "Give me {number}",
+          "I want {number}",
+          "I need {number}",
+          "How about {number}",
+          "Let's do {number}",
+          "I'll buy {number}",
+          "I'll buy {number} oxen",
+          "I'll buy {number}  ox",
+          "I'll buy {number} spare parts",
+          "I'll buy {number} parts",
+          "I'll buy {number} pounds",
+          "I'll buy {number} pounds of food",
+          "Let's do {number} ox",
+          "Let's do {number} oxen",
+          "Let's do {number} spare parts",
+          "Let's do {number} parts",
+          "Let's do {number} pounds",
+          "Let's do {number} pounds of food",
+          "How about {number} ox",
+          "How about {number} oxen",
+          "How about {number} spare parts",
+          "How about {number} parts",
+          "How about {number} pounds of food",
+          "How about {number} pounds",
+          "I need {number} ox",
+          "I need {number} oxen",
+          "I need {number} spare parts",
+          "I need {number} parts",
+          "I need {number} pounds",
+          "I need {number} pounds of food",
+          "I want {number} ox",
+          "I want {number} oxen",
+          "I want {number} parts",
+          "I want {number} spare parts",
+          "I want {number} pounds",
+          "I want {number} pounds of food",
+          "Give me {number} ox",
+          "Give me {number} oxen",
+          "Give me {number} parts",
+          "Give me {number} spare parts",
+          "Give me {number} pounds",
+          "Give me {number} pounds of food",
+          "{number} ox",
+          "{number} oxen",
+          "{number} spare parts",
+          "{number} parts",
+          "{number} pounds",
+          "{number} pounds of food"
+        ],
+        "slots": [
+          {
+            "name": "number",
+            "type": "AMAZON.NUMBER"
           }
         ]
       },
