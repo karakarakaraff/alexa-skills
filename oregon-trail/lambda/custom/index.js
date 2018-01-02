@@ -352,11 +352,35 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
   },
   'Unhandled': function() {
     if (this.event.request.intent.name !== "GetName") {
-      this.response.speak("I'm sorry, but that's not a name I understand. Please choose another name.").listen("Please choose another name.");
-      this.emit(":responseReady");
-    } else {
-      this.response.speak("That is not a name.");
-      this.emit(":responseReady");
+      // Allow people to register a name that is also a month
+      if (this.event.request.intent.name === "GetStartingMonth") {
+        if (peopleHealthy.length === 0) {
+          mainPlayer = this.event.request.intent.slots.month.value;
+          peopleHealthy.push(mainPlayer);
+          setupParty.call(this);
+        } else if (peopleHealthy.length === 1) {
+          var person2 = this.event.request.intent.slots.month.value;
+          peopleHealthy.push(person2);
+          setupParty.call(this);
+        } else if (peopleHealthy.length === 2) {
+          var person3 = this.event.request.intent.slots.month.value;
+          peopleHealthy.push(person3);
+          setupParty.call(this);
+        } else if (peopleHealthy.length === 3) {
+          var person4 = this.event.request.intent.slots.month.value;
+          peopleHealthy.push(person4);
+          setupParty.call(this);
+        } else if (peopleHealthy.length === 4) {
+          var person5 = this.event.request.intent.slots.month.value;
+          peopleHealthy.push(person5);
+          setupParty.call(this);
+        } else {
+          setupParty.call(this);
+        }
+      } else {
+        this.response.speak("I'm sorry, but that's not a name I understand. Please choose another name.").listen("Please choose another name.");
+        this.emit(":responseReady");
+      }
     }
   },
 });
