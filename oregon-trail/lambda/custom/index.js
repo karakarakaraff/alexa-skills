@@ -174,6 +174,10 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     if (this.event.request.intent.name !== "GetProfession") {
       this.response.speak("I'm sorry, but that's not a profession I understand. Please choose to be a banker, a carpenter, or a farmer.").listen("Please choose to be a banker, a carpenter, or a farmer.");
       this.emit(":responseReady");
+    } else {
+      // TODO setup help state and function
+      this.handler.state = GAME_STATES.HELP;
+      this.emitWithState('helpTheUser');
     }
   },
 });
@@ -233,6 +237,10 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
     if (this.event.request.intent.name !== "GetNumber") {
       this.response.speak("I'm sorry, I didn't understand how many " + currentlyBuying + " you want to buy. Please say a number.").listen("Please say a number.");
       this.emit(":responseReady");
+    } else {
+      // TODO setup help state and function
+      this.handler.state = GAME_STATES.HELP;
+      this.emitWithState('helpTheUser');
     }
   },
 });
@@ -273,6 +281,10 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
     if (this.event.request.intent.name !== "GetStartingMonth") {
       this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
       this.emit(":responseReady");
+    } else {
+      // TODO setup help state and function
+      this.handler.state = GAME_STATES.HELP;
+      this.emitWithState('helpTheUser');
     }
   },
 });
@@ -340,6 +352,219 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
       this.emit(":responseReady");
     }
   },
+  'Starve': function() {
+    if (daysWithoutFood === 1) {
+      this.response.speak("You have run out of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else if (daysWithoutFood % 2 === 0 && peopleHealthy.length > 0) {
+      if (peopleHealthy.length === 1) {
+        if (fate % 2 === 0) {
+          sickness();
+          this.response.speak("You are starving and are very weak. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        }
+      } else {
+        if (fate % 2 === 0) {
+          sickness();
+          this.response.speak(invalid + " is starving and is very weak. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        }
+      }
+    } else if (daysWithoutFood % 3 === 0 && fate % 2 === 0) {
+      if (peopleHealthy.length + peopleSick.length === 1) {
+        gameOverMessage = "you starved";
+        throw new gameOver.call(this);
+      } else if (peopleSick.length > 0){
+        deathPeopleSick.call(this);
+        this.response.speak(victim + " has died of starvation. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else if (peopleHealthy.length > 0) {
+        deathPeopleHealthy.call(this);
+        this.response.speak(victim + " has died of starvation. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else {
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('PlayGame');
+    }
+  },
+  'Death': function() {
+    var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
+    var fatality = diseases[Math.floor(Math.random() * diseases.length)];
+    if (peopleHealthy.length + peopleSick.length === 1 && peopleSick.indexOf(mainPlayer) === 0) {
+      gameOverMessage = "you died";
+      throw new gameOver.call(this);
+    } else if (peopleSick.length > 0) {
+      deathPeopleSick.call(this);
+      this.response.speak(victim + " has died of " + fatality + ". Rest in peace, " + victim + ". Now, it's time to move on. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('PlayGame');
+    }
+  },
+  'Snow': function() {
+    days += lostDays;
+    trailDays += lostDays;
+    food -= lostDays*(peopleHealthy.length + peopleSick.length);
+    if (lostDays === 1) {
+      this.response.speak("You got stuck in some snow. You have lost 1 day. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length > 1) {
+      if (peopleSick.length > 0) {
+        deathPeopleSick.call(this);
+        this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        deathPeopleHealthy.call(this);
+        this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length === 1) {
+      gameOverMessage = "froze to death";
+      throw new gameOver.call(this);
+    } else {
+      this.response.speak("You got stuck in some snow. You have lost " + lostDays + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    }
+  },
+  'Storm': function() {
+    days += lostDays;
+    trailDays += lostDays;
+    food -= lostDays*(peopleHealthy.length + peopleSick.length);
+    if (lostDays >= 3) {
+      oxen -= 1;
+      if (oxen === 0) {
+        gameOverMessage = "no more oxen -- thunderstorm";
+      throw new gameOver.call(this);
+      } else {
+        this.response.speak("You got caught in a thunderstorm and an ox ran away. You lost " + lostDays + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else if (lostDays === 1) {
+      this.response.speak("You got caught in a thunderstorm. You lost 1 day. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("You got caught in a thunderstorm. You lost " + lostDays + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    }
+  },
+  'NoGrass': function() {
+    daysWithoutGrass++;
+    if (daysWithoutGrass % 3 === 0) {
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('OxProblem');
+    } else {
+      this.response.speak("There's no grass for the oxen. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    }
+  },
+  'BuffaloStampede': function() {
+    var stampedeChance = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+    if (stampedeChance === 9 && peopleSick.length + peopleHealthy.length > 1) {
+      if (peopleHealthy.length > 1) {
+        deathPeopleHealthy.call(this);
+        this.response.speak("Oh no! Buffalo stampede! " + victim + " got trampled. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else if (peopleSick.length > 0) {
+        deathPeopleSick.call(this);
+        this.response.speak("Oh no! Buffalo stampede! " + victim + " got trampled. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else {
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('PlayGame');
+    }
+  },
+  'OxProblem': function() {
+    var allOxProblems = ["An ox has wandered off.", "An ox has died."];
+    var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
+    if (oxen > 1) {
+      oxen -= 1;
+      this.response.speak(randomOxProblem + " Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else if (oxen === 1) {
+      gameOverMessage = "no more oxen -- ox probs";
+      throw new gameOver.call(this);
+    }
+  },
+  'Fire': function() {
+    var destroyedItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
+    var itemIndex = Math.floor(Math.random() * destroyedItems.length);
+    if (oxen === 1 && window[destroyedItems[itemIndex][0]] === "oxen") {
+      gameOverMessage = "no more oxen -- fire";
+      throw new gameOver.call(this);
+    } else if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
+      window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
+      this.response.speak("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else if (window[destroyedItems[itemIndex][0]] > 0) {
+      window[destroyedItems[itemIndex][0]] = 0;
+      this.response.speak("A fire broke out in your wagon and destroyed your remaining " + destroyedItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('PlayGame');
+    }
+  },
+  'Thief': function() {
+    var stolenItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
+    var itemIndex = Math.floor(Math.random() * stolenItems.length);
+    if (oxen === 1 && window[stolenItems[itemIndex][0]] === "oxen") {
+      gameOverMessage = "no more oxen -- thief";
+      throw new gameOver.call(this);
+    } else if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
+      window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
+      this.response.speak("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else if (window[stolenItems[itemIndex][0]] > 0) {
+      window[stolenItems[itemIndex][0]] = 0;
+      this.response.speak("A thief broke into your wagon and stole your remaining " + stolenItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('PlayGame');
+    }
+  },
+  'FindItems': function() {
+    var foundItems = [["food", 50, "pounds of food"],["oxen", 2, "oxen"],["money", 50, "dollars"],["parts", 1, "spare part"],["money", 100, "dollars"]];
+    var itemIndex = Math.floor(Math.random() * foundItems.length);
+    window[foundItems[itemIndex][0]] += foundItems[itemIndex][1];
+    this.response.speak("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " " + foundItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'FindBerries': function() {
+    daysWithoutFood = 0;
+    food += 3*(Math.floor(Math.random() * (10 - 1 + 1)) + 1);
+    this.response.speak("You found wild berries. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'BrokenWagon': function() {
+    if (parts > 0) {
+      parts -= 1;
+      days++;
+      trailDays++;
+      food -= (peopleHealthy.length + peopleSick.length);
+      this.response.speak("Your wagon broke, but you repaired it. You now have " + parts + " spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      gameOverMessage = "broken wagon";
+      throw new gameOver.call(this);
+    }
+  },
+  'GetLost': function() {
+    var howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
+    days += howLong;
+    trailDays += howLong;
+    food -= howLong*(peopleHealthy.length + peopleSick.length);
+    if (howLong === 1) {
+      this.response.speak("You lost the trail. You wasted 1 day. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("You lost the trail. You wasted " + howLong + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    }
+  },
   'ContinueGame': function() {
     this.handler.state = GAME_STATES.PLAY;
     this.emitWithState('PlayGame');
@@ -363,7 +588,9 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    // TODO what kind of unhandled responses would go here?
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
   },
 });
 
@@ -401,8 +628,14 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Do you want to go hunting for more food? Please say yes or no.").listen("Do you want to go hunting for more food? Please say yes or no.");
-    this.emit(":responseReady");
+    if (this.event.request.intent.name !== "AMAZON.YesIntent" && this.event.request.intent.name !== "AMAZON.NoIntent") {
+      this.response.speak("Do you want to go hunting for more food? Please say yes or no.").listen("Do you want to go hunting for more food? Please say yes or no.");
+      this.emit(":responseReady");
+    } else {
+      // TODO setup help state and function
+      this.handler.state = GAME_STATES.HELP;
+      this.emitWithState('helpTheUser');
+    }
   },
 });
 
@@ -444,7 +677,14 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    // TODO handle if user does NOT say yes, no, number, continue; if they say a number instead of yes/no, etc.
+    if (this.event.request.intent.name !== "GetNumber") {
+      this.response.speak("I'm sorry, I didn't understand your number. Please say a number between 1 and 10.").listen("Please say a number between 1 and 10.");
+      this.emit(":responseReady");
+    } else {
+      // TODO setup help state and function
+      this.handler.state = GAME_STATES.HELP;
+      this.emitWithState('helpTheUser');
+    }
   },
 });
 
@@ -492,8 +732,14 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Do you want to take a rest? Please say yes or no.").listen("Please say yes or no.");
-    this.emit(":responseReady");
+    if (this.event.request.intent.name !== "AMAZON.YesIntent" && this.event.request.intent.name !== "AMAZON.NoIntent") {
+      this.response.speak("Do you want to take a rest? Please say yes or no.").listen("Please say yes or no.");
+      this.emit(":responseReady");
+    } else {
+      // TODO setup help state and function
+      this.handler.state = GAME_STATES.HELP;
+      this.emitWithState('helpTheUser');
+    }
   },
 });
 
@@ -529,6 +775,10 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
     if (this.event.request.intent.name !== "GetNumber") {
       this.response.speak("I'm sorry, I didn't understand how many days you want to rest. Please say a number.").listen("Please say a number.");
       this.emit(":responseReady");
+    } else {
+      // TODO setup help state and function
+      this.handler.state = GAME_STATES.HELP;
+      this.emitWithState('helpTheUser');
     }
   },
 });
@@ -554,6 +804,7 @@ var trailDays = 0; // tracks daily usage of supplies
 var invalid; // tracks people as they get sick
 var victim; // tracks people as they die
 var guess = 0; // track user's random number guess for hunting
+var lostDays; // tracks how many days a user gets stuck
 var daysWithoutFood = 0; // tracks how many days in a row there is no food -- could lead to starvation
 var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lead to oxen dying or wandering off
 var mapLocation; // follows map, remembers choices at split trails
@@ -815,10 +1066,10 @@ var crossRiver = function(depth, sinkChance, cost) {
         gameOverMessage = "you drowned";
         throw new gameOver.call(this);
       } else if (peopleSick.length >= 1) {
-        death(peopleSick);
+        deathPeopleSick.call(this);
         alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food.");
       } else {
-        death(peopleHealthy);
+        deathPeopleHealthy.call(this);
         alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food."
         );
       }
@@ -1034,15 +1285,6 @@ var tradeItems = function(tradeChances) {
   }
 };
 
-// HUNTING
-var goHunting = function() {
-  days++;
-  trailDays++;
-  food -= (peopleHealthy.length + peopleSick.length);
-  this.response.speak("You will guess a number between 1 and 10. If you guess within 3 numbers of the secret number, you will shoot an animal. The closer you are to the number, the larger your animal. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
-  this.emit(':responseReady');
-};
-
 // RESTING
 var daysOfRest = 0;
 var howManyToHeal = 0;
@@ -1075,173 +1317,7 @@ var rest = function() {
   }
 };
 
-var snow = function(lostDays) {
-  days += lostDays;
-  trailDays += lostDays;
-  food -= lostDays*(peopleHealthy.length + peopleSick.length);
-  if (lostDays === 1) {
-    alert("You got stuck in some snow. You have lost 1 day.");
-  } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length > 1) {
-    if (peopleSick.length > 0) {
-      death(peopleSick);
-      alert("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death.");
-    } else {
-      death(peopleHealthy);
-      alert("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death.");
-    }
-  } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length === 1) {
-    alert("You got stuck in a large snow storm for " + lostDays + " days and froze to death.");
-  } else {
-    alert("You got stuck in some snow. You have lost " + lostDays + " days.");
-  }
-};
-
-var storm = function(lostDays) {
-  days += lostDays;
-  trailDays += lostDays;
-  food -= lostDays*(peopleHealthy.length + peopleSick.length);
-  if (lostDays >= 3) {
-    oxen -= 1;
-    alert("You got caught in a thunderstorm and an ox ran away. You lost " + lostDays + " days.");
-  } else if (lostDays === 1) {
-    alert("You got caught in a thunderstorm. You lost 1 day.");
-  } else {
-    alert("You got caught in a thunderstorm. You lost " + lostDays + " days.");
-  }
-};
-
-var noGrass = function() {
-  daysWithoutGrass++;
-  alert("There's no grass for the oxen.");
-  if (daysWithoutGrass % 3 === 0) {
-    oxProblem();
-  }
-};
-
-var buffaloStampede = function() {
-  var stampedeChance = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-  if (stampedeChance === 9 && peopleSick.length + peopleHealthy.length > 1) {
-    if (peopleHealthy.length > 1) {
-      death(peopleHealthy);
-      alert("Buffalo stampede! " + victim + " got trampled.");
-    } else if (peopleSick.length > 0) {
-      death(peopleSick);
-      alert("Buffalo stampede! " + victim + " got trampled.");
-    }
-  }
-};
-
-var oxProblem = function() {
-  var allOxProblems = ["An ox has wandered off.", "An ox has died."];
-  var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
-  alert(randomOxProblem);
-  if (oxen > 1) {
-    oxen -= 1;
-  } else if (oxen === 1) {
-    gameOverMessage = "no more oxen";
-    throw new gameOver.call(this);
-  }
-};
-
-var fire = function() {
-  var destroyedItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
-  var itemIndex = Math.floor(Math.random() * destroyedItems.length);
-  if (oxen === 1 && window[destroyedItems[itemIndex][0]] === "oxen") {
-    alert("A fire broke out on your wagon and killed your last ox. This is as far as you can go. Good luck homesteading!");
-    gameOverMessage = "no more oxen";
-    throw new gameOver.call(this);
-  } else if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
-    window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
-    alert("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ".");
-  } else if (window[destroyedItems[itemIndex][0]] > 0) {
-    window[destroyedItems[itemIndex][0]] = 0;
-    alert("A fire broke out in your wagon and destroyed your remaining " + destroyedItems[itemIndex][2] + ".");
-  }
-};
-
-var thief = function() {
-  var stolenItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
-  var itemIndex = Math.floor(Math.random() * stolenItems.length);
-  if (oxen === 1 && window[stolenItems[itemIndex][0]] === "oxen") {
-    alert("A theif stole your last ox. This is as far as you can go. Good luck homesteading!");
-    gameOverMessage = "no more oxen";
-    throw new gameOver.call(this);
-  } else if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
-    window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
-    alert("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ".");
-  } else {
-    window[stolenItems[itemIndex][0]] = 0;
-    alert("A thief broke into your wagon and stole your remaining " + stolenItems[itemIndex][2] + ".");
-  }
-};
-
-var findItems = function() {
-  var foundItems = [["food", 50, "pounds of food"],["oxen", 2, "oxen"],["money", 50, "dollars"],["parts", 1, "spare part"],["money", 100, "dollars"]];
-  var itemIndex = Math.floor(Math.random() * foundItems.length);
-  window[foundItems[itemIndex][0]] += foundItems[itemIndex][1];
-  alert("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " " + foundItems[itemIndex][2] + ".");
-};
-
-var findBerries = function() {
-  daysWithoutFood = 0;
-  food += 3*(Math.floor(Math.random() * (10 - 1 + 1)) + 1);
-  alert("You found wild berries.");
-};
-
-var brokenWagon = function() {
-  if (parts > 0) {
-    parts -= 1;
-    days++;
-    trailDays++;
-    food -= (peopleHealthy.length + peopleSick.length);
-    alert("Your wagon broke, but you repaired it.");
-  } else {
-    gameOverMessage = "broken wagon";
-    throw new gameOver.call(this);
-  }
-};
-
-var getLost = function() {
-  var howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
-  days += howLong;
-  trailDays += howLong;
-  food -= howLong*(peopleHealthy.length + peopleSick.length);
-  if (howLong === 1) {
-    alert("You lost the trail. You wasted 1 day.");
-  } else {
-    alert("You lost the trail. You wasted " + howLong + " days.");
-  }
-};
-
-var starve = function() {
-  if (daysWithoutFood === 1) {
-    alert("You have run out of food.");
-  } else if (daysWithoutFood % 2 === 0 && peopleHealthy.length > 0) {
-    if (peopleHealthy.length === 1) {
-      if (fate % 2 === 0) {
-        sickness();
-        alert("You are starving and are very weak.");
-      }
-    } else {
-      if (fate % 2 === 0) {
-        sickness();
-        alert(invalid + " is starving and is very weak.");
-      }
-    }
-  } else if (daysWithoutFood % 3 === 0 && fate % 2 === 0) {
-    if (peopleHealthy.length + peopleSick.length === 1) {
-      gameOverMessage = "you starved";
-      throw new gameOver.call(this);
-    } else if (peopleSick.length > 0){
-      death(peopleSick);
-      alert(victim + " has died of starvation.");
-    } else if (peopleHealthy.length > 0) {
-      death(peopleHealthy);
-      alert(victim + " has died of starvation.");
-    }
-  }
-};
-
+// RECOVERY
 var recoveredMessage;
 var recovery = function() {
   var peopleCured = 0;
@@ -1274,6 +1350,7 @@ var recovery = function() {
   healThem.call(this);
 };
 
+// SICKNESS
 var sickness = function() {
   if (peopleHealthy.length > 1) {
     var invalidIndex = Math.floor(Math.random() * (peopleHealthy.length - 1 - 1 + 1)) + 1;
@@ -1287,17 +1364,31 @@ var sickness = function() {
   }
 };
 
-var death = function(array) {
+// DEATH OF SICK PERSON
+var deathPeopleSick = function() {
   var victimIndex;
-  if (array.indexOf(mainPlayer) === 0) {
-    victimIndex = Math.floor(Math.random() * ((array.length - 1) - 1 + 1)) + 1;
+  if (peopleSick.indexOf(mainPlayer) === 0) {
+    victimIndex = Math.floor(Math.random() * ((peopleSick.length - 1) - 1 + 1)) + 1;
   } else {
-    victimIndex = Math.floor(Math.random() * array.length);
+    victimIndex = Math.floor(Math.random() * peopleSick.length);
   }
-  victim = array[victimIndex];
-  array.splice(victimIndex, 1);
+  victim = peopleSick[victimIndex];
+  peopleSick.splice(victimIndex, 1);
 };
 
+// DEATH OF HEALTHY PERSON
+var deathPeopleHealthy = function() {
+  var victimIndex;
+  if (peopleHealthy.indexOf(mainPlayer) === 0) {
+    victimIndex = Math.floor(Math.random() * ((peopleHealthy.length - 1) - 1 + 1)) + 1;
+  } else {
+    victimIndex = Math.floor(Math.random() * peopleHealthy.length);
+  }
+  victim = peopleHealthy[victimIndex];
+  peopleHealthy.splice(victimIndex, 1);
+};
+
+// GAME OVER
 var gameOver = function() {
   if (gameOverMessage === "winner") {
     var bonus;
@@ -1327,10 +1418,26 @@ var gameOver = function() {
     this.response.speak("You have died of starvation. Game over!");
     this.response.cardRenderer("Game over! You have died of starvation.");
     this.emit(':responseReady');
-  } else if (gameOverMessage === "no more oxen") {
+  } else if (gameOverMessage === "froze to death") {
+    this.response.speak("You got stuck in a large snow storm for " + lostDays + " days and froze to death.");
+    this.response.cardRenderer("Game over! You froze to death.");
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "no more oxen -- ox probs") {
     var allOxProblems = ["An ox has wandered off.", "An ox has died."];
     var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
     this.response.speak(randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "no more oxen -- fire") {
+    this.response.speak(randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "no more oxen -- thief") {
+    this.response.speak(randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "no more oxen -- thunderstorm") {
+    this.response.speak("You got caught in a major thunderstorm and your last ox ran away. This is as far as you can go. Good luck homesteading!");
     this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
     this.emit(':responseReady');
   } else if (gameOverMessage === "broken wagon") {
@@ -1606,7 +1713,8 @@ var theOregonTrail = function() {
     // FOOD STATUS
     if (food <= 0) {
       daysWithoutFood++;
-      starve();
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('Starve');
     } else {
       if (food >= (peopleHealthy.length + peopleSick.length)) {
         food -= (peopleHealthy.length + peopleSick.length); // each person eats 1 lb/day
@@ -1627,33 +1735,28 @@ var theOregonTrail = function() {
         this.emitWithState('Alert');
       // DEATH OF SICK/INJURED
       } else if (fate === 10) {
-        var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
-        var fatality = diseases[Math.floor(Math.random() * diseases.length)];
-
-        if (peopleHealthy.length + peopleSick.length === 1 && peopleSick.indexOf(mainPlayer) === 0) {
-          gameOverMessage = "you died";
-          throw new gameOver.call(this);
-        } else if (peopleSick.length > 0) {
-          death(peopleSick);
-          alert(victim + " has died of " + fatality + ".");
-        }
+        this.handler.state = GAME_STATES.PLAY;
+        this.emitWithState('Death');
       // WEATHER
       } else if (fate === 3 && trailDays % 2 === 0) {
-        var lostDays;
         if (days < 122 || (days > 306 && days < 487) || days > 671) {
           lostDays = Math.floor(Math.random() * (7 - 4 + 1)) + 1;
-          snow(lostDays);
+          this.handler.state = GAME_STATES.PLAY;
+          this.emitWithState('Snow');
         } else if ((days > 122 && days < 153) || (days > 487 && days < 518)) {
           lostDays = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
-          storm(lostDays);
+          this.handler.state = GAME_STATES.PLAY;
+          this.emitWithState('Storm');
         }
       // GREAT AMERICAN DESERT
       } else if (fate === 9) {
         if (mapLocation === "Kansas River" || mapLocation === "Fort Kearny" || mapLocation === "Chimney Rock") {
           if (days < 122 || (days > 365 && days < 487)) {
-            noGrass();
+            this.handler.state = GAME_STATES.PLAY;
+            this.emitWithState('NoGrass');
           } else if (days > 183 && days < 214) {
-            buffaloStampede();
+            this.handler.state = GAME_STATES.PLAY;
+            this.emitWithState('BuffaloStampede');
           }
         }
       // GOOD THINGS
@@ -1661,26 +1764,34 @@ var theOregonTrail = function() {
         var goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
         if (goodThing === 1) {
           if ((days > 122 && days < 275) || (days > 487 && days < 640)) {
-            findBerries();
+            this.handler.state = GAME_STATES.PLAY;
+            this.emitWithState('FindBerries');
           } else {
-            findItems();
+            this.handler.state = GAME_STATES.PLAY;
+            this.emitWithState('FindItems');
           }
         } else if (goodThing === 2 && peopleSick.length > 0) {
-          recovery(1);
+          howManyToHeal = 1;
+          recovery.call(this);
         }
       // BAD THINGS
       } else if (fate === 6 && trailDays % 2 === 1) {
         var badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
         if (badThing === 1) {
-          oxProblem();
+          this.handler.state = GAME_STATES.PLAY;
+          this.emitWithState('OxProblem');
         } else if (badThing === 2) {
-          fire();
+          this.handler.state = GAME_STATES.PLAY;
+          this.emitWithState('Fire');
         } else if (badThing === 3) {
-          thief();
+          this.handler.state = GAME_STATES.PLAY;
+          this.emitWithState('Thief');
         } else if (badThing === 4) {
-          brokenWagon();
+          this.handler.state = GAME_STATES.PLAY;
+          this.emitWithState('BrokenWagon');
         } else if (badThing === 5) {
-          getLost();
+          this.handler.state = GAME_STATES.PLAY;
+          this.emitWithState('GetLost');
         }
       }
     }
