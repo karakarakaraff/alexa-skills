@@ -9,6 +9,9 @@ const GAME_STATES = {
   MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
   PLAY: '_PLAYMODE', // playing the game
   HUNT: '_HUNTMODE', // hunting within the game
+  HUNT_NUMBER: '_HUNTNUMBERMODE', // choosing a random number for hunting
+  SICK: '_SICKMODE', // when a person gets sick or injured
+  REST: '_RESTMODE', // resting for potential recovery
   HELP: '_HELPMODE', // help the user // TODO still need to set this up and register it below
 };
 
@@ -279,7 +282,67 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
   'PlayGame': function() {
     this.response.speak("The game is playing.");
     this.emit(":responseReady");
-    // theOregonTrail.call(this);
+    // theOregonTrail.call(this); // TODO call the game when ready
+  },
+  'Hunting': function() {
+    var randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+    if (guess === randomNumber - 3 || guess === randomNumber + 3) {
+      food += 2;
+      this.response.speak("You guessed " + guess + ". The secret number was " + randomNumber + ". Congratulations! You shot a squirrel and brought back 2 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.cardRenderer(statusCard);
+      this.emit(':responseReady');
+    } else if (guess === randomNumber - 2 || guess === randomNumber + 2) {
+      food += 5;
+      this.response.speak("You guessed " + guess + ". The secret number was " + randomNumber + ". Congratulations! You shot a rabbit and brought back 5 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.cardRenderer(statusCard);
+      this.emit(':responseReady');
+    } else if (guess === randomNumber - 1 || guess === randomNumber + 1) {
+      food += 50;
+      this.response.speak("You guessed " + guess + ". The secret number was " + randomNumber + ". Congratulations! You shot a deer and brought back 50 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.cardRenderer(statusCard);
+      this.emit(':responseReady');
+    } else if (guess === randomNumber) {
+      food += 100;
+      if (mapLocation === "Independence" || mapLocation === "Kansas River" || mapLocation === "Fort Kearney" || mapLocation === "Chimney Rock" || mapLocation === "Fort Laramie") {
+        this.response.speak("You guessed " + guess + ". The secret number was " + randomNumber + ". Congratulations! You shot a buffalo and brought back 100 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.cardRenderer(statusCard);
+        this.emit(':responseReady');
+      } else {
+        this.response.speak("You guessed " + guess + ". The secret number was " + randomNumber + ". Congratulations! You shot a bear and brought back 100 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.cardRenderer(statusCard);
+        this.emit(':responseReady');
+      }
+    } else {
+      this.response.speak("You guessed " + guess + ". The secret number was " + randomNumber + " Sorry, you didn't get anything on this hunting round. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.cardRenderer(statusCard);
+      this.emit(':responseReady');
+    }
+  },
+  'Recovery': function() {
+    if (howManyToHeal === 0 && daysOfRest > 1) {
+      if (peopleHealthy.length === 0) {
+        this.response.speak("You rested for " + daysOfRest + " days, but you still aren't feeling any better. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("You rested for " + daysOfRest + " days, but " + invalid + " still is not feeling any better. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else if (howManyToHeal === 0) {
+      if (peopleHealthy.length === 0) {
+        this.response.speak("You rested for one day, but you still aren't feeling any better. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("You rested for one day, but " + invalid + " still is not feeling any better. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else {
+      this.response.speak("You rested for " + daysOfRest + " days. " + recoveredMessage + " Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    }
+  },
+  'ContinueGame': function() {
+    this.handler.state = GAME_STATES.PLAY;
+    this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
     // TODO setup help state and function
@@ -312,23 +375,55 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emit(":responseReady");
   },
   'AMAZON.YesIntent': function() {
-    goHunting.call(this);
+    this.handler.state = GAME_STATES.HUNT_NUMBER;
+    this.emitWithState('ChooseRandomNumber');
   },
   'AMAZON.NoIntent': function() {
     this.handler.state = GAME_STATES.PLAY;
     this.emitWithState('PlayGame');
   },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Do you want to go hunting for more food? Please say yes or no.").listen("Do you want to go hunting for more food? Please say yes or no.");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE SECRET NUMBER FOR HUNTING
+const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, {
+  'ChooseRandomNumber': function() {
+    days++;
+    trailDays++;
+    food -= (peopleHealthy.length + peopleSick.length);
+    this.response.speak("You will guess a number between 1 and 10. If you guess within 3 numbers of the secret number, you will shoot an animal. The closer you are to the number, the larger your animal. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
+    this.emit(':responseReady');
+  },
   'GetNumber': function() {
     guess = +this.event.request.intent.slots.number.value;
     if (guess >= 1 && guess <= 10) {
-      shootAnimal.call(this);
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('Hunting');
     } else {
-      guessAgain.call(this);
+      this.response.speak("Sorry, you must guess a number between 1 and 10. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
+      this.emit(':responseReady');
     }
-  },
-  'ContinueGame': function() {
-    this.handler.state = GAME_STATES.PLAY;
-    this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
     // TODO setup help state and function
@@ -353,6 +448,91 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
   },
 });
 
+// HANDLE SICKNESS AND INJURY
+const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
+  'Alert': function() {
+    var healthIssues = ["the flu", "cholera", "exhaustion", "typhoid fever", "a snake bite", "a broken arm", "a broken leg"];
+    var issue = healthIssues[Math.floor(Math.random() * healthIssues.length)];
+    if (peopleHealthy.length > 1) {
+      sickness();
+      this.response.speak(invalid + " has " + issue + ". Do you want to rest to see if " + invalid + " feels better?").listen("Do you want to rest to see if " + invalid + " feels better?");
+      this.response.cardRenderer(invalid + " has " + issue + ".");
+      this.emit(":responseReady");
+    } else {
+      sickness();
+      this.response.speak("You have " + issue + ". Do you want to rest to see if " + invalid + " feels better?").listen("Do you want to rest to see if you feel better?");
+      this.response.cardRenderer("You have " + issue + ".");
+      this.emit(":responseReady");
+    }
+  },
+  'AMAZON.YesIntent': function() {
+    this.handler.state = GAME_STATES.REST;
+    this.emitWithState('HowManyDays');
+  },
+  'AMAZON.NoIntent': function() {
+    this.handler.state = GAME_STATES.PLAY;
+    this.emitWithState('PlayGame');
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Do you want to take a rest? Please say yes or no.").listen("Please say yes or no.");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE DAYS OF REST
+const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
+  'HowManyDays': function() {
+    this.response.speak("Ok, how many days do you want to rest?").listen("How many days do you want to rest?");
+    this.emit(":responseReady");
+  },
+  'GetNumber': function() {
+    daysOfRest = this.event.request.intent.slots.number.value;
+    rest.call(this);
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    if (this.event.request.intent.name !== "GetNumber") {
+      this.response.speak("I'm sorry, I didn't understand how many days you want to rest. Please say a number.").listen("Please say a number.");
+      this.emit(":responseReady");
+    }
+  },
+});
+
 
 
 // =====================
@@ -373,6 +553,7 @@ var days = 0; // tracks calendar
 var trailDays = 0; // tracks daily usage of supplies
 var invalid; // tracks people as they get sick
 var victim; // tracks people as they die
+var guess = 0; // track user's random number guess for hunting
 var daysWithoutFood = 0; // tracks how many days in a row there is no food -- could lead to starvation
 var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lead to oxen dying or wandering off
 var mapLocation; // follows map, remembers choices at split trails
@@ -415,6 +596,7 @@ var resetVariables = function () {
   trailDays = 0;
   invalid = undefined;
   victim = undefined;
+  guess = 0;
   daysWithoutFood = 0;
   daysWithoutGrass = 0;
   mapLocation = undefined;
@@ -855,74 +1037,39 @@ var goHunting = function() {
   days++;
   trailDays++;
   food -= (peopleHealthy.length + peopleSick.length);
-  this.response.speak("You will guess a number between 1 and 10. If you guess within 3 integers of the correct number, you will shoot an animal. The closer you are to the number, the larger your animal. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
+  this.response.speak("You will guess a number between 1 and 10. If you guess within 3 numbers of the secret number, you will shoot an animal. The closer you are to the number, the larger your animal. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
   this.emit(':responseReady');
 };
 
-var guess = 0;
-var shootAnimal = function() {
-  var randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-  if (guess === randomNumber - 3 || guess === randomNumber + 3) {
-    food += 2;
-    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a squirrel and brought back 2 pounds of food. Congratulations! Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-    this.response.cardRenderer(statusCard);
-    this.emit(':responseReady');
-  } else if (guess === randomNumber - 2 || guess === randomNumber + 2) {
-    food += 5;
-    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a rabbit and brought back 5 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-    this.response.cardRenderer(statusCard);
-    this.emit(':responseReady');
-  } else if (guess === randomNumber - 1 || guess === randomNumber + 1) {
-    food += 50;
-    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a deer and brought back 50 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-    this.response.cardRenderer(statusCard);
-    this.emit(':responseReady');
-  } else if (guess === randomNumber) {
-    food += 100;
-    if (mapLocation === "Independence" || mapLocation === "Kansas River" || mapLocation === "Fort Kearney" || mapLocation === "Chimney Rock" || mapLocation === "Fort Laramie") {
-      this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a buffalo and brought back 100 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-      this.response.cardRenderer(statusCard);
-      this.emit(':responseReady');
-    } else {
-      this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "You shot a bear and brought back 100 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-      this.response.cardRenderer(statusCard);
-      this.emit(':responseReady');
-    }
-  } else {
-    this.response.speak("You guessed " + guess + ". The random number was " + randomNumber + "Sorry, you didn't get anything on this hunting round. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-    this.response.cardRenderer(statusCard);
-    this.emit(':responseReady');
-  }
-};
-
-var guessAgain = function() {
-  this.response.speak("Sorry, you must guess a number between 1 and 10. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
-  this.emit(':responseReady');
-};
-
-
-
-var rest = function(restDays) {
+// RESTING
+var daysOfRest = 0;
+var howManyToHeal = 0;
+var rest = function() {
   var chanceOfRecovery = (Math.floor(Math.random() * (10 - 1 + 1)) + 1);
-  if (restDays >= 7 && chanceOfRecovery % 2 === 0) {
-    days += restDays;
-    trailDays += restDays;
-    food -= restDays*(peopleHealthy.length + peopleSick.length);
-    recovery(3);
-  } else if (restDays >= 5 && chanceOfRecovery % 2 === 0) {
-    days += restDays;
-    trailDays += restDays;
-    food -= restDays*(peopleHealthy.length + peopleSick.length);
-    recovery(2);
-  } else if (restDays >= 2 && chanceOfRecovery % 2 === 0) {
-    days += restDays;
-    trailDays += restDays;
-    food -= restDays*(peopleHealthy.length + peopleSick.length);
-    recovery(1);
+  if (daysOfRest >= 7 && chanceOfRecovery % 2 === 0) {
+    days += daysOfRest;
+    trailDays += daysOfRest;
+    food -= daysOfRest*(peopleHealthy.length + peopleSick.length);
+    howManyToHeal = 3;
+    recovery.call(this);
+  } else if (daysOfRest >= 5 && chanceOfRecovery % 2 === 0) {
+    days += daysOfRest;
+    trailDays += daysOfRest;
+    food -= daysOfRest*(peopleHealthy.length + peopleSick.length);
+    howManyToHeal = 2;
+    recovery.call(this);
+  } else if (daysOfRest >= 2 && chanceOfRecovery % 2 === 0) {
+    days += daysOfRest;
+    trailDays += daysOfRest;
+    food -= daysOfRest*(peopleHealthy.length + peopleSick.length);
+    howManyToHeal = 1;
+    recovery.call(this);
   } else {
     days++;
     trailDays++;
     food -= (peopleHealthy.length + peopleSick.length);
+    howManyToHeal = 0;
+    recovery.call(this);
   }
 };
 
@@ -1088,8 +1235,10 @@ var starve = function() {
   }
 };
 
-var recovery = function(howManyToHeal) {
+var recoveredMessage;
+var recovery = function() {
   var peopleCured = 0;
+  var message = [];
 
   var healThem = function() {
     peopleCured++;
@@ -1098,20 +1247,24 @@ var recovery = function(howManyToHeal) {
     if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
       peopleSick.shift();
       peopleHealthy.unshift(mainPlayer);
-      alert("You are feeling much better.");
+      message.push("You are feeling much better.");
     } else {
       var recoveredPerson = peopleSick[recoveredIndex];
       peopleSick.splice(recoveredIndex, 1);
       peopleHealthy.push(recoveredPerson);
-      alert(recoveredPerson + " is feeling much better.");
+      message.push(recoveredPerson + " is feeling much better.");
     }
 
     if (peopleCured < howManyToHeal && peopleSick.length > 0) {
-    healThem();
+      healThem.call(this);
+    } else {
+      recoveredMessage = message.join(" ");
+      this.handler.state = GAME_STATES.PLAY;
+      this.emitWithState('Recovery');
     }
   };
 
-  healThem();
+  healThem.call(this);
 };
 
 var sickness = function() {
@@ -1437,7 +1590,8 @@ var theOregonTrail = function() {
     fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
 
     // TRAVELING
-    travel(miles);
+    // travel(miles);
+    // TODO setup handlers for forts, shopping, trading, crossing rivers, choosing directions
 
     // FOOD STATUS
     if (food <= 0) {
@@ -1459,28 +1613,8 @@ var theOregonTrail = function() {
         this.emitWithState('ChooseToHunt');
       // SICKNESS/INJURY
       } else if (fate % 4 === 0 && trailDays % 4 === 0) {
-        var healthIssues = ["the flu", "cholera", "exhaustion", "typhoid fever", "a snake bite", "a broken arm", "a broken leg"];
-        var issue = healthIssues[Math.floor(Math.random() * healthIssues.length)];
-        var daysOfRest;
-        var restOption;
-
-        if (peopleHealthy.length > 1) {
-          sickness();
-          alert(invalid + " has " + issue + ".");
-          restOption = prompt("Do you want to rest to see if "+ invalid + " feels better? Type 'yes' or 'no'.");
-          if (restOption === "yes" ) {
-            daysOfRest = +prompt("How many days would you like to rest? Type a number.");
-            rest(daysOfRest);
-          }
-        } else {
-          sickness();
-          alert("You have " + issue + ".");
-          restOption = prompt("Do you want to rest to see if you feel better? Type 'yes' or 'no'.");
-          if (restOption === "yes" ) {
-            daysOfRest = +prompt("How many days would you like to rest? Type a number.");
-            rest(daysOfRest);
-          }
-        }
+        this.handler.state = GAME_STATES.SICK;
+        this.emitWithState('Alert');
       // DEATH OF SICK/INJURED
       } else if (fate === 10) {
         var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
@@ -1546,6 +1680,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, playHandlers, huntingHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, playHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers);
   alexa.execute();
 };
