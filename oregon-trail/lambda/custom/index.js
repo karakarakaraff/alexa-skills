@@ -559,6 +559,7 @@ var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lea
 var mapLocation; // follows map, remembers choices at split trails
 var alreadyTradedAtThisFort = false; // tracks trading at each fort
 var fate; // adds randomness to the game and changes every day
+var gameOverMessage; // tracks the reason for game over
 
 // 1836 CALENDAR
 function dateFrom1836(day){
@@ -811,7 +812,8 @@ var crossRiver = function(depth, sinkChance, cost) {
     if (fate <= sinkChance && depth > 6) {
       food -= fate * 10;
       if (peopleHealthy.length + peopleSick.length === 1) {
-        throw new gameOver("you drowned");
+        gameOverMessage = "you drowned";
+        throw new gameOver.call(this);
       } else if (peopleSick.length >= 1) {
         death(peopleSick);
         alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food.");
@@ -1136,7 +1138,8 @@ var oxProblem = function() {
   if (oxen > 1) {
     oxen -= 1;
   } else if (oxen === 1) {
-    throw new gameOver("no more oxen");
+    gameOverMessage = "no more oxen";
+    throw new gameOver.call(this);
   }
 };
 
@@ -1145,7 +1148,8 @@ var fire = function() {
   var itemIndex = Math.floor(Math.random() * destroyedItems.length);
   if (oxen === 1 && window[destroyedItems[itemIndex][0]] === "oxen") {
     alert("A fire broke out on your wagon and killed your last ox. This is as far as you can go. Good luck homesteading!");
-    throw new gameOver("no more oxen");
+    gameOverMessage = "no more oxen";
+    throw new gameOver.call(this);
   } else if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
     window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
     alert("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ".");
@@ -1160,7 +1164,8 @@ var thief = function() {
   var itemIndex = Math.floor(Math.random() * stolenItems.length);
   if (oxen === 1 && window[stolenItems[itemIndex][0]] === "oxen") {
     alert("A theif stole your last ox. This is as far as you can go. Good luck homesteading!");
-    throw new gameOver("no more oxen");
+    gameOverMessage = "no more oxen";
+    throw new gameOver.call(this);
   } else if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
     window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
     alert("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ".");
@@ -1191,7 +1196,8 @@ var brokenWagon = function() {
     food -= (peopleHealthy.length + peopleSick.length);
     alert("Your wagon broke, but you repaired it.");
   } else {
-    throw new gameOver("broken wagon");
+    gameOverMessage = "broken wagon";
+    throw new gameOver.call(this);
   }
 };
 
@@ -1224,7 +1230,8 @@ var starve = function() {
     }
   } else if (daysWithoutFood % 3 === 0 && fate % 2 === 0) {
     if (peopleHealthy.length + peopleSick.length === 1) {
-      throw new gameOver("you starved");
+      gameOverMessage = "you starved";
+      throw new gameOver.call(this);
     } else if (peopleSick.length > 0){
       death(peopleSick);
       alert(victim + " has died of starvation.");
@@ -1291,8 +1298,8 @@ var death = function(array) {
   array.splice(victimIndex, 1);
 };
 
-var gameOver = function(status) {
-  if (status === "winner") {
+var gameOver = function() {
+  if (gameOverMessage === "winner") {
     var bonus;
     if (profession.toLowerCase() === "banker") {
       bonus = 1;
@@ -1305,26 +1312,28 @@ var gameOver = function(status) {
     this.response.speak("Congratulations, you reached Oregon City! You finished the game with a score of " + points + " points.");
     this.response.cardRenderer("Congratulations, you reach Oregon City! FINAL SCORE: " + points);
     this.emit(':responseReady');
-  } else if (status === "you died") {
+  } else if (gameOverMessage === "you died") {
     var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
     var fatality = diseases[Math.floor(Math.random() * diseases.length)];
     this.response.speak("You have died of " + fatality + ". Game over!");
     this.response.cardRenderer("Game over! You have died of " + fatality);
     this.emit(':responseReady');
-  } else if (status === "you drowned") {
+  } else if (gameOverMessage === "you drowned") {
     this.response.speak("Your wagon was overtaken by water, and you drowned. Game over!");
     this.response.cardRenderer("Game over! You drowned trying to cross the " + mapLocation + ".");
     this.emit(':responseReady');
     alert("Your wagon was overtaken by water, and you drowned.");
-  } else if (status === "you starved") {
+  } else if (gameOverMessage === "you starved") {
     this.response.speak("You have died of starvation. Game over!");
     this.response.cardRenderer("Game over! You have died of starvation.");
     this.emit(':responseReady');
-  } else if (status === "no more oxen") {
-    this.response.speak("That was your last ox. This is as far as you can go. Good luck homesteading!");
+  } else if (gameOverMessage === "no more oxen") {
+    var allOxProblems = ["An ox has wandered off.", "An ox has died."];
+    var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
+    this.response.speak(randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
     this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
     this.emit(':responseReady');
-  } else if (status === "broken wagon") {
+  } else if (gameOverMessage === "broken wagon") {
     this.response.speak("Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
     this.response.cardRenderer("Game over! Your wagon broke, and you don't have any spare parts to fix it.");
     this.emit(':responseReady');
@@ -1503,7 +1512,8 @@ var theDalles = function() {
 
 var oregonCity = function() {
   alert("Oregon City");
-  throw new gameOver("winner");
+  gameOverMessage = "winner";
+  throw new gameOver.call(this);
 };
 
 
@@ -1621,7 +1631,8 @@ var theOregonTrail = function() {
         var fatality = diseases[Math.floor(Math.random() * diseases.length)];
 
         if (peopleHealthy.length + peopleSick.length === 1 && peopleSick.indexOf(mainPlayer) === 0) {
-          throw new gameOver("you died");
+          gameOverMessage = "you died";
+          throw new gameOver.call(this);
         } else if (peopleSick.length > 0) {
           death(peopleSick);
           alert(victim + " has died of " + fatality + ".");
