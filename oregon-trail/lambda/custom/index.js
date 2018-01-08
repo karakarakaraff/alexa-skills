@@ -7,7 +7,8 @@ const GAME_STATES = {
   PROFESSION_SETUP: '_PROFESSIONSETUPMODE', // setting up user's profession and starting money/food/oxen/parts
   SUPPLIES_SETUP: '_SUPPLIESSETUP', // setting up user's first purchases at general store
   MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
-  PLAY: '_PLAYMODE', // playing the game
+  EVENT: '_EVENTMODE', // events within the game
+  LANDMARK: '_LANDMARKMODE', // landmarks along the trail
   HUNT: '_HUNTMODE', // hunting within the game
   HUNT_NUMBER: '_HUNTNUMBERMODE', // choosing a random number for hunting
   SICK: '_SICKMODE', // when a person gets sick or injured
@@ -289,8 +290,8 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
   },
 });
 
-// HANDLE GAMEPLAY
-const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
+// HANDLE GAME EVENTS
+const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   'PlayGame': function() {
     this.response.speak("The game is playing.");
     this.emit(":responseReady");
@@ -384,7 +385,7 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
         this.emit(":responseReady");
       }
     } else {
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   },
@@ -399,7 +400,7 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
       this.response.speak(victim + " has died of " + fatality + ". Rest in peace, " + victim + ". Now, it's time to move on. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     } else {
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   },
@@ -452,7 +453,7 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
   'NoGrass': function() {
     daysWithoutGrass++;
     if (daysWithoutGrass % 3 === 0) {
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('OxProblem');
     } else {
       this.response.speak("There's no grass for the oxen. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -472,7 +473,7 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
         this.emit(":responseReady");
       }
     } else {
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   },
@@ -503,7 +504,7 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
       this.response.speak("A fire broke out in your wagon and destroyed your remaining " + destroyedItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     } else {
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   },
@@ -522,7 +523,7 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
       this.response.speak("A thief broke into your wagon and stole your remaining " + stolenItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     } else {
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   },
@@ -566,7 +567,7 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
     }
   },
   'ContinueGame': function() {
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
@@ -594,6 +595,204 @@ const playHandlers = Alexa.CreateStateHandler(GAME_STATES.PLAY, {
   },
 });
 
+// HANDLE LANDMARKS ALONG THE TRAIL
+const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
+  'KansasRiver': function() {
+    /*
+    var depth;
+    if (days < 92) {
+      depth = 3;
+    } else {
+      depth = 4;
+    }
+    alert("Kansas River");
+    crossRiver(depth, 2, 5);
+    */
+  },
+  'FortKearny': function() {
+    /*
+    alert("Fort Kearny");
+    alreadyTradedAtThisFort = false;
+    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
+    if (getStuff === "yes") {
+      if (money <= 0) {
+        alert("You don't have any money, but you can try trading.");
+        tradeItems(1);
+      } else {
+        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading instead? Type 'buy' or 'trade'.");
+        if (buyOrTrade === "buy") {
+          goShopping();
+        } else if (buyOrTrade === "trade") {
+          tradeItems(1);
+        }
+      }
+    }
+    */
+  },
+  'ChimneyRock': function() {
+    /*
+    alert("Chimney Rock");
+    */
+  },
+  'FortLaramie': function() {
+    /*
+    alert("Fort Laramie");
+    alreadyTradedAtThisFort = false;
+    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
+    if (getStuff === "yes") {
+      if (money <= 0) {
+        alert("You don't have any money, but you can try trading.");
+        tradeItems(2);
+      } else {
+        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
+        if (buyOrTrade === "buy") {
+          goShopping();
+        } else if (buyOrTrade === "trade") {
+          tradeItems(2);
+        }
+      }
+    }
+    */
+  },
+  'IndependenceRock': function() {
+    /*
+    alert("Independence Rock");
+    */
+  },
+  'SouthPass': function() {
+    /*
+    alert("South Pass");
+    */
+  },
+  'GreenRiver': function() {
+    /*
+    alert("Green River");
+    crossRiver(8, 8, 12);
+    */
+  },
+  'FortBridger': function() {
+    /*
+    alert("Fort Bridger");
+    alreadyTradedAtThisFort = false;
+    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
+    if (getStuff === "yes") {
+      if (money <= 0) {
+        alert("You don't have any money, but you can try trading.");
+        tradeItems(3);
+      } else {
+        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
+        if (buyOrTrade === "buy") {
+          goShopping();
+        } else if (buyOrTrade === "trade") {
+          tradeItems(3);
+        }
+      }
+    }
+    */
+  },
+  'SodaSprings': function() {
+    /*
+    alert("Soda Springs");
+    */
+  },
+  'FortHall': function() {
+    /*
+    alert("Fort Hall");
+    alreadyTradedAtThisFort = false;
+    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
+    if (getStuff === "yes") {
+      if (money <= 0) {
+        alert("You don't have any money, but you can try trading.");
+        tradeItems(2);
+      } else {
+        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
+        if (buyOrTrade === "buy") {
+          goShopping();
+        } else if (buyOrTrade === "trade") {
+          tradeItems(2);
+        }
+      }
+    }
+    */
+  },
+  'SnakeRiver': function() {
+    /*
+    alert("Snake River");
+    crossRiver(5, 5, 7);
+    */
+  },
+  'FortBoise': function() {
+    /*
+    alert("Fort Boise");
+    alreadyTradedAtThisFort = false;
+    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
+    if (getStuff === "yes") {
+      if (money <= 0) {
+        alert("You don't have any money, but you can try trading.");
+        tradeItems(1);
+      } else {
+        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
+        if (buyOrTrade === "buy") {
+          goShopping();
+        } else if (buyOrTrade === "trade") {
+          tradeItems(1);
+        }
+      }
+    }
+    */
+  },
+  'FortWallaWalla': function() {
+    /*
+    alert("Fort Walla Walla");
+    alreadyTradedAtThisFort = false;
+    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
+    if (getStuff === "yes") {
+      if (money <= 0) {
+        alert("You don't have any money, but you can try trading.");
+        tradeItems(1);
+      } else {
+        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
+        if (buyOrTrade === "buy") {
+          goShopping();
+        } else if (buyOrTrade === "trade") {
+          tradeItems(1);
+        }
+      }
+    }
+    */
+  },
+  'TheDalles': function() {
+    /*
+    alert("The Dalles");
+    */
+  },
+  'OregonCity': function() {
+    gameOverMessage = "winner";
+    throw new gameOver.call(this);
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    // TODO
+  },
+});
+
 // HANDLE HUNTING
 const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
   'ChooseToHunt': function() {
@@ -606,7 +805,7 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emitWithState('ChooseRandomNumber');
   },
   'AMAZON.NoIntent': function() {
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
@@ -651,7 +850,7 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
   'GetNumber': function() {
     guess = +this.event.request.intent.slots.number.value;
     if (guess >= 1 && guess <= 10) {
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('Hunting');
     } else {
       this.response.speak("Sorry, you must guess a number between 1 and 10. Please choose a number between 1 and 10.").listen("Please choose a number between 1 and 10.");
@@ -710,7 +909,7 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emitWithState('HowManyDays');
   },
   'AMAZON.NoIntent': function() {
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
@@ -1024,27 +1223,27 @@ var chooseMonthAgain = function() {
 var setDays = function() {
   if (month.toLowerCase() === "march") {
     days = 61;
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   } else if (month.toLowerCase() === "april") {
     days = 92;
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   } else if (month.toLowerCase() === "may") {
     days = 122;
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   } else if (month.toLowerCase() === "june") {
     days = 153;
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   } else if (month.toLowerCase() === "july") {
     days = 183;
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   } else if (month.toLowerCase() === "august") {
     days = 214;
-    this.handler.state = GAME_STATES.PLAY;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   }
 };
@@ -1342,7 +1541,7 @@ var recovery = function() {
       healThem.call(this);
     } else {
       recoveredMessage = message.join(" ");
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('Recovery');
     }
   };
@@ -1453,203 +1652,39 @@ var gameOver = function() {
 
 
 
-// =========================
-// LANDMARKS ALONG THE TRAIL
-// =========================
-var kansasRiver = function() {
-  var depth;
-  if (days < 92) {
-    depth = 3;
-  } else {
-    depth = 4;
-  }
-  alert("Kansas River");
-  crossRiver(depth, 2, 5);
-};
-
-var fortKearny = function() {
-  alert("Fort Kearny");
-
-  alreadyTradedAtThisFort = false;
-  var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-  if (getStuff === "yes") {
-    if (money <= 0) {
-      alert("You don't have any money, but you can try trading.");
-      tradeItems(1);
-    } else {
-      var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading instead? Type 'buy' or 'trade'.");
-      if (buyOrTrade === "buy") {
-        goShopping();
-      } else if (buyOrTrade === "trade") {
-        tradeItems(1);
-      }
-    }
-  }
-};
-
-var chimneyRock = function() {
-  alert("Chimney Rock");
-};
-
-var fortLaramie = function() {
-  alert("Fort Laramie");
-
-  alreadyTradedAtThisFort = false;
-  var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-  if (getStuff === "yes") {
-    if (money <= 0) {
-      alert("You don't have any money, but you can try trading.");
-      tradeItems(2);
-    } else {
-      var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-      if (buyOrTrade === "buy") {
-        goShopping();
-      } else if (buyOrTrade === "trade") {
-        tradeItems(2);
-      }
-    }
-  }
-};
-
-var independenceRock = function() {
-  alert("Independence Rock");
-};
-
-var southPass = function() {
-  alert("South Pass");
-};
-
-var greenRiver = function() {
-  alert("Green River");
-  crossRiver(8, 8, 12);
-};
-
-var fortBridger = function() {
-  alert("Fort Bridger");
-
-  alreadyTradedAtThisFort = false;
-  var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-  if (getStuff === "yes") {
-    if (money <= 0) {
-      alert("You don't have any money, but you can try trading.");
-      tradeItems(3);
-    } else {
-      var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-      if (buyOrTrade === "buy") {
-        goShopping();
-      } else if (buyOrTrade === "trade") {
-        tradeItems(3);
-      }
-    }
-  }
-};
-
-var sodaSprings = function() {
-  alert("Soda Springs");
-};
-
-var fortHall = function() {
-  alert("Fort Hall");
-
-  alreadyTradedAtThisFort = false;
-  var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-  if (getStuff === "yes") {
-    if (money <= 0) {
-      alert("You don't have any money, but you can try trading.");
-      tradeItems(2);
-    } else {
-      var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-      if (buyOrTrade === "buy") {
-        goShopping();
-      } else if (buyOrTrade === "trade") {
-        tradeItems(2);
-      }
-    }
-  }
-};
-
-var snakeRiver = function() {
-  alert("Snake River");
-  crossRiver(5, 5, 7);
-};
-
-var fortBoise = function() {
-  alert("Fort Boise");
-
-  alreadyTradedAtThisFort = false;
-  var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-  if (getStuff === "yes") {
-    if (money <= 0) {
-      alert("You don't have any money, but you can try trading.");
-      tradeItems(1);
-    } else {
-      var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-      if (buyOrTrade === "buy") {
-        goShopping();
-      } else if (buyOrTrade === "trade") {
-        tradeItems(1);
-      }
-    }
-  }
-};
-
-var fortWallaWalla = function() {
-  alert("Fort Walla Walla");
-
-  alreadyTradedAtThisFort = false;
-  var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-  if (getStuff === "yes") {
-    if (money <= 0) {
-      alert("You don't have any money, but you can try trading.");
-      tradeItems(1);
-    } else {
-      var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-      if (buyOrTrade === "buy") {
-        goShopping();
-      } else if (buyOrTrade === "trade") {
-        tradeItems(1);
-      }
-    }
-  }
-};
-
-var theDalles = function() {
-  alert("The Dalles");
-};
-
-var oregonCity = function() {
-  alert("Oregon City");
-  gameOverMessage = "winner";
-  throw new gameOver.call(this);
-};
-
-
-
 // =============
 // THE TRAIL MAP
 // =============
 var travel = function(distance) {
   if (distance === 105) {
     mapLocation = "Kansas River";
-    kansasRiver();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('KansasRiver');
   } else if (distance === 300) {
     mapLocation = "Fort Kearny";
-    fortKearny();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('FortKearny');
   } else if (distance === 555) {
     mapLocation = "Chimney Rock";
-    chimneyRock();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('ChimneyRock');
   } else if (distance === 645) {
     mapLocation = "Fort Laramie";
-    fortLaramie();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('FortLaramie');
   } else if (distance === 825) {
     mapLocation = "Independence Rock";
-    independenceRock();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('IndependenceRock');
   } else if (distance === 930) {
     mapLocation = "South Pass";
-    southPass();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('SouthPass');
   } else if (distance === 1050 && mapLocation !== "Fort Bridger") {
     mapLocation = "Green River";
-    greenRiver();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('GreenRiver');
+    // TODO handle user's direction choice
     mapLocation = prompt("Do you want to stay on the trail to Fort Bridger or take the shortcut through Soda Springs?\n\nType 'Fort Bridger' or 'Soda Springs'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Bridger" && mapLocation !== "Soda Springs") {
       alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Bridger.");
@@ -1660,19 +1695,25 @@ var travel = function(distance) {
     }
   } else if (distance === 1200) {
     if (mapLocation === "Fort Bridger") {
-      fortBridger();
+      this.handler.state = GAME_STATES.LANDMARK;
+      this.emitWithState('FortBridger');
     } else if (mapLocation === "Soda Springs") {
-      sodaSprings();
+      this.handler.state = GAME_STATES.LANDMARK;
+      this.emitWithState('SodaSprings');
     }
   } else if (distance === 1260) {
     mapLocation = "Fort Hall";
-    fortHall();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('FortHall');
   } else if (distance === 1440) {
     mapLocation = "Snake River";
-    snakeRiver();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('SnakeRiver');
   } else if (distance === 1560 && mapLocation !== "Fort Walla Walla") {
     mapLocation = "Fort Boise";
-    fortBoise();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('FortBoise');
+    // TODO handle user's direction choice
     mapLocation = prompt("Do you want to stay on the trail to Fort Walla Walla or take the shortcut through The Dalles?\n\nType 'Fort Walla Walla' or 'The Dalles'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Walla Walla" && mapLocation !== "The Dalles") {
       alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Walla Walla.");
@@ -1683,13 +1724,16 @@ var travel = function(distance) {
     }
   } else if (distance === 1710) {
     if (mapLocation === "Fort Walla Walla") {
-      fortWallaWalla();
+      this.handler.state = GAME_STATES.LANDMARK;
+      this.emitWithState('FortWallaWalla');
     } else if (mapLocation === "The Dalles") {
-      theDalles();
+      this.handler.state = GAME_STATES.LANDMARK;
+      this.emitWithState('TheDalles');
     }
   } else if (distance === 1845) {
     mapLocation = "Oregon City";
-    oregonCity();
+    this.handler.state = GAME_STATES.LANDMARK;
+    this.emitWithState('OregonCity');
   }
 };
 
@@ -1713,7 +1757,7 @@ var theOregonTrail = function() {
     // FOOD STATUS
     if (food <= 0) {
       daysWithoutFood++;
-      this.handler.state = GAME_STATES.PLAY;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('Starve');
     } else {
       if (food >= (peopleHealthy.length + peopleSick.length)) {
@@ -1735,27 +1779,27 @@ var theOregonTrail = function() {
         this.emitWithState('Alert');
       // DEATH OF SICK/INJURED
       } else if (fate === 10) {
-        this.handler.state = GAME_STATES.PLAY;
+        this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('Death');
       // WEATHER
       } else if (fate === 3 && trailDays % 2 === 0) {
         if (days < 122 || (days > 306 && days < 487) || days > 671) {
           lostDays = Math.floor(Math.random() * (7 - 4 + 1)) + 1;
-          this.handler.state = GAME_STATES.PLAY;
+          this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('Snow');
         } else if ((days > 122 && days < 153) || (days > 487 && days < 518)) {
           lostDays = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
-          this.handler.state = GAME_STATES.PLAY;
+          this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('Storm');
         }
       // GREAT AMERICAN DESERT
       } else if (fate === 9) {
         if (mapLocation === "Kansas River" || mapLocation === "Fort Kearny" || mapLocation === "Chimney Rock") {
           if (days < 122 || (days > 365 && days < 487)) {
-            this.handler.state = GAME_STATES.PLAY;
+            this.handler.state = GAME_STATES.EVENT;
             this.emitWithState('NoGrass');
           } else if (days > 183 && days < 214) {
-            this.handler.state = GAME_STATES.PLAY;
+            this.handler.state = GAME_STATES.EVENT;
             this.emitWithState('BuffaloStampede');
           }
         }
@@ -1764,10 +1808,10 @@ var theOregonTrail = function() {
         var goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
         if (goodThing === 1) {
           if ((days > 122 && days < 275) || (days > 487 && days < 640)) {
-            this.handler.state = GAME_STATES.PLAY;
+            this.handler.state = GAME_STATES.EVENT;
             this.emitWithState('FindBerries');
           } else {
-            this.handler.state = GAME_STATES.PLAY;
+            this.handler.state = GAME_STATES.EVENT;
             this.emitWithState('FindItems');
           }
         } else if (goodThing === 2 && peopleSick.length > 0) {
@@ -1778,19 +1822,19 @@ var theOregonTrail = function() {
       } else if (fate === 6 && trailDays % 2 === 1) {
         var badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
         if (badThing === 1) {
-          this.handler.state = GAME_STATES.PLAY;
+          this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('OxProblem');
         } else if (badThing === 2) {
-          this.handler.state = GAME_STATES.PLAY;
+          this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('Fire');
         } else if (badThing === 3) {
-          this.handler.state = GAME_STATES.PLAY;
+          this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('Thief');
         } else if (badThing === 4) {
-          this.handler.state = GAME_STATES.PLAY;
+          this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('BrokenWagon');
         } else if (badThing === 5) {
-          this.handler.state = GAME_STATES.PLAY;
+          this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('GetLost');
         }
       }
@@ -1802,6 +1846,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, playHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, landmarkHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers);
   alexa.execute();
 };
