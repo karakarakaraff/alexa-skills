@@ -13,6 +13,7 @@ const GAME_STATES = {
   HUNT_NUMBER: '_HUNTNUMBERMODE', // choosing a random number for hunting
   SICK: '_SICKMODE', // when a person gets sick or injured
   REST: '_RESTMODE', // resting for potential recovery
+  RIVER: '_RIVERMODE', // crossing rivers
   HELP: '_HELPMODE', // help the user // TODO still need to set this up and register it below
 };
 
@@ -374,14 +375,14 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     } else if (daysWithoutFood % 3 === 0 && fate % 2 === 0) {
       if (peopleHealthy.length + peopleSick.length === 1) {
         gameOverMessage = "you starved";
-        throw new gameOver.call(this);
+        gameOver.call(this);
       } else if (peopleSick.length > 0){
         deathPeopleSick.call(this);
-        this.response.speak(victim + " has died of starvation. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.speak(victim + " has died of starvation. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else if (peopleHealthy.length > 0) {
         deathPeopleHealthy.call(this);
-        this.response.speak(victim + " has died of starvation. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.speak(victim + " has died of starvation. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       }
     } else {
@@ -394,10 +395,10 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     var fatality = diseases[Math.floor(Math.random() * diseases.length)];
     if (peopleHealthy.length + peopleSick.length === 1 && peopleSick.indexOf(mainPlayer) === 0) {
       gameOverMessage = "you died";
-      throw new gameOver.call(this);
+      gameOver.call(this);
     } else if (peopleSick.length > 0) {
       deathPeopleSick.call(this);
-      this.response.speak(victim + " has died of " + fatality + ". Rest in peace, " + victim + ". Now, it's time to move on. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.speak(victim + " has died of " + fatality + ". Rest in peace " + victim + ". Now, it's time to move on. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     } else {
       this.handler.state = GAME_STATES.EVENT;
@@ -414,16 +415,16 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length > 1) {
       if (peopleSick.length > 0) {
         deathPeopleSick.call(this);
-        this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else {
         deathPeopleHealthy.call(this);
-        this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.speak("You got stuck in a large snow storm. You lost " + lostDays + " days, and " + victim + " froze to death. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       }
     } else if (lostDays >= 5 && peopleSick.length + peopleHealthy.length === 1) {
       gameOverMessage = "froze to death";
-      throw new gameOver.call(this);
+      gameOver.call(this);
     } else {
       this.response.speak("You got stuck in some snow. You have lost " + lostDays + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
@@ -437,7 +438,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
       oxen -= 1;
       if (oxen === 0) {
         gameOverMessage = "no more oxen -- thunderstorm";
-      throw new gameOver.call(this);
+      gameOver.call(this);
       } else {
         this.response.speak("You got caught in a thunderstorm and an ox ran away. You lost " + lostDays + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
@@ -465,11 +466,11 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     if (stampedeChance === 9 && peopleSick.length + peopleHealthy.length > 1) {
       if (peopleHealthy.length > 1) {
         deathPeopleHealthy.call(this);
-        this.response.speak("Oh no! Buffalo stampede! " + victim + " got trampled. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.speak("Oh no! Buffalo stampede! " + victim + " got trampled. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else if (peopleSick.length > 0) {
         deathPeopleSick.call(this);
-        this.response.speak("Oh no! Buffalo stampede! " + victim + " got trampled. Rest in peace, " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.response.speak("Oh no! Buffalo stampede! " + victim + " got trampled. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       }
     } else {
@@ -486,7 +487,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
       this.emit(":responseReady");
     } else if (oxen === 1) {
       gameOverMessage = "no more oxen -- ox probs";
-      throw new gameOver.call(this);
+      gameOver.call(this);
     }
   },
   'Fire': function() {
@@ -494,7 +495,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     var itemIndex = Math.floor(Math.random() * destroyedItems.length);
     if (oxen === 1 && window[destroyedItems[itemIndex][0]] === "oxen") {
       gameOverMessage = "no more oxen -- fire";
-      throw new gameOver.call(this);
+      gameOver.call(this);
     } else if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
       window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
       this.response.speak("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -513,7 +514,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     var itemIndex = Math.floor(Math.random() * stolenItems.length);
     if (oxen === 1 && window[stolenItems[itemIndex][0]] === "oxen") {
       gameOverMessage = "no more oxen -- thief";
-      throw new gameOver.call(this);
+      gameOver.call(this);
     } else if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
       window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
       this.response.speak("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -550,7 +551,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
       this.emit(":responseReady");
     } else {
       gameOverMessage = "broken wagon";
-      throw new gameOver.call(this);
+      gameOver.call(this);
     }
   },
   'GetLost': function() {
@@ -565,6 +566,55 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
       this.response.speak("You lost the trail. You wasted " + howLong + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     }
+  },
+  'RiverSuccess': function() {
+    this.response.speak("Congratulations! You safely crossed the river. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'RiverAccident': function() {
+    this.response.speak("You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'RiverDeath': function() {
+    this.response.speak("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'NoFerryMoneyRiverSuccess': function() {
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You wall have to try floating across the river. <break time='2s'/> Congratulations! You safely crossed the river. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'NoFerryMoneyRiverAccident': function() {
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You wall have to try floating across the river. <break time='2s'/> You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'NoFerryMoneyRiverDeath': function() {
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You wall have to try floating across the river. <break time='2s'/> Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'LandmarkChimneyRock': function() {
+    this.response.speak("You have arrived at Chimney Rock. Congratulations! Located in western Nebraska, Chimney Rock is a prominent geological formation that rises nearly 300 feet above the surrounding plains. For this reason, it is a well-known landmark along the trail, which means you're going the right way. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(":responseReady");
+  },
+  'LandmarkIndependenceRock': function() {
+    this.response.speak("You have arrived at Independence Rock. Congratulations! Located in central Wyoming, Independence Rock is a large granite hill where many pioneers carve their names. It is a well-known landmark along the trail. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(":responseReady");
+  },
+  'LandmarkSouthPass': function() {
+    this.response.speak("You have arrived at South Pass. Congratulations! Located in southwestern Wyoming, South Pass is the lowest point along the continental divide. It's the easiest way to cross the Rocky Mountains. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(":responseReady");
+  },
+  'LandmarkSodaSprings': function() {
+    this.response.speak("You have arrived at Soda Springs. Congratulations! Located in southeastern Idaho, these springs bubble like soda water, which is how they got their name. It's a popular place to bathe and relax, but don't drink the water! You might get sick. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(":responseReady");
+  },
+  'LandmarkTheDalles': function() {
+    this.response.speak("You have arrived at The Dalles. Congratulations! Located in northern Oregon, the Dalles is where the trail stops. You are blocked by the cascade mountains, and the only way to finish your journey is by floating down the Colombia River gorge. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCard);
+    this.emit(":responseReady");
   },
   'ContinueGame': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -598,16 +648,15 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
 // HANDLE LANDMARKS ALONG THE TRAIL
 const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
   'KansasRiver': function() {
-    /*
-    var depth;
     if (days < 92) {
-      depth = 3;
+      riverDepth = 3;
     } else {
-      depth = 4;
+      riverDepth = 4;
     }
-    alert("Kansas River");
-    crossRiver(depth, 2, 5);
-    */
+    ferryCost = 5;
+    sinkChance = 2;
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('CrossingChoice');
   },
   'FortKearny': function() {
     /*
@@ -630,9 +679,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     */
   },
   'ChimneyRock': function() {
-    /*
-    alert("Chimney Rock");
-    */
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('LandmarkChimneyRock');
   },
   'FortLaramie': function() {
     /*
@@ -655,20 +703,19 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     */
   },
   'IndependenceRock': function() {
-    /*
-    alert("Independence Rock");
-    */
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('LandmarkIndependenceRock');
   },
   'SouthPass': function() {
-    /*
-    alert("South Pass");
-    */
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('LandmarkSouthPass');
   },
   'GreenRiver': function() {
-    /*
-    alert("Green River");
-    crossRiver(8, 8, 12);
-    */
+    riverDepth = 8;
+    ferryCost = 12;
+    sinkChance = 8;
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('CrossingChoice');
   },
   'FortBridger': function() {
     /*
@@ -691,9 +738,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     */
   },
   'SodaSprings': function() {
-    /*
-    alert("Soda Springs");
-    */
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('LandmarkSodaSprings');
   },
   'FortHall': function() {
     /*
@@ -716,10 +762,11 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     */
   },
   'SnakeRiver': function() {
-    /*
-    alert("Snake River");
-    crossRiver(5, 5, 7);
-    */
+    riverDepth = 5;
+    ferryCost = 7;
+    sinkChance = 5;
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('CrossingChoice');
   },
   'FortBoise': function() {
     /*
@@ -762,13 +809,12 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     */
   },
   'TheDalles': function() {
-    /*
-    alert("The Dalles");
-    */
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('LandmarkTheDalles');
   },
   'OregonCity': function() {
     gameOverMessage = "winner";
-    throw new gameOver.call(this);
+    gameOver.call(this);
   },
   'AMAZON.HelpIntent': function() {
     // TODO setup help state and function
@@ -982,6 +1028,96 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
   },
 });
 
+// HANDLE RIVER CROSSINGS
+const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
+  'CrossingChoice': function() {
+    this.response.speak("You have arrived at the " + mapLocation + ". The river is " + riverDepth + " feet deep. You can buy a ferry for $" + ferryCost + ", or you can try to float across on your own. Do you want to ferry or float across the river?").listen("Do you want to ferry or float across the river?");
+    this.emit(":responseReady");
+  },
+  'GetRiverCrossing': function() {
+    if (this.event.request.intent.slots.crossing.value === "ferry") {
+      if (money >= ferryCost) {
+        money -= ferryCost;
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('RiverSuccess');
+      } else {
+        if (fate <= sinkChance && riverDepth > 6) {
+          food -= fate * 10;
+          if (peopleHealthy.length + peopleSick.length === 1) {
+            gameOverMessage = "no ferry money you drowned";
+            gameOver.call(this);
+          } else if (peopleSick.length >= 1) {
+            deathPeopleSick.call(this);
+            this.handler.state = GAME_STATES.EVENT;
+            this.emitWithState('NoFerryMoneyRiverDeath');
+          } else {
+            deathPeopleHealthy.call(this);
+            this.handler.state = GAME_STATES.EVENT;
+            this.emitWithState('NoFerryMoneyRiverDeath');
+          }
+        } else if (fate <= sinkChance && riverDepth > 4) {
+          food -= fate * 3;
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('NoFerryMoneyRiverAccident');
+        } else {
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('NoFerryMoneyRiverSuccess');
+        }
+      }
+    } else if (this.event.request.intent.slots.crossing.value === "float") {
+      if (fate <= sinkChance && riverDepth > 6) {
+        food -= fate * 10;
+        if (peopleHealthy.length + peopleSick.length === 1) {
+          gameOverMessage = "you drowned";
+          gameOver.call(this);
+        } else if (peopleSick.length >= 1) {
+          deathPeopleSick.call(this);
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('RiverDeath');
+        } else {
+          deathPeopleHealthy.call(this);
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('RiverDeath');
+        }
+      } else if (fate <= sinkChance && riverDepth > 4) {
+        food -= fate * 3;
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('RiverAccident');
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('RiverSuccess');
+      }
+    } else {
+      this.handler.state = GAME_STATES.RIVER;
+      this.emitWithState('Unhandled');
+    }
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    if (this.event.request.intent.slots.crossing.value !== "ferry" && this.event.request.intent.slots.crossing.value !== "float") {
+      this.response.speak("I'm sorry, I didn't understand your choice. Do you want to ferry or float across the river?").listen("Please say ferry or float.");
+      this.emit(":responseReady");
+    }
+  },
+});
+
 
 
 // =====================
@@ -1006,6 +1142,9 @@ var guess = 0; // track user's random number guess for hunting
 var lostDays; // tracks how many days a user gets stuck
 var daysWithoutFood = 0; // tracks how many days in a row there is no food -- could lead to starvation
 var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lead to oxen dying or wandering off
+var riverDepth = 0; // tracks river's depth
+var ferryCost = 0; // tracks cost to ferry across river
+var sinkChance = 0; // tracks likelihood of sinking if floating across river
 var mapLocation; // follows map, remembers choices at split trails
 var alreadyTradedAtThisFort = false; // tracks trading at each fort
 var fate; // adds randomness to the game and changes every day
@@ -1253,54 +1392,6 @@ var setDays = function() {
 // ======================
 // EVENTS ALONG THE TRAIL
 // ======================
-var crossRiver = function(depth, sinkChance, cost) {
-  var cross = prompt(
-    "You must cross the river. It is " + depth + " feet deep. Do you want to ferry for $" + cost + " or try to float across? Type 'ferry' or 'float'."
-  );
-
-  var float = function() {
-    if (fate <= sinkChance && depth > 6) {
-      food -= fate * 10;
-      if (peopleHealthy.length + peopleSick.length === 1) {
-        gameOverMessage = "you drowned";
-        throw new gameOver.call(this);
-      } else if (peopleSick.length >= 1) {
-        deathPeopleSick.call(this);
-        alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food.");
-      } else {
-        deathPeopleHealthy.call(this);
-        alert("Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food."
-        );
-      }
-    } else if (fate <= sinkChance && depth > 4) {
-      food -= fate * 3;
-      alert("You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food."
-      );
-    } else {
-      alert("Congratulations! You safely crossed the river.");
-    }
-  };
-
-  if (cross === "ferry") {
-    if (money >= cost) {
-      money -= cost;
-      alert("Congratulations! You safely crossed the river.");
-    } else if (food >= cost * 3) {
-      var choice = prompt(
-        "You don't have $" + cost + ", but the ferry will accept " + cost * 3 + " pounds of food as your payment. Will you accept? Type 'yes' or 'no'.");
-      if (choice === "yes") {
-        food -= cost * 3;
-        alert("Congratulations! You safely crossed the river.");
-      } else {
-        alert("You will have to try to float across.");
-        float();
-      }
-    }
-  } else {
-    float();
-  }
-};
-
 var goShopping = function() {
   var tradeInstead;
   if (money > 0) {
@@ -1612,7 +1703,10 @@ var gameOver = function() {
     this.response.speak("Your wagon was overtaken by water, and you drowned. Game over!");
     this.response.cardRenderer("Game over! You drowned trying to cross the " + mapLocation + ".");
     this.emit(':responseReady');
-    alert("Your wagon was overtaken by water, and you drowned.");
+  } else if (gameOverMessage === "no ferry money you drowned") {
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You wall have to try floating across the river. <break time='2s'/> Your wagon was overtaken by water, and you drowned. Game over!");
+    this.response.cardRenderer("Game over! You drowned trying to cross the " + mapLocation + ".");
+    this.emit(':responseReady');
   } else if (gameOverMessage === "you starved") {
     this.response.speak("You have died of starvation. Game over!");
     this.response.cardRenderer("Game over! You have died of starvation.");
@@ -1846,6 +1940,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, landmarkHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, landmarkHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
   alexa.execute();
 };

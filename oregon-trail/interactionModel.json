@@ -72,7 +72,7 @@
         ]
       },
       {
-        "name": "continuation_confirmation",
+        "name": "CONTINUATION_CONFIRMATION",
         "values": [
           {
             "id": null,
@@ -261,7 +261,7 @@
         "slots": [
           {
             "name": "continue",
-            "type": "continuation_confirmation"
+            "type": "CONTINUATION_CONFIRMATION"
           }
         ]
       },
@@ -273,7 +273,32 @@
           "Let's {buy_or_trade}",
           "I would like to {buy_or_trade}",
           "Do {buy_or_trade}",
-          "How about {buy_or_trade}"
+          "How about {buy_or_trade}",
+          "I need to {buy_or_trade}",
+          "{buy_or_trade} oxen",
+          "{buy_or_trade} parts",
+          "{buy_or_trade} food",
+          "I want to {buy_or_trade} oxen",
+          "I want to {buy_or_trade} parts",
+          "I want to {buy_or_trade} food",
+          "Let's {buy_or_trade} oxen",
+          "Let's {buy_or_trade} parts",
+          "Let's {buy_or_trade} food",
+          "I would like to {buy_or_trade} oxen",
+          "I would like to {buy_or_trade} parts",
+          "I would like to {buy_or_trade} food",
+          "How about {buy_or_trade} oxen",
+          "How about {buy_or_trade} parts",
+          "How about {buy_or_trade} food",
+          "I need to {buy_or_trade} oxen",
+          "I need to {buy_or_trade} parts",
+          "I need to {buy_or_trade} food",
+          "{buy_or_trade} supplies",
+          "I want to {buy_or_trade} supplies",
+          "Let's {buy_or_trade} supplies",
+          "I would like to {buy_or_trade} supplies",
+          "How about {buy_or_trade} supplies",
+          "I need to {buy_or_trade} supplies"
         ],
         "slots": [
           {
@@ -419,7 +444,15 @@
           "Give me {crossing}",
           "I'm going to {crossing}",
           "I'm gonna {crossing}",
-          "I wanna {crossing}"
+          "I wanna {crossing}",
+          "{crossing} across",
+          "I'll {crossing} across",
+          "Let's {crossing} across",
+          "How about {crossing} across",
+          "I want to {crossing} across",
+          "I'm going to {crossing} across",
+          "I'm gonna {crossing} across",
+          "I wanna {crossing} across"
         ],
         "slots": [
           {
