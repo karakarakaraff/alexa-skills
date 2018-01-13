@@ -36,10 +36,8 @@ const CANCEL_MESSAGE = "Ok, let's play again soon.";
 const newSessionHandlers = {
   'LaunchRequest': function() {
     resetVariables.call(this); // ensure all variables have default, empty values to start
-    this.handler.state = GAME_STATES.EVENT; // TEST -- put back to user_setup/startgame
-    this.emitWithState('PlayGame'); // TEST -- put back to user_setup/startgame
-    // this.handler.state = GAME_STATES.USER_SETUP;
-    // this.emitWithState('StartGame');
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables to default empty values
@@ -750,23 +748,28 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     }
   },
   'TradeFailure': function() {
-    tradeDeal = 0; // INSIDE the if loops
     if (tradeDeal === 1 || tradeDeal === 10) {
+      tradeDeal = 0;
       this.response.speak("Sorry, you don't have enough food to make the trade. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
       this.emit(":responseReady");
     } else if (tradeDeal === 2 || tradeDeal === 8) {
+      tradeDeal = 0;
       this.response.speak("Sorry, you only have one ox. You must keep him to continue on the trail. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
       this.emit(":responseReady");
     } else if (tradeDeal === 3 || tradeDeal === 5 || tradeDeal === 9) {
+      tradeDeal = 0;
       this.response.speak("Sorry, you don't have any spare parts to make the trade. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
       this.emit(":responseReady");
     } else if (tradeDeal === 4 || tradeDeal === 7) {
+      tradeDeal = 0;
       this.response.speak("Sorry, you don't have enough money to make the trade. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
       this.emit(":responseReady");
     } else if (tradeDeal === 6) {
+      tradeDeal = 0;
       this.response.speak("Sorry, you only have two oxen. If you trade them both away, you won't be able to continue on the trail. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
       this.emit(":responseReady");
     } else {
+      tradeDeal = 0;
       this.response.speak("Sorry, it's not a deal. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
       this.emit(":responseReady");
     }
