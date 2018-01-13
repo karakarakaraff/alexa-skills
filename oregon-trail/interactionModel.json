@@ -135,9 +135,16 @@
             "name": {
               "value": "parts",
               "synonyms": [
-                "spare parts",
-                "spare part",
                 "part"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "spare parts",
+              "synonyms": [
+                "spare part"
               ]
             }
           }

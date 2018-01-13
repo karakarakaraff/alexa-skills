@@ -929,7 +929,7 @@ const shoppingHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING, {
     }
   },
   'GetBuyOrTradeItem': function() {
-    if (this.event.request.intent.slots.item.value === "food" || this.event.request.intent.slots.item.value === "oxen" || this.event.request.intent.slots.item.value === "parts" ) {
+    if (this.event.request.intent.slots.item.value === "food" || this.event.request.intent.slots.item.value === "oxen" || this.event.request.intent.slots.item.value === "parts" || this.event.request.intent.slots.item.value === "spare parts") {
       currentlyBuyingWhat = this.event.request.intent.slots.item.value;
       this.handler.state = GAME_STATES.SHOPPING_AMOUNT;
       this.emitWithState('HowMany');
@@ -973,7 +973,7 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
       itemPrice = 50;
       this.response.speak("Ok, let's buy oxen. Each ox costs $50. How many oxen do you want to buy?").listen("How many oxen do you want to buy?");
       this.emit(":responseReady");
-    } else if (currentlyBuyingWhat === "parts") {
+    } else if (currentlyBuyingWhat === "parts" || currentlyBuyingWhat === "spare parts") {
       itemPrice = 30;
       this.response.speak("Ok, let's buy spare parts. Each spare part costs $30. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
       this.emit(":responseReady");
@@ -991,7 +991,7 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
       } else if (currentlyBuyingWhat === "oxen") {
         this.response.speak("Sorry, you can't buy zero oxen. If you want to cancel your purchase, say cancel. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
         this.emit(":responseReady");
-      } else if (currentlyBuyingWhat === "parts") {
+      } else if (currentlyBuyingWhat === "parts" || currentlyBuyingWhat === "spare parts") {
         this.response.speak("Sorry, you can't buy zero spare parts. If you want to cancel your purchase, say cancel. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy? Please say a number.");
         this.emit(":responseReady");
       }
@@ -1009,7 +1009,7 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
         this.response.speak("If you want to cancel your purchase, say cancel. If you want to buy oxen, they cost $50 each. You currently have $" + money + " and " + oxen + " oxen. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
         this.emit(":responseReady");
       }
-    } else if (currentlyBuyingWhat === "parts") {
+    } else if (currentlyBuyingWhat === "parts" || currentlyBuyingWhat === "spare parts") {
       if (parts === 1) {
         this.response.speak("If you want to cancel your purchase, say cancel. If you want to buy spare parts, they cost $30 each. You currently have $" + money + " and " + parts + " spare part. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
         this.emit(":responseReady");
@@ -1040,7 +1040,7 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
     } else if (currentlyBuyingWhat === "oxen") {
       this.response.speak("Sorry, I didnt get that. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
       this.emit(":responseReady");
-    } else if (currentlyBuyingWhat === "parts") {
+    } else if (currentlyBuyingWhat === "parts" || currentlyBuyingWhat === "spare parts") {
       this.response.speak("Sorry, I didnt get that. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy? Please say a number.");
       this.emit(":responseReady");
     }
@@ -1054,7 +1054,7 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
       total = currentlyBuyingHowMany * 0.5;
     } else if (currentlyBuyingWhat === "oxen") {
       total = currentlyBuyingHowMany * 50;
-    } else if (currentlyBuyingWhat === "parts") {
+    } else if (currentlyBuyingWhat === "parts" || currentlyBuyingWhat === "spare parts") {
       total = currentlyBuyingHowMany * 30;
     }
 
@@ -1074,7 +1074,7 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
         oxen += currentlyBuyingHowMany;
         this.response.speak("Great! You bought " + currentlyBuyingHowMany + " oxen. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
         this.emit(":responseReady");
-      } else if (currentlyBuyingWhat === "parts") {
+      } else if (currentlyBuyingWhat === "parts" || currentlyBuyingWhat === "spare parts") {
         parts += currentlyBuyingHowMany;
         this.response.speak("Great! You bought " + currentlyBuyingHowMany + " spare parts. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
         this.emit(":responseReady");
