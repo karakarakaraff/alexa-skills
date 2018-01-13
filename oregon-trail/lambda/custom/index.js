@@ -35,12 +35,10 @@ const CANCEL_MESSAGE = "Ok, let's play again soon.";
 // ==============
 const newSessionHandlers = {
   'LaunchRequest': function() {
-    resetVariables.call(this); // ensure all variables have default, empty values to start
     this.handler.state = GAME_STATES.USER_SETUP;
     this.emitWithState('StartGame');
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables to default empty values
     this.handler.state = GAME_STATES.USER_SETUP;
     this.emitWithState('StartGame');
   },
@@ -65,7 +63,12 @@ const newSessionHandlers = {
 // HANDLE NAMES FOR MAIN PLAYER AND PARTY MEMBERS
 const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
   'StartGame': function() {
+    resetVariables.call(this); // ensure all variables have default, empty values to start
     gameIntro.call(this);
+  },
+  'StartGameAgain': function() {
+    resetVariables.call(this); // reset all variables
+    gameIntroStartOver.call(this);
   },
   'GetName': function() {
     if (peopleHealthy.length === 0) {
@@ -97,14 +100,17 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
-    peopleHealthy.pop();
-    this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('GetName');
+    if (peopleHealthy.length === 0) {
+      this.response.speak("If you want to leave the game, say stop. Otherwise, please tell me your name.").listen("What is your name?");
+      this.emit(":responseReady");
+    } else {
+      peopleHealthy.pop();
+      setupParty.call(this);
+    }
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -160,19 +166,16 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("You can be a banker, a carpenter, or a farmer. Being a banker makes the game easier because you have a lot of money. Being a farmer is the hardest. If you want to play on intermediate mode, be a carpenter. Do you want to be a banker, a carpenter, or a farmer?").listen("Do you want to be a banker, a carpenter, or a farmer?");
+    this.response.speak("Being a banker makes the game easier because you have a lot of money. Being a farmer is the hardest. If you want to play on intermediate mode, be a carpenter. Do you want to be a banker, a carpenter, or a farmer?").listen("Do you want to be a banker, a carpenter, or a farmer?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
-    hasChosenProfession = false;
-    profession = undefined;
-    this.handler.state = GAME_STATES.PROFESSION_SETUP;
-    this.emitWithState('GetProfession');
+    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please choose to be a banker, a carpenter, or a farmer.").listen("Please choose to be a banker, a carpenter, or a farmer.");
+    this.emit(":responseReady");
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -227,7 +230,7 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
       this.response.speak("I recommend buying 1000 pounds of food. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy?");
       this.emit(":responseReady");
     } else if (currentlyBuyingWhat === "oxen") {
-      this.response.speak("I recommend buying 6 oxen. How many pounds of oxen do you want to buy?").listen("How many oxen do you want to buy?");
+      this.response.speak("I recommend buying 6 oxen. How many oxen do you want to buy?").listen("How many oxen do you want to buy?");
       this.emit(":responseReady");
     } else if (currentlyBuyingWhat === "spare parts") {
       this.response.speak("I recommend buying 3 spare parts. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
@@ -238,30 +241,23 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
     }
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
-    hasBeenToGeneralStore = false;
-    if (profession.toLowerCase() === "banker") {
-      money += 1200;
-      food = 0;
-      oxen = 0;
-      parts = 0;
-    } else if (profession.toLowerCase() === "carpenter") {
-      money += 800;
-      food = 0;
-      oxen = 0;
-      parts += 4;
-    } else if (profession.toLowerCase() === "farmer") {
-      money += 400;
-      food += 500;
-      oxen += 4;
-      parts = 0;
+    if (currentlyBuyingWhat === "pounds of food") {
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please tell me how many pounds of food you want to buy.").listen("How many pounds of food do you want to buy?");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "oxen") {
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please tell me how many oxen you want to buy.").listen("How many oxen do you want to buy?");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "spare parts") {
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please tell me how many spare parts you want to buy.").listen("How many spare parts do you want to buy?");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over.").listen("If you want to start over from the beginning, say start over.");
+      this.emit(":responseReady");
     }
-    this.handler.state = GAME_STATES.SUPPLIES_SETUP;
-    this.emitWithState('GetNumber');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -297,14 +293,12 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
-    hasChosenMonth = false;
-    this.handler.state = GAME_STATES.MONTH_SETUP;
-    this.emitWithState('GetStartingMonth');
+    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please choose a month between March and August.").listen("Please choose a month between March and August.");
+    this.emit(":responseReady");
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -669,9 +663,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -809,9 +802,8 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -858,9 +850,8 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
     }
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.FIRST_TRAIL_SPLIT;
@@ -907,9 +898,8 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
     }
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.SECOND_TRAIL_SPLIT;
@@ -953,9 +943,8 @@ const shoppingHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     currentlyBuyingWhat = undefined;
@@ -1031,9 +1020,8 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
     }
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     currentlyBuyingWhat = undefined;
@@ -1107,9 +1095,8 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.CHANGE_PURCHASE;
@@ -1182,9 +1169,8 @@ const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -1243,9 +1229,8 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -1281,9 +1266,8 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -1328,9 +1312,8 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -1381,9 +1364,8 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -1419,9 +1401,8 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.EVENT;
@@ -1511,9 +1492,8 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
     this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
     this.handler.state = GAME_STATES.RIVER;
@@ -1644,6 +1624,13 @@ var resetVariables = function () {
 var gameIntro = function() {
   mapLocation = "Independence";
   this.response.speak(WELCOME_MESSAGE + " " + START_GAME_MESSAGE + " Let's begin by setting up your five-person party." + " " + "What is your name?").listen("What is your name?");
+  this.response.cardRenderer(WELCOME_MESSAGE);
+  this.emit(':responseReady');
+};
+
+var gameIntroStartOver = function() {
+  mapLocation = "Independence";
+  this.response.speak("Ok, let's start over. What is your name?").listen("What is your name?");
   this.response.cardRenderer(WELCOME_MESSAGE);
   this.emit(':responseReady');
 };
