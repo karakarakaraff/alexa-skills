@@ -163,17 +163,14 @@
         ]
       },
       {
-        "name": "SPLIT_CHOICE_FIRST",
+        "name": "SPLIT_CHOICES",
         "values": [
           {
             "id": null,
             "name": {
               "value": "Fort Bridger",
               "synonyms": [
-                "bridger",
-                "the fort",
-                "stay on the trail",
-                "fort"
+                "bridger"
               ]
             }
           },
@@ -183,28 +180,7 @@
               "value": "Soda Springs",
               "synonyms": [
                 "springs",
-                "the springs",
-                "shortcut",
-                "not the fort",
-                "the shortcut"
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "name": "SPLIT_CHOICE_SECOND",
-        "values": [
-          {
-            "id": null,
-            "name": {
-              "value": "Fort Walla Walla",
-              "synonyms": [
-                "walla walla",
-                "walla",
-                "the fort",
-                "stay on the trail",
-                "fort"
+                "the springs"
               ]
             }
           },
@@ -213,10 +189,17 @@
             "name": {
               "value": "The Dalles",
               "synonyms": [
-                "dalles",
-                "shortcut",
-                "not the fort",
-                "the shortcut"
+                "dalles"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Fort Walla Walla",
+              "synonyms": [
+                "walla walla",
+                "walla"
               ]
             }
           }
@@ -464,6 +447,26 @@
           {
             "name": "month",
             "type": "AMAZON.Month"
+          }
+        ]
+      },
+      {
+        "name": "GetTrailSplit",
+        "samples": [
+          "{direction}",
+          "go to {direction}",
+          "head toward {direction}",
+          "{direction} please",
+          "let's go to {direction}",
+          "let's head toward {direction}",
+          "how about {direction}",
+          "{direction} is good",
+          "let's do {direction}"
+        ],
+        "slots": [
+          {
+            "name": "direction",
+            "type": "SPLIT_CHOICES"
           }
         ]
       }

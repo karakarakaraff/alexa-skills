@@ -9,6 +9,8 @@ const GAME_STATES = {
   MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
   EVENT: '_EVENTMODE', // events within the game
   FORT: '_FORTMODE', // handles user's choices at forts
+  FIRST_TRAIL_SPLIT: '_FIRSTTRAILSPLITMODE', // handle's user direction choice
+  SECOND_TRAIL_SPLIT: '_SECONDTRAILSPLITMODE', // handle's user direction choice
   SHOPPING: '_SHOPPINGMODE', // choosing which supplies to buy
   SHOPPING_AMOUNT: '_SHOPPINGAMOUNTMODE', // choosing how much to buy
   SHOPPING_SUCCESS: '_SHOPPINGSUCCESSMODE', // getting total, choosing to buy more
@@ -19,7 +21,6 @@ const GAME_STATES = {
   SICK: '_SICKMODE', // when a person gets sick or injured
   REST: '_RESTMODE', // resting for potential recovery
   RIVER: '_RIVERMODE', // crossing rivers
-  HELP: '_HELPMODE', // help the user // TODO still need to set this up and register it below
 };
 
 const GAME_NAME = "Oregon Trail";
@@ -46,9 +47,8 @@ const newSessionHandlers = {
     this.emitWithState('StartGame');
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -95,9 +95,8 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("Say a name, and that person will be added to your party.").listen("Please say a name.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -105,8 +104,9 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    peopleHealthy.pop();
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('GetName');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -162,9 +162,8 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("You can be a banker, a carpenter, or a farmer. Being a banker makes the game easier because you have a lot of money. Being a farmer is the hardest. If you want to play on intermediate mode, be a carpenter. Do you want to be a banker, a carpenter, or a farmer?").listen("Do you want to be a banker, a carpenter, or a farmer?");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -172,8 +171,10 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    hasChosenProfession = false;
+    profession = undefined;
+    this.handler.state = GAME_STATES.PROFESSION_SETUP;
+    this.emitWithState('GetProfession');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -184,9 +185,8 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
       this.response.speak("I'm sorry, but that's not a profession I understand. Please choose to be a banker, a carpenter, or a farmer.").listen("Please choose to be a banker, a carpenter, or a farmer.");
       this.emit(":responseReady");
     } else {
-      // TODO setup help state and function
-      this.handler.state = GAME_STATES.HELP;
-      this.emitWithState('helpTheUser');
+      this.handler.state = GAME_STATES.PROFESSION_SETUP;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -225,9 +225,19 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    if (currentlyBuyingWhat === "pounds of food") {
+      this.response.speak("I recommend buying 1000 pounds of food. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy?");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "oxen") {
+      this.response.speak("I recommend buying 6 oxen. How many pounds of oxen do you want to buy?").listen("How many oxen do you want to buy?");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "spare parts") {
+      this.response.speak("I recommend buying 3 spare parts. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("Say a number, and that's the amount you will buy.").listen("Please say a number.");
+      this.emit(":responseReady");
+    }
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -235,8 +245,25 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    hasBeenToGeneralStore = false;
+    if (profession.toLowerCase() === "banker") {
+      money += 1200;
+      food = 0;
+      oxen = 0;
+      parts = 0;
+    } else if (profession.toLowerCase() === "carpenter") {
+      money += 800;
+      food = 0;
+      oxen = 0;
+      parts += 4;
+    } else if (profession.toLowerCase() === "farmer") {
+      money += 400;
+      food += 500;
+      oxen += 4;
+      parts = 0;
+    }
+    this.handler.state = GAME_STATES.SUPPLIES_SETUP;
+    this.emitWithState('GetNumber');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -247,9 +274,8 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
       this.response.speak("I'm sorry, I didn't understand how many " + currentlyBuyingWhat + " you want to buy. Please say a number.").listen("Please say a number.");
       this.emit(":responseReady");
     } else {
-      // TODO setup help state and function
-      this.handler.state = GAME_STATES.HELP;
-      this.emitWithState('helpTheUser');
+      this.handler.state = GAME_STATES.SUPPLIES_SETUP;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -269,9 +295,8 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("If you start too early, there won't be enough grass for the oxen. However, if you start too late, you risk getting caught in snow storms. I recommend leaving in May or June. When do you want to leave?").listen("When do you want to leave?");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -279,8 +304,9 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    hasChosenMonth = false;
+    this.handler.state = GAME_STATES.MONTH_SETUP;
+    this.emitWithState('GetStartingMonth');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -291,9 +317,8 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
       this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
       this.emit(":responseReady");
     } else {
-      // TODO setup help state and function
-      this.handler.state = GAME_STATES.HELP;
-      this.emitWithState('helpTheUser');
+      this.handler.state = GAME_STATES.MONTH_SETUP;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -301,9 +326,7 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
 // HANDLE GAME EVENTS
 const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   'PlayGame': function() {
-    this.response.speak("The game is playing."); // TEST
-    this.emit(":responseReady"); // TEST
-    // theOregonTrail.call(this); // TODO call the game when ready
+    theOregonTrail.call(this);
   },
   'Hunting': function() {
     var randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
@@ -368,13 +391,13 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     } else if (daysWithoutFood % 2 === 0 && peopleHealthy.length > 0) {
       if (peopleHealthy.length === 1) {
         if (fate % 2 === 0) {
-          sickness();
+          sickness.call(this);
           this.response.speak("You are starving and are very weak. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
           this.emit(":responseReady");
         }
       } else {
         if (fate % 2 === 0) {
-          sickness();
+          sickness.call(this);
           this.response.speak(invalid + " is starving and is very weak. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
           this.emit(":responseReady");
         }
@@ -623,14 +646,29 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.response.cardRenderer(statusCard);
     this.emit(":responseReady");
   },
+  'ChoseFortBridger': function() {
+    this.response.speak("Great! You're going to Fort Bridger. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'ChoseSodaSprings': function() {
+    this.response.speak("Great! You're going to Soda Springs. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'ChoseFortWallaWalla': function() {
+    this.response.speak("Great! You're going to Fort Walla Walla. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'ChoseTheDalles': function() {
+    this.response.speak("Great! You're going to The Dalles. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
   'ContinueGame': function() {
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("If you want to start the game from the beginning, say start over. If you want to quit, say stop. Otherwise, say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -638,17 +676,16 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('AMAZON.HelpIntent');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('AMAZON.HelpIntent');
   },
 });
 
@@ -765,9 +802,8 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("If you want to buy something from the fort's general store, say buy. If you want to try trading, say trade. If you don't want to buy or trade, you can say cancel.").listen("Please say buy or trade, or say cancel to continue on the trail.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -784,6 +820,104 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
   },
   'Unhandled': function() {
     this.response.speak("Sorry, I didn't understand that. Do you want to buy or trade anything at this fort?").listen("Say buy or trade if you do, or say no.");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE FIRST TRAIL SPLIT
+const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL_SPLIT, {
+  'ChooseDirection': function() {
+    this.response.speak("The trail splits here. You can go to Fort Bridger, or you can take the shortcut to Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+    this.emit(":responseReady");
+  },
+  'GetTrailSplit': function() {
+    if (this.event.request.intent.slots.direction.value === "Fort Bridger") {
+      mapLocation = "Fort Bridger";
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('ChoseFortBridger');
+    } else if (this.event.request.intent.slots.direction.value === "Soda Springs") {
+      mapLocation === "Soda Springs";
+      extraMiles -= 105;
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('ChoseSodaSprings');
+    } else {
+      this.handler.state = GAME_STATES.FIRST_TRAIL_SPLIT;
+      this.emitWithState('Unhandled');
+    }
+  },
+  'AMAZON.HelpIntent': function() {
+    if (food <= 15 * (peopleHealthy.length + peopleSick.length) || oxen <= 2 || parts <= 1) {
+      this.response.speak("If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Bridger or Soda Springs?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Bridger or Soda Springs?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+      this.emit(":responseReady");
+    }
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.FIRST_TRAIL_SPLIT;
+    this.emitWithState('AMAZON.HelpIntent');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Bridger or Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE SECOND TRAIL SPLIT
+const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRAIL_SPLIT, {
+  'ChooseDirection': function() {
+    this.response.speak("The trail splits here. You can go to Fort Walla Walla, or you can take the shortcut to The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+    this.emit(":responseReady");
+  },
+  'GetTrailSplit': function() {
+    if (this.event.request.intent.slots.direction.value === "Fort Walla Walla") {
+      mapLocation = "Fort Walla Walla";
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('ChoseFortWallaWalla');
+    } else if (this.event.request.intent.slots.direction.value === "The Dalles") {
+      mapLocation === "The Dalles";
+      extraMiles -= 150;
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('ChoseTheDalles');
+    } else {
+      this.handler.state = GAME_STATES.SECOND_TRAIL_SPLIT;
+      this.emitWithState('Unhandled');
+    }
+  },
+  'AMAZON.HelpIntent': function() {
+    if (food <= 19 * (peopleHealthy.length + peopleSick.length) || oxen <= 2 || parts <= 1) {
+      this.response.speak("If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Walla Walla or The Dalles?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Walla Walla or The Dalles?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+      this.emit(":responseReady");
+    }
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.SECOND_TRAIL_SPLIT;
+    this.emitWithState('AMAZON.HelpIntent');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Walla Walla or The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
     this.emit(":responseReady");
   },
 });
@@ -812,9 +946,8 @@ const shoppingHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("You can buy food, oxen, or spare parts. Food will cost 50 cents per pound, oxen will cost $50 each, and spare parts will cost $30 each. You currently have $" + money + ". What do you want to buy?").listen("What do you want to buy?");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -873,9 +1006,26 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    if (currentlyBuyingWhat === "food") {
+      this.response.speak("If you want to cancel your purchase, say cancel. If you want to buy food, it costs 50 cents per pound. You currently have $" + money + " and " + food + " pounds of food. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy? Please say a number.");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "oxen") {
+      if (oxen === 1) {
+        this.response.speak("If you want to cancel your purchase, say cancel. If you want to buy oxen, they cost $50 each. You currently have $" + money + " and " + oxen + " ox. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("If you want to cancel your purchase, say cancel. If you want to buy oxen, they cost $50 each. You currently have $" + money + " and " + oxen + " oxen. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.emit(":responseReady");
+      }
+    } else if (currentlyBuyingWhat === "parts") {
+      if (parts === 1) {
+        this.response.speak("If you want to cancel your purchase, say cancel. If you want to buy spare parts, they cost $30 each. You currently have $" + money + " and " + parts + " spare part. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("If you want to cancel your purchase, say cancel. If you want to buy spare parts, they cost $30 each. You currently have $" + money + " and " + parts + " spare parts. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.emit(":responseReady");
+      }
+    }
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -949,9 +1099,9 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
     this.emitWithState('TradeInstead');
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("You have $" + money + ". Do you want to buy anything else?").listen("Do you want to buy anything else?");
+    this.response.cardRenderer(statusCard);
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1025,9 +1175,8 @@ const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
     this.emitWithState('Status');
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("If you want to accept the trade, say yes. If you don't like the trade, say no. Say cancel if you don't want to trade anymore.").listen("Please say yes, no, or cancel.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1087,9 +1236,8 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("Say yes if you need more supplies. Say no or cancel if you want to get back on the trail.").listen("Please say yes, no, or cancel.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1126,9 +1274,8 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("If you want to go to the hunting game, say yes. If not, say no to continue on the trail.").listen("Do you want to go hunting for more food? Please say yes or no.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1136,8 +1283,8 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -1148,9 +1295,8 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
       this.response.speak("Do you want to go hunting for more food? Please say yes or no.").listen("Do you want to go hunting for more food? Please say yes or no.");
       this.emit(":responseReady");
     } else {
-      // TODO setup help state and function
-      this.handler.state = GAME_STATES.HELP;
-      this.emitWithState('helpTheUser');
+      this.handler.state = GAME_STATES.HUNT;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -1175,9 +1321,8 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("Say a number between 1 and 10 to shoot an animal. If you'd rather get back to the trail, say cancel.").listen("Please say a number between 1 and 10.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1185,8 +1330,8 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -1197,9 +1342,8 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
       this.response.speak("I'm sorry, I didn't understand your number. Please say a number between 1 and 10.").listen("Please say a number between 1 and 10.");
       this.emit(":responseReady");
     } else {
-      // TODO setup help state and function
-      this.handler.state = GAME_STATES.HELP;
-      this.emitWithState('helpTheUser');
+      this.handler.state = GAME_STATES.HUNT_NUMBER;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -1210,12 +1354,12 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     var healthIssues = ["the flu", "cholera", "exhaustion", "typhoid fever", "a snake bite", "a broken arm", "a broken leg"];
     var issue = healthIssues[Math.floor(Math.random() * healthIssues.length)];
     if (peopleHealthy.length > 1) {
-      sickness();
+      sickness.call(this);
       this.response.speak(invalid + " has " + issue + ". Do you want to rest to see if " + invalid + " feels better?").listen("Do you want to rest to see if " + invalid + " feels better?");
       this.response.cardRenderer(invalid + " has " + issue + ".");
       this.emit(":responseReady");
     } else {
-      sickness();
+      sickness.call(this);
       this.response.speak("You have " + issue + ". Do you want to rest to see if " + invalid + " feels better?").listen("Do you want to rest to see if you feel better?");
       this.response.cardRenderer("You have " + issue + ".");
       this.emit(":responseReady");
@@ -1230,9 +1374,8 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("Uh oh! Someone's not feeling well. If you take a rest, there's a chance they could feel better. The longer the rest, the better the chance for them to heal. Do you want to rest? Say yes or no.").listen("Say yes to rest, or say no to continue on the trail.");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1240,8 +1383,8 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -1252,9 +1395,8 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
       this.response.speak("Do you want to take a rest? Please say yes or no.").listen("Please say yes or no.");
       this.emit(":responseReady");
     } else {
-      // TODO setup help state and function
-      this.handler.state = GAME_STATES.HELP;
-      this.emitWithState('helpTheUser');
+      this.handler.state = GAME_STATES.SICK;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -1270,9 +1412,8 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
     rest.call(this);
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("The more days you rest, the better the chances of recovery. How many days do you want to rest?").listen("How many days do you want to rest?");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1280,8 +1421,8 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -1292,9 +1433,8 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
       this.response.speak("I'm sorry, I didn't understand how many days you want to rest. Please say a number.").listen("Please say a number.");
       this.emit(":responseReady");
     } else {
-      // TODO setup help state and function
-      this.handler.state = GAME_STATES.HELP;
-      this.emitWithState('helpTheUser');
+      this.handler.state = GAME_STATES.REST;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -1364,9 +1504,8 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
+    this.response.speak("If a river is less than three feet deep, it's usually safe to float. If it's over six feet deep, you definitely want a ferry. This river is " + riverDepth + " feet deep. Do you want to ferry, or do you want to float?").listen("Do you want to ferry, or do you want to float?");
+    this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables
@@ -1374,8 +1513,8 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
     this.emitWithState('StartGame');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('Unhandled');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -1416,7 +1555,9 @@ var daysWithoutGrass = 0; // tracks how many days there is no grass -- could lea
 var riverDepth = 0; // tracks river's depth
 var ferryCost = 0; // tracks cost to ferry across river
 var sinkChance = 0; // tracks likelihood of sinking if floating across river
-var mapLocation; // follows map, remembers choices at split trails
+var mapLocation; // tracks player's location on map
+var hasChosenFirstDirection = false; // tracks player's choice at split trail
+var hasChosenSecondDirection = false; // tracks player's choice at split trail
 var currentlyBuyingWhat; // tracks what user is buying
 var currentlyBuyingHowMany; // tracks how much a user is buying
 var itemPrice = 0; // tracks cost of item user is buying
@@ -1424,7 +1565,7 @@ var total; // tracks user's total purchase
 var purchaseChoice; // tracks if user is buying or trading
 var tradeChances = 0; // tracks how many times a user is allowed to trade at a fort
 var tradeAttempts = 0; // tracks how many times a user tries to trade at a fort
-var tradeDeal = 0; // random number between 1 and 10 that holds the trade offer
+var tradeDeal = 0; // random number between 1 and 10 that tracks the trade offer
 var fate; // adds randomness to the game and changes every day
 var gameOverMessage; // tracks the reason for game over
 
@@ -1472,6 +1613,8 @@ var resetVariables = function () {
   ferryCost = 0;
   sinkChance = 0;
   mapLocation = undefined;
+  hasChosenFirstDirection = false;
+  hasChosenSecondDirection = false;
   currentlyBuyingWhat = undefined;
   currentlyBuyingHowMany = 0;
   itemPrice = 0;
@@ -1946,8 +2089,8 @@ var gameOver = function() {
 // =============
 // THE TRAIL MAP
 // =============
-var travel = function(distance) {
-  if (distance === 105) {
+var travel = function() {
+  if (miles === 105) {
     mapLocation = "Kansas River";
     if (days < 92) {
       riverDepth = 3;
@@ -1958,47 +2101,38 @@ var travel = function(distance) {
     sinkChance = 2;
     this.handler.state = GAME_STATES.RIVER;
     this.emitWithState('CrossingChoice');
-  } else if (distance === 300) {
+  } else if (miles === 300) {
     mapLocation = "Fort Kearny";
     tradeChances = 1;
     tradeAttempts = 0;
     this.handler.state = GAME_STATES.FORT;
     this.emitWithState('WelcomeToFort');
-  } else if (distance === 555) {
+  } else if (miles === 555) {
     mapLocation = "Chimney Rock";
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('ChimneyRock');
-  } else if (distance === 645) {
+  } else if (miles === 645) {
     mapLocation = "Fort Laramie";
     tradeChances = 2;
     tradeAttempts = 0;
     this.handler.state = GAME_STATES.FORT;
     this.emitWithState('WelcomeToFort');
-  } else if (distance === 825) {
+  } else if (miles === 825) {
     mapLocation = "Independence Rock";
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('IndependenceRock');
-  } else if (distance === 930) {
+  } else if (miles === 930) {
     mapLocation = "South Pass";
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('SouthPass');
-  } else if (distance === 1050 && mapLocation !== "Fort Bridger") {
+  } else if (miles === 1050 && mapLocation !== "Fort Bridger") {
     mapLocation = "Green River";
     riverDepth = 8;
     ferryCost = 12;
     sinkChance = 8;
     this.handler.state = GAME_STATES.RIVER;
     this.emitWithState('CrossingChoice');
-    // TODO handle user's direction choice
-    mapLocation = prompt("Do you want to stay on the trail to Fort Bridger or take the shortcut through Soda Springs?\n\nType 'Fort Bridger' or 'Soda Springs'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
-    if (mapLocation !== "Fort Bridger" && mapLocation !== "Soda Springs") {
-      alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Bridger.");
-      mapLocation = "Fort Bridger";
-    }
-    if (mapLocation === "Soda Springs") {
-      extraMiles -= 105;
-    }
-  } else if (distance === 1200) {
+  } else if (miles === 1200) {
     if (mapLocation === "Fort Bridger") {
       tradeChances = 3;
       tradeAttempts = 0;
@@ -2008,35 +2142,26 @@ var travel = function(distance) {
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('SodaSprings');
     }
-  } else if (distance === 1260) {
+  } else if (miles === 1260) {
     mapLocation = "Fort Hall";
     tradeChances = 2;
     tradeAttempts = 0;
     this.handler.state = GAME_STATES.FORT;
     this.emitWithState('WelcomeToFort');
-  } else if (distance === 1440) {
+  } else if (miles === 1440) {
     mapLocation = "Snake River";
     riverDepth = 5;
     ferryCost = 7;
     sinkChance = 5;
     this.handler.state = GAME_STATES.RIVER;
     this.emitWithState('CrossingChoice');
-  } else if (distance === 1560 && mapLocation !== "Fort Walla Walla") {
+  } else if (miles === 1560 && mapLocation !== "Fort Walla Walla") {
     mapLocation = "Fort Boise";
     tradeChances = 1;
     tradeAttempts = 0;
     this.handler.state = GAME_STATES.FORT;
     this.emitWithState('WelcomeToFort');
-    // TODO handle user's direction choice
-    mapLocation = prompt("Do you want to stay on the trail to Fort Walla Walla or take the shortcut through The Dalles?\n\nType 'Fort Walla Walla' or 'The Dalles'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
-    if (mapLocation !== "Fort Walla Walla" && mapLocation !== "The Dalles") {
-      alert("Sorry, you didn't enter your desired location correctly. You'll stay on the trail and go to Fort Walla Walla.");
-      mapLocation = "Fort Walla Walla";
-    }
-    if (mapLocation === "The Dalles") {
-      extraMiles -= 150;
-    }
-  } else if (distance === 1710) {
+  } else if (miles === 1710) {
     if (mapLocation === "Fort Walla Walla") {
       tradeChances = 1;
       tradeAttempts = 0;
@@ -2046,7 +2171,7 @@ var travel = function(distance) {
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('TheDalles');
     }
-  } else if (distance === 1845) {
+  } else if (miles === 1845) {
     mapLocation = "Oregon City";
     gameOverMessage = "winner";
     gameOver.call(this);
@@ -2067,8 +2192,15 @@ var theOregonTrail = function() {
     fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
 
     // TRAVELING
-    // travel(miles);
-    // TODO setup handlers for choosing directions
+    if (mapLocation === "Green River" && hasChosenFirstDirection === false) {
+      this.handler.state = GAME_STATES.FIRST_TRAIL_SPLIT;
+      this.emitWithState('ChooseDirection');
+    } else if (mapLocation === "Fort Boise" && hasChosenSecondDirection === false) {
+      this.handler.state = GAME_STATES.SECOND_TRAIL_SPLIT;
+      this.emitWithState('ChooseDirection');
+    } else {
+      travel.call(this);
+    }
 
     // FOOD STATUS
     if (food <= 0) {
@@ -2162,6 +2294,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, fortHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, fortHandlers, firstTrailSplitHandlers, secondTrailSplitHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
   alexa.execute();
 };
