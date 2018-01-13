@@ -8,7 +8,6 @@ const GAME_STATES = {
   SUPPLIES_SETUP: '_SUPPLIESSETUP', // setting up user's first purchases at general store
   MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
   EVENT: '_EVENTMODE', // events within the game
-  LANDMARK: '_LANDMARKMODE', // landmarks along the trail
   FORT: '_FORTMODE', // handles user's choices at forts
   SHOPPING: '_SHOPPINGMODE', // choosing which supplies to buy
   SHOPPING_AMOUNT: '_SHOPPINGAMOUNTMODE', // choosing how much to buy
@@ -599,27 +598,27 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.response.speak("Sorry, you don't have enough money to pay the ferry. You wall have to try floating across the river. <break time='2s'/> Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
-  'LandmarkChimneyRock': function() {
+  'ChimneyRock': function() {
     this.response.speak("You have arrived at Chimney Rock. Congratulations! Located in western Nebraska, Chimney Rock is a prominent geological formation that rises nearly 300 feet above the surrounding plains. For this reason, it is a well-known landmark along the trail, which means you're going the right way. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.response.cardRenderer(statusCard);
     this.emit(":responseReady");
   },
-  'LandmarkIndependenceRock': function() {
+  'IndependenceRock': function() {
     this.response.speak("You have arrived at Independence Rock. Congratulations! Located in central Wyoming, Independence Rock is a large granite hill where many pioneers carve their names. It is a well-known landmark along the trail. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.response.cardRenderer(statusCard);
     this.emit(":responseReady");
   },
-  'LandmarkSouthPass': function() {
+  'SouthPass': function() {
     this.response.speak("You have arrived at South Pass. Congratulations! Located in southwestern Wyoming, South Pass is the lowest point along the continental divide. It's the easiest way to cross the Rocky Mountains. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.response.cardRenderer(statusCard);
     this.emit(":responseReady");
   },
-  'LandmarkSodaSprings': function() {
+  'SodaSprings': function() {
     this.response.speak("You have arrived at Soda Springs. Congratulations! Located in southeastern Idaho, these springs bubble like soda water, which is how they got their name. It's a popular place to bathe and relax, but don't drink the water! You might get sick. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.response.cardRenderer(statusCard);
     this.emit(":responseReady");
   },
-  'LandmarkTheDalles': function() {
+  'TheDalles': function() {
     this.response.speak("You have arrived at The Dalles. Congratulations! Located in northern Oregon, the Dalles is where the trail stops. You are blocked by the cascade mountains, and the only way to finish your journey is by floating down the Colombia River gorge. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.response.cardRenderer(statusCard);
     this.emit(":responseReady");
@@ -650,212 +649,6 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     // TODO setup help state and function
     this.handler.state = GAME_STATES.HELP;
     this.emitWithState('helpTheUser');
-  },
-});
-
-// HANDLE LANDMARKS ALONG THE TRAIL
-const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
-  'KansasRiver': function() {
-    if (days < 92) {
-      riverDepth = 3;
-    } else {
-      riverDepth = 4;
-    }
-    ferryCost = 5;
-    sinkChance = 2;
-    this.handler.state = GAME_STATES.RIVER;
-    this.emitWithState('CrossingChoice');
-  },
-  'FortKearny': function() {
-    this.handler.state = GAME_STATES.FORT;
-    this.emitWithState('WelcomeToFort');
-    /*
-    alert("Fort Kearny");
-    alreadyTradedAtThisFort = false;
-    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-    if (getStuff === "yes") {
-      if (money <= 0) {
-        alert("You don't have any money, but you can try trading.");
-        tradeItems(1);
-      } else {
-        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading instead? Type 'buy' or 'trade'.");
-        if (buyOrTrade === "buy") {
-          goShopping();
-        } else if (buyOrTrade === "trade") {
-          tradeItems(1);
-        }
-      }
-    }
-    */
-  },
-  'ChimneyRock': function() {
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('LandmarkChimneyRock');
-  },
-  'FortLaramie': function() {
-    this.handler.state = GAME_STATES.FORT;
-    this.emitWithState('WelcomeToFort');
-    /*
-    alert("Fort Laramie");
-    alreadyTradedAtThisFort = false;
-    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-    if (getStuff === "yes") {
-      if (money <= 0) {
-        alert("You don't have any money, but you can try trading.");
-        tradeItems(2);
-      } else {
-        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-        if (buyOrTrade === "buy") {
-          goShopping();
-        } else if (buyOrTrade === "trade") {
-          tradeItems(2);
-        }
-      }
-    }
-    */
-  },
-  'IndependenceRock': function() {
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('LandmarkIndependenceRock');
-  },
-  'SouthPass': function() {
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('LandmarkSouthPass');
-  },
-  'GreenRiver': function() {
-    riverDepth = 8;
-    ferryCost = 12;
-    sinkChance = 8;
-    this.handler.state = GAME_STATES.RIVER;
-    this.emitWithState('CrossingChoice');
-  },
-  'FortBridger': function() {
-    this.handler.state = GAME_STATES.FORT;
-    this.emitWithState('WelcomeToFort');
-    /*
-    alert("Fort Bridger");
-    alreadyTradedAtThisFort = false;
-    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-    if (getStuff === "yes") {
-      if (money <= 0) {
-        alert("You don't have any money, but you can try trading.");
-        tradeItems(3);
-      } else {
-        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-        if (buyOrTrade === "buy") {
-          goShopping();
-        } else if (buyOrTrade === "trade") {
-          tradeItems(3);
-        }
-      }
-    }
-    */
-  },
-  'SodaSprings': function() {
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('LandmarkSodaSprings');
-  },
-  'FortHall': function() {
-    this.handler.state = GAME_STATES.FORT;
-    this.emitWithState('WelcomeToFort');
-    /*
-    alert("Fort Hall");
-    alreadyTradedAtThisFort = false;
-    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-    if (getStuff === "yes") {
-      if (money <= 0) {
-        alert("You don't have any money, but you can try trading.");
-        tradeItems(2);
-      } else {
-        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-        if (buyOrTrade === "buy") {
-          goShopping();
-        } else if (buyOrTrade === "trade") {
-          tradeItems(2);
-        }
-      }
-    }
-    */
-  },
-  'SnakeRiver': function() {
-    riverDepth = 5;
-    ferryCost = 7;
-    sinkChance = 5;
-    this.handler.state = GAME_STATES.RIVER;
-    this.emitWithState('CrossingChoice');
-  },
-  'FortBoise': function() {
-    this.handler.state = GAME_STATES.FORT;
-    this.emitWithState('WelcomeToFort');
-    /*
-    alert("Fort Boise");
-    alreadyTradedAtThisFort = false;
-    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-    if (getStuff === "yes") {
-      if (money <= 0) {
-        alert("You don't have any money, but you can try trading.");
-        tradeItems(1);
-      } else {
-        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-        if (buyOrTrade === "buy") {
-          goShopping();
-        } else if (buyOrTrade === "trade") {
-          tradeItems(1);
-        }
-      }
-    }
-    */
-  },
-  'FortWallaWalla': function() {
-    this.handler.state = GAME_STATES.FORT;
-    this.emitWithState('WelcomeToFort');
-    /*
-    alert("Fort Walla Walla");
-    alreadyTradedAtThisFort = false;
-    var getStuff = prompt("Do you want to buy or trade anything while you're here? Type 'yes' or 'no'.");
-    if (getStuff === "yes") {
-      if (money <= 0) {
-        alert("You don't have any money, but you can try trading.");
-        tradeItems(1);
-      } else {
-        var buyOrTrade = prompt("You have $" + money + " to spend. Do you want to use it to buy something, or do you want to try trading? Type 'buy' or 'trade'.");
-        if (buyOrTrade === "buy") {
-          goShopping();
-        } else if (buyOrTrade === "trade") {
-          tradeItems(1);
-        }
-      }
-    }
-    */
-  },
-  'TheDalles': function() {
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('LandmarkTheDalles');
-  },
-  'OregonCity': function() {
-    gameOverMessage = "winner";
-    gameOver.call(this);
-  },
-  'AMAZON.HelpIntent': function() {
-    // TODO setup help state and function
-    this.handler.state = GAME_STATES.HELP;
-    this.emitWithState('helpTheUser');
-  },
-  'AMAZON.StartOverIntent': function() {
-    resetVariables.call(this); // reset all variables
-    this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
-  },
-  'AMAZON.CancelIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
-  },
-  'AMAZON.StopIntent': function() {
-    this.response.speak(EXIT_SKILL_MESSAGE);
-    this.emit(":responseReady");
-  },
-  'Unhandled': function() {
-    // TODO
   },
 });
 
@@ -899,7 +692,50 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
       this.emit(":responseReady");
     }
   },
+  'TradeSuccess': function() {
+    if (oxen === 1 && parts === 1) {
+      tradeDeal = 0;
+      this.response.speak("It's a deal! You now have " + food + " pounds of food, " + oxen + " ox, " + parts + " spare part, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else if (oxen === 1 && parts > 1) {
+      this.response.speak("It's a deal! You now have " + food + " pounds of food, " + oxen + " ox, " + parts + " spare parts, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else if (oxen > 1 && parts === 1) {
+      this.response.speak("It's a deal! You now have " + food + " pounds of food, " + oxen + " oxen, " + parts + " spare part, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("It's a deal! You now have " + food + " pounds of food, " + oxen + " oxen, " + parts + " spare parts, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    }
+  },
+  'TradeFailure': function() {
+    tradeDeal = 0; // INSIDE the if loops
+    if (tradeDeal === 1 || tradeDeal === 10) {
+      this.response.speak("Sorry, you don't have enough food to make the trade. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.emit(":responseReady");
+    } else if (tradeDeal === 2 || tradeDeal === 8) {
+      this.response.speak("Sorry, you only have one ox. You must keep him to continue on the trail. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.emit(":responseReady");
+    } else if (tradeDeal === 3 || tradeDeal === 5 || tradeDeal === 9) {
+      this.response.speak("Sorry, you don't have any spare parts to make the trade. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.emit(":responseReady");
+    } else if (tradeDeal === 4 || tradeDeal === 7) {
+      this.response.speak("Sorry, you don't have enough money to make the trade. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.emit(":responseReady");
+    } else if (tradeDeal === 6) {
+      this.response.speak("Sorry, you only have two oxen. If you trade them both away, you won't be able to continue on the trail. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("Sorry, it's not a deal. Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.emit(":responseReady");
+    }
+  },
   'NotEnoughMoney': function() {
+    purchaseChoice = "trade";
     this.response.speak("Sorry, you don't have enough money. You only have $" + money + ". Do you want to try again?").listen("Do you want to try again?");
     this.emit(":responseReady");
   },
@@ -908,7 +744,8 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
       this.handler.state = GAME_STATES.SHOPPING;
       this.emitWithState('WelcomeToStore');
     } else if (this.event.request.intent.slots.buy_or_trade.value === "trade") {
-      // TODO go to trading handler
+      this.handler.state = GAME_STATES.TRADING;
+      this.emitWithState('Offer');
     } else {
       this.handler.state = GAME_STATES.FORT;
       this.emitWithState('Unhandled');
@@ -919,8 +756,13 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     this.emit(":responseReady");
   },
   'AMAZON.NoIntent': function() {
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    if (purchaseChoice === "trade") {
+      this.handler.state = GAME_STATES.CHANGE_PURCHASE;
+      this.emitWithState('TradeInstead');
+    } else {
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('PlayGame');
+    }
   },
   'AMAZON.HelpIntent': function() {
     // TODO setup help state and function
@@ -1132,7 +974,55 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
 
 // HANDLE TRADING
 const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
-  'XXXXX': function() {
+  'Offer': function() {
+    if (tradeAttempts < tradeChances) {
+      tradeAttempts++;
+      days++;
+      trailDays++;
+      food -= (peopleHealthy.length + peopleSick.length);
+      tradeDeal = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+      if (tradeDeal === 1) {
+        this.response.speak("An old settler will give you a spare part for 50 pounds of food. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 2) {
+        this.response.speak("A woman at the fort will give you 100 pounds of food for an ox. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 3) {
+        this.response.speak("The general store owner will give you $15 for a spare part. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 4) {
+        this.response.speak("A man at the fort will give you an ox for $25. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 5) {
+        this.response.speak("A man at the fort will give you $30 for a spare part. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 6) {
+        this.response.speak("A Native American at the fort will give you 200 pounds of food for two oxen. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 7) {
+        this.response.speak("A woman at the fort will give you a spare part for $50. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 8) {
+        this.response.speak("A man at the fort will give you $100 for an ox. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 9) {
+        this.response.speak("An old settler will give you $20 for a spare part. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      } else if (tradeDeal === 10) {
+        this.response.speak("A man at the fort will give you a spare part for 75 pounds of food. Do you accept this trade?").listen("Do you accept this trade? Please say yes or no.");
+        this.emit(":responseReady");
+      }
+    } else {
+      this.handler.state = GAME_STATES.CHANGE_PURCHASE;
+      this.emitWithState('NoMoreTrading');
+    }
+  },
+  'AMAZON.YesIntent': function() {
+    evaluateOffer.call(this);
+  },
+  'AMAZON.NoIntent': function() {
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('Status');
   },
   'AMAZON.HelpIntent': function() {
     // TODO setup help state and function
@@ -1153,7 +1043,7 @@ const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("").listen("");
+    this.response.speak("Sorry, I didn't get that. Please say yes or no to the offer.").listen("Please say yes or no to the offer.");
     this.emit(":responseReady");
   },
 });
@@ -1175,9 +1065,15 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
     this.response.speak("You have $" + money + ". Do you want to buy any supplies?").listen("Do you want to buy any supplies?");
     this.emit(":responseReady");
   },
+  'NoMoreTrading': function() {
+    purchaseChoice = "buy";
+    this.response.speak("Sorry, no one else wants to trade with you. Do you want to go to the fort's general store?").listen("Do you want to go to the fort's general store?");
+    this.emit(":responseReady");
+  },
   'AMAZON.YesIntent': function() {
     if (purchaseChoice === "trade") {
-      // TODO go to trading
+      this.handler.state = GAME_STATES.TRADING;
+      this.emitWithState('Offer');
     } else if (purchaseChoice === "buy") {
       this.handler.state = GAME_STATES.SHOPPING;
       this.emitWithState('WelcomeToStore');
@@ -1526,7 +1422,9 @@ var currentlyBuyingHowMany; // tracks how much a user is buying
 var itemPrice = 0; // tracks cost of item user is buying
 var total; // tracks user's total purchase
 var purchaseChoice; // tracks if user is buying or trading
-var alreadyTradedAtThisFort = false; // tracks trading at each fort
+var tradeChances = 0; // tracks how many times a user is allowed to trade at a fort
+var tradeAttempts = 0; // tracks how many times a user tries to trade at a fort
+var tradeDeal = 0; // random number between 1 and 10 that holds the trade offer
 var fate; // adds randomness to the game and changes every day
 var gameOverMessage; // tracks the reason for game over
 
@@ -1574,14 +1472,17 @@ var resetVariables = function () {
   ferryCost = 0;
   sinkChance = 0;
   mapLocation = undefined;
-  alreadyTradedAtThisFort = false;
+  currentlyBuyingWhat = undefined;
+  currentlyBuyingHowMany = 0;
+  itemPrice = 0;
+  total = 0;
+  purchaseChoice = undefined;
+  tradeChances = 0;
+  tradeAttempts = 0;
   fate = 0;
   gameOverMessage = undefined;
   hasChosenProfession = false;
   hasBeenToGeneralStore = false;
-  currentlyBuyingWhat = undefined;
-  currentlyBuyingHowMany = 0;
-  itemPrice = 0;
   boughtFood = false;
   boughtOxen = false;
   boughtParts = false;
@@ -1766,122 +1667,108 @@ var setDays = function() {
 // ======================
 // EVENTS ALONG THE TRAIL
 // ======================
-var tradeItems = function(tradeChances) {
-  alreadyTradedAtThisFort = true;
-  var tradeAttempts = 0;
-  var makeADeal = function() {
-    if (tradeAttempts < tradeChances) {
-      if (mapLocation !== "Independence") {
-        days++;
-        trailDays++;
-        food -= (peopleHealthy.length + peopleSick.length);
-      }
-      tradeAttempts++;
-      var tradeDeal = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-      var yeahOrNah;
-      if (tradeDeal === 1) {
-        yeahOrNah = prompt("An old settler will give you a spare part for 50 pounds of food. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && food >= 50) {
-          parts++;
-          food -= 50;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && food < 50) {
-          alert("Sorry, you don't have enough food to make the trade.");
-        }
-      } else if (tradeDeal === 2) {
-        yeahOrNah = prompt("A woman at the fort will give you 100 pounds of food for an ox. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && oxen > 1) {
-          food += 100;
-          oxen--;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && oxen === 1) {
-          alert("Sorry, you only have one ox. You must keep him to continue on the trail.");
-        }
-      } else if (tradeDeal === 3) {
-        yeahOrNah = prompt("The general store owner will give you $15 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && parts >= 1) {
-          money += 15;
-          parts--;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && parts < 1) {
-          alert("Sorry, you don't have any spare parts to make the trade.");
-        }
-      } else if (tradeDeal === 4) {
-        yeahOrNah = prompt("A man at the fort will give you an ox for $25. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && money >= 25) {
-          oxen++;
-          money -= 25;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && money < 25) {
-          alert("Sorry, you don't have enough money to make the trade.");
-        }
-      } else if (tradeDeal === 5) {
-        yeahOrNah = prompt("A man at the fort will give you $30 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && parts >= 1) {
-          money += 30;
-          parts --;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && parts < 1) {
-          alert("Sorry, you don't have any spare parts to make the trade.");
-        }
-      } else if (tradeDeal === 6) {
-        yeahOrNah = prompt("A Native American at the fort will give you 200 pounds of food for two oxen. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && oxen > 2) {
-          food += 200;
-          oxen -= 2;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && oxen > 2) {
-          alert("Sorry, you only have two oxen. If you trade them both away, you won't be able to continue on the trail.");
-        }
-      } else if (tradeDeal === 7) {
-        yeahOrNah = prompt("A woman at the fort will give you a spare part for $50. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && money >= 50) {
-          parts++;
-          money -= 50;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && money < 50) {
-          alert("Sorry, you don't have enough money to make the trade.");
-        }
-      } else if (tradeDeal === 8) {
-        yeahOrNah = prompt("A man at the fort will give you $100 for an ox. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && oxen > 1) {
-          money += 100;
-          oxen--;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && oxen === 1) {
-          alert("Sorry, you only have one ox. You must keep him to continue on the trail.");
-        }
-      } else if (tradeDeal === 9) {
-        yeahOrNah = prompt("An old settler will give you $20 for a spare part. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && parts >= 1) {
-          money += 20;
-          parts--;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && parts < 1) {
-          alert("Sorry, you don't have any spare parts to make the trade.");
-        }
-      } else if (tradeDeal === 10) {
-        yeahOrNah = prompt("A man at the fort will give you a spare part for 75 pounds of food. Do you accept this trade? Type 'yes' or 'no'.");
-        if (yeahOrNah === "yes" && food >= 50) {
-          parts++;
-          food -= 75;
-          alert("It's a deal!");
-        } else if (yeahOrNah === "yes" && food < 50) {
-          alert("Sorry, you don't have enough food to make the trade.");
-        }
-      }
-      var tradeAgain = prompt("Do you want to try again? Type 'yes' or 'no'.");
-      if (tradeAgain === "yes") {
-        makeADeal();
-      }
+// TRADING
+var evaluateOffer = function() {
+  if (tradeDeal === 1) {
+    if (food >= 50) {
+      parts++;
+      food -= 50;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
     } else {
-      alert("No one else at this fort wants to trade with you.");
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
     }
-  };
-  makeADeal();
-  var goShoppingInstead = prompt("Instead of trading, do you want to buy anything? Type 'yes' or 'no'.");
-  if (goShoppingInstead === "yes") {
-    goShopping();
+  } else if (tradeDeal === 2) {
+    if (oxen > 1) {
+      food += 100;
+      oxen--;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 3) {
+    if (parts >= 1) {
+      money += 15;
+      parts--;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 4) {
+    if (money >= 25) {
+      oxen++;
+      money -= 25;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 5) {
+    if (parts >= 1) {
+      money += 30;
+      parts --;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 6) {
+    if (oxen > 2) {
+      food += 200;
+      oxen -= 2;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 7) {
+    if (money >= 50) {
+      parts++;
+      money -= 50;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 8) {
+    if (oxen > 1) {
+      money += 100;
+      oxen--;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 9) {
+    if (parts >= 1) {
+      money += 20;
+      parts--;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
+  } else if (tradeDeal === 10) {
+    if (food >= 50) {
+      parts++;
+      food -= 75;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeSuccess');
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('TradeFailure');
+    }
   }
 };
 
@@ -2062,32 +1949,46 @@ var gameOver = function() {
 var travel = function(distance) {
   if (distance === 105) {
     mapLocation = "Kansas River";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('KansasRiver');
+    if (days < 92) {
+      riverDepth = 3;
+    } else {
+      riverDepth = 4;
+    }
+    ferryCost = 5;
+    sinkChance = 2;
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('CrossingChoice');
   } else if (distance === 300) {
     mapLocation = "Fort Kearny";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('FortKearny');
+    tradeChances = 1;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
   } else if (distance === 555) {
     mapLocation = "Chimney Rock";
-    this.handler.state = GAME_STATES.LANDMARK;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('ChimneyRock');
   } else if (distance === 645) {
     mapLocation = "Fort Laramie";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('FortLaramie');
+    tradeChances = 2;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
   } else if (distance === 825) {
     mapLocation = "Independence Rock";
-    this.handler.state = GAME_STATES.LANDMARK;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('IndependenceRock');
   } else if (distance === 930) {
     mapLocation = "South Pass";
-    this.handler.state = GAME_STATES.LANDMARK;
+    this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('SouthPass');
   } else if (distance === 1050 && mapLocation !== "Fort Bridger") {
     mapLocation = "Green River";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('GreenRiver');
+    riverDepth = 8;
+    ferryCost = 12;
+    sinkChance = 8;
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('CrossingChoice');
     // TODO handle user's direction choice
     mapLocation = prompt("Do you want to stay on the trail to Fort Bridger or take the shortcut through Soda Springs?\n\nType 'Fort Bridger' or 'Soda Springs'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Bridger" && mapLocation !== "Soda Springs") {
@@ -2099,24 +2000,33 @@ var travel = function(distance) {
     }
   } else if (distance === 1200) {
     if (mapLocation === "Fort Bridger") {
-      this.handler.state = GAME_STATES.LANDMARK;
-      this.emitWithState('FortBridger');
+      tradeChances = 3;
+      tradeAttempts = 0;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('WelcomeToFort');
     } else if (mapLocation === "Soda Springs") {
-      this.handler.state = GAME_STATES.LANDMARK;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('SodaSprings');
     }
   } else if (distance === 1260) {
     mapLocation = "Fort Hall";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('FortHall');
+    tradeChances = 2;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
   } else if (distance === 1440) {
     mapLocation = "Snake River";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('SnakeRiver');
+    riverDepth = 5;
+    ferryCost = 7;
+    sinkChance = 5;
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('CrossingChoice');
   } else if (distance === 1560 && mapLocation !== "Fort Walla Walla") {
     mapLocation = "Fort Boise";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('FortBoise');
+    tradeChances = 1;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
     // TODO handle user's direction choice
     mapLocation = prompt("Do you want to stay on the trail to Fort Walla Walla or take the shortcut through The Dalles?\n\nType 'Fort Walla Walla' or 'The Dalles'.").replace(/(\b[a-z])/g, function(x){return x.toUpperCase();});
     if (mapLocation !== "Fort Walla Walla" && mapLocation !== "The Dalles") {
@@ -2128,16 +2038,18 @@ var travel = function(distance) {
     }
   } else if (distance === 1710) {
     if (mapLocation === "Fort Walla Walla") {
-      this.handler.state = GAME_STATES.LANDMARK;
-      this.emitWithState('FortWallaWalla');
+      tradeChances = 1;
+      tradeAttempts = 0;
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('WelcomeToFort');
     } else if (mapLocation === "The Dalles") {
-      this.handler.state = GAME_STATES.LANDMARK;
+      this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('TheDalles');
     }
   } else if (distance === 1845) {
     mapLocation = "Oregon City";
-    this.handler.state = GAME_STATES.LANDMARK;
-    this.emitWithState('OregonCity');
+    gameOverMessage = "winner";
+    gameOver.call(this);
   }
 };
 
@@ -2250,6 +2162,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, landmarkHandlers, fortHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, fortHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
   alexa.execute();
 };
