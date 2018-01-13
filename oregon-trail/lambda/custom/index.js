@@ -9,6 +9,12 @@ const GAME_STATES = {
   MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
   EVENT: '_EVENTMODE', // events within the game
   LANDMARK: '_LANDMARKMODE', // landmarks along the trail
+  FORT: '_FORTMODE', // handles user's choices at forts
+  SHOPPING: '_SHOPPINGMODE', // choosing which supplies to buy
+  SHOPPING_AMOUNT: '_SHOPPINGAMOUNTMODE', // choosing how much to buy
+  SHOPPING_SUCCESS: '_SHOPPINGSUCCESSMODE', // getting total, choosing to buy more
+  TRADING: '_TRADINGMODE', // trading supplies
+  CHANGE_PURCHASE: '_CHANGEPURCHASEMODE', // option to trade instead of buy/buy instead of trade
   HUNT: '_HUNTMODE', // hunting within the game
   HUNT_NUMBER: '_HUNTNUMBERMODE', // choosing a random number for hunting
   SICK: '_SICKMODE', // when a person gets sick or injured
@@ -30,8 +36,10 @@ const CANCEL_MESSAGE = "Ok, let's play again soon.";
 const newSessionHandlers = {
   'LaunchRequest': function() {
     resetVariables.call(this); // ensure all variables have default, empty values to start
-    this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    this.handler.state = GAME_STATES.EVENT; // TEST -- put back to user_setup/startgame
+    this.emitWithState('PlayGame'); // TEST -- put back to user_setup/startgame
+    // this.handler.state = GAME_STATES.USER_SETUP;
+    // this.emitWithState('StartGame');
   },
   'AMAZON.StartOverIntent': function() {
     resetVariables.call(this); // reset all variables to default empty values
@@ -190,25 +198,25 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
     if (hasBeenToGeneralStore === false) {
       generalStore.call(this);
     } else {
-      amountToBuy = +this.event.request.intent.slots.number.value;
-      if (currentlyBuying !== undefined && (amountToBuy * itemPrice > money)) {
+      currentlyBuyingHowMany = +this.event.request.intent.slots.number.value;
+      if (currentlyBuyingWhat !== undefined && (currentlyBuyingHowMany * itemPrice > money)) {
         notEnoughMoney.call(this);
       } else {
-        money -= (amountToBuy * itemPrice);
-        if (currentlyBuying === "pounds of food") {
-          food += amountToBuy;
+        money -= (currentlyBuyingHowMany * itemPrice);
+        if (currentlyBuyingWhat === "pounds of food") {
+          food += currentlyBuyingHowMany;
           boughtFood = true;
           generalStore.call(this);
-        } else if (currentlyBuying === "oxen") {
-          if (oxen === 0 && amountToBuy > 0) {
-            oxen += amountToBuy;
+        } else if (currentlyBuyingWhat === "oxen") {
+          if (oxen === 0 && currentlyBuyingHowMany > 0) {
+            oxen += currentlyBuyingHowMany;
             boughtOxen = true;
             generalStore.call(this);
           } else {
             mustBuyOxen.call(this);
           }
-        } else if (currentlyBuying === "spare parts") {
-          parts += amountToBuy;
+        } else if (currentlyBuyingWhat === "spare parts") {
+          parts += currentlyBuyingHowMany;
           boughtParts = true;
           generalStore.call(this);
         } else {
@@ -237,7 +245,7 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
   },
   'Unhandled': function() {
     if (this.event.request.intent.name !== "GetNumber") {
-      this.response.speak("I'm sorry, I didn't understand how many " + currentlyBuying + " you want to buy. Please say a number.").listen("Please say a number.");
+      this.response.speak("I'm sorry, I didn't understand how many " + currentlyBuyingWhat + " you want to buy. Please say a number.").listen("Please say a number.");
       this.emit(":responseReady");
     } else {
       // TODO setup help state and function
@@ -294,8 +302,8 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
 // HANDLE GAME EVENTS
 const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   'PlayGame': function() {
-    this.response.speak("The game is playing.");
-    this.emit(":responseReady");
+    this.response.speak("The game is playing."); // TEST
+    this.emit(":responseReady"); // TEST
     // theOregonTrail.call(this); // TODO call the game when ready
   },
   'Hunting': function() {
@@ -659,6 +667,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     this.emitWithState('CrossingChoice');
   },
   'FortKearny': function() {
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
     /*
     alert("Fort Kearny");
     alreadyTradedAtThisFort = false;
@@ -683,6 +693,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     this.emitWithState('LandmarkChimneyRock');
   },
   'FortLaramie': function() {
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
     /*
     alert("Fort Laramie");
     alreadyTradedAtThisFort = false;
@@ -718,6 +730,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     this.emitWithState('CrossingChoice');
   },
   'FortBridger': function() {
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
     /*
     alert("Fort Bridger");
     alreadyTradedAtThisFort = false;
@@ -742,6 +756,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     this.emitWithState('LandmarkSodaSprings');
   },
   'FortHall': function() {
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
     /*
     alert("Fort Hall");
     alreadyTradedAtThisFort = false;
@@ -769,6 +785,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     this.emitWithState('CrossingChoice');
   },
   'FortBoise': function() {
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
     /*
     alert("Fort Boise");
     alreadyTradedAtThisFort = false;
@@ -789,6 +807,8 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
     */
   },
   'FortWallaWalla': function() {
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
     /*
     alert("Fort Walla Walla");
     alreadyTradedAtThisFort = false;
@@ -836,6 +856,361 @@ const landmarkHandlers = Alexa.CreateStateHandler(GAME_STATES.LANDMARK, {
   },
   'Unhandled': function() {
     // TODO
+  },
+});
+
+// HANDLE FORTS
+const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
+  'WelcomeToFort': function() {
+    if (oxen === 1 && parts === 1) {
+      this.response.speak("Welcome to " + mapLocation + "! You currently have " + food + " pounds of food, " + oxen + " ox, " + parts + " spare part, and $" + money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else if (oxen === 1 && parts > 1) {
+      this.response.speak("Welcome to " + mapLocation + "! You currently have " + food + " pounds of food, " + oxen + " ox, " + parts + " spare parts, and $" + money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else if (oxen > 1 && parts === 1) {
+      this.response.speak("Welcome to " + mapLocation + "! You currently have " + food + " pounds of food, " + oxen + " oxen, " + parts + " spare part, and $" + money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("Welcome to " + mapLocation + "! You currently have " + food + " pounds of food, " + oxen + " oxen, " + parts + " spare parts, and $" + money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    }
+  },
+  'Status': function() {
+    if (oxen === 1 && parts === 1) {
+      this.response.speak("You have " + food + " pounds of food, " + oxen + " ox, " + parts + " spare part, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else if (oxen === 1 && parts > 1) {
+      this.response.speak("You have " + food + " pounds of food, " + oxen + " ox, " + parts + " spare parts, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else if (oxen > 1 && parts === 1) {
+      this.response.speak("You have " + food + " pounds of food, " + oxen + " oxen, " + parts + " spare part, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("You have " + food + " pounds of food, " + oxen + " oxen, " + parts + " spare parts, and $" + money + ". Do you want to buy or trade anything else?").listen("Do you want to buy or trade anything else?");
+      this.response.cardRenderer(statusCard);
+      this.emit(":responseReady");
+    }
+  },
+  'NotEnoughMoney': function() {
+    this.response.speak("Sorry, you don't have enough money. You only have $" + money + ". Do you want to try again?").listen("Do you want to try again?");
+    this.emit(":responseReady");
+  },
+  'GetBuyOrTradeItem': function() {
+    if (this.event.request.intent.slots.buy_or_trade.value === "buy") {
+      this.handler.state = GAME_STATES.SHOPPING;
+      this.emitWithState('WelcomeToStore');
+    } else if (this.event.request.intent.slots.buy_or_trade.value === "trade") {
+      // TODO go to trading handler
+    } else {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('Unhandled');
+    }
+  },
+  'AMAZON.YesIntent': function() {
+    this.response.speak("Ok. You can buy supplies from the store, or you can try to trade supplies with other pioneers. What do you want to do? Please choose to buy or trade.").listen("Say buy or trade, or say cancel if you changed your mind.");
+    this.emit(":responseReady");
+  },
+  'AMAZON.NoIntent': function() {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Sorry, I didn't understand that. Do you want to buy or trade anything at this fort?").listen("Say buy or trade if you do, or say no.");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE SHOPPING
+const shoppingHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING, {
+  'WelcomeToStore': function() {
+    currentlyBuyingWhat = undefined;
+    currentlyBuyingHowMany = 0;
+    if (money > 0) {
+      this.response.speak("Ok, you have $" + money + " to spend. You can buy food, oxen, or spare parts. What do you want to buy?").listen("What do you want to buy?");
+      this.emit(":responseReady");
+    } else {
+      this.handler.state = GAME_STATES.CHANGE_PURCHASE;
+      this.emitWithState('TradeInstead');
+    }
+  },
+  'GetBuyOrTradeItem': function() {
+    if (this.event.request.intent.slots.item.value === "food" || this.event.request.intent.slots.item.value === "oxen" || this.event.request.intent.slots.item.value === "parts" ) {
+      currentlyBuyingWhat = this.event.request.intent.slots.item.value;
+      this.handler.state = GAME_STATES.SHOPPING_AMOUNT;
+      this.emitWithState('HowMany');
+    } else {
+      this.handler.state = GAME_STATES.SHOPPING;
+      this.emitWithState('Unhandled');
+    }
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    currentlyBuyingWhat = undefined;
+    currentlyBuyingHowMany = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('Status');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Sorry, I didn't get that. You can buy food, oxen, or spare parts. If you changed your mind, you can say cancel. What do you want to buy?").listen("What do you want to buy?");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE SHOPPING AMOUNT
+const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMOUNT, {
+  'HowMany': function() {
+    if (currentlyBuyingWhat === "food") {
+      itemPrice = 0.5;
+      this.response.speak("Ok, let's buy food. Food costs 50 cents per pound. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy?");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "oxen") {
+      itemPrice = 50;
+      this.response.speak("Ok, let's buy oxen. Each ox costs $50. How many oxen do you want to buy?").listen("How many oxen do you want to buy?");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "parts") {
+      itemPrice = 30;
+      this.response.speak("Ok, let's buy spare parts. Each spare part costs $30. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
+      this.emit(":responseReady");
+    }
+  },
+  'GetNumber': function() {
+    currentlyBuyingHowMany = +this.event.request.intent.slots.number.value;
+    if (currentlyBuyingHowMany > 0) {
+      this.handler.state = GAME_STATES.SHOPPING_SUCCESS;
+      this.emitWithState('Total');
+    } else {
+      if (currentlyBuyingWhat === "food") {
+        this.response.speak("Sorry, you can't buy zero pounds of food. If you want to cancel your purchase, say cancel. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy? Please say a number.");
+        this.emit(":responseReady");
+      } else if (currentlyBuyingWhat === "oxen") {
+        this.response.speak("Sorry, you can't buy zero oxen. If you want to cancel your purchase, say cancel. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.emit(":responseReady");
+      } else if (currentlyBuyingWhat === "parts") {
+        this.response.speak("Sorry, you can't buy zero spare parts. If you want to cancel your purchase, say cancel. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy? Please say a number.");
+        this.emit(":responseReady");
+      }
+    }
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    currentlyBuyingWhat = undefined;
+    currentlyBuyingHowMany = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('Status');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    if (currentlyBuyingWhat === "food") {
+      this.response.speak("Sorry, I didnt get that. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy? Please say a number.");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "oxen") {
+      this.response.speak("Sorry, I didnt get that. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+      this.emit(":responseReady");
+    } else if (currentlyBuyingWhat === "parts") {
+      this.response.speak("Sorry, I didnt get that. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy? Please say a number.");
+      this.emit(":responseReady");
+    }
+  },
+});
+
+// HANDLE SHOPPING SUCCESS
+const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SUCCESS, {
+  'Total': function() {
+    if (currentlyBuyingWhat === "food") {
+      total = currentlyBuyingHowMany * 0.5;
+    } else if (currentlyBuyingWhat === "oxen") {
+      total = currentlyBuyingHowMany * 50;
+    } else if (currentlyBuyingWhat === "parts") {
+      total = currentlyBuyingHowMany * 30;
+    }
+
+    if (money < total) {
+      this.handler.state = GAME_STATES.FORT;
+      this.emitWithState('NotEnoughMoney');
+    } else {
+      days++;
+      trailDays++;
+      food -= (peopleHealthy.length + peopleSick.length);
+      money -= currentlyBuyingHowMany * itemPrice;
+      if (currentlyBuyingWhat === "food") {
+        food += currentlyBuyingHowMany;
+        this.response.speak("Great! You bought " + currentlyBuyingHowMany + " pounds of food. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+        this.emit(":responseReady");
+      } else if (currentlyBuyingWhat === "oxen") {
+        oxen += currentlyBuyingHowMany;
+        this.response.speak("Great! You bought " + currentlyBuyingHowMany + " oxen. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+        this.emit(":responseReady");
+      } else if (currentlyBuyingWhat === "parts") {
+        parts += currentlyBuyingHowMany;
+        this.response.speak("Great! You bought " + currentlyBuyingHowMany + " spare parts. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+        this.emit(":responseReady");
+      }
+    }
+  },
+  'AMAZON.YesIntent': function() {
+    this.handler.state = GAME_STATES.SHOPPING;
+    this.emitWithState('WelcomeToStore');
+  },
+  'AMAZON.NoIntent': function() {
+    this.handler.state = GAME_STATES.CHANGE_PURCHASE;
+    this.emitWithState('TradeInstead');
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.CHANGE_PURCHASE;
+    this.emitWithState('TradeInstead');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Do you want to buy anything else? Please say yes or no.").listen("Do you want to buy anything else? Please say yes or no.");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE TRADING
+const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
+  'XXXXX': function() {
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("").listen("");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE SHOPPING-TRADING OR TRADING-SHOPPING TRANSITION
+const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCHASE, {
+  'TradeInstead': function() {
+    purchaseChoice = "trade";
+    if (money === 0) {
+      this.response.speak("Sorry, you don't have any money. Do you want to try trading with other pioneers at the fort?").listen("Do you want to try trading?");
+      this.emit(":responseReady");
+    } else {
+      this.response.speak("Do you want to try trading with other pioneers at the fort?").listen("Do you want to try trading?");
+      this.emit(":responseReady");
+    }
+  },
+  'BuyInstead': function() {
+    purchaseChoice = "buy";
+    this.response.speak("You have $" + money + ". Do you want to buy any supplies?").listen("Do you want to buy any supplies?");
+    this.emit(":responseReady");
+  },
+  'AMAZON.YesIntent': function() {
+    if (purchaseChoice === "trade") {
+      // TODO go to trading
+    } else if (purchaseChoice === "buy") {
+      this.handler.state = GAME_STATES.SHOPPING;
+      this.emitWithState('WelcomeToStore');
+    } else {
+      this.handler.state = GAME_STATES.CHANGE_PURCHASE;
+      this.emitWithState('Unhandled');
+    }
+  },
+  'AMAZON.NoIntent': function() {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
+  },
+  'AMAZON.HelpIntent': function() {
+    // TODO setup help state and function
+    this.handler.state = GAME_STATES.HELP;
+    this.emitWithState('helpTheUser');
+  },
+  'AMAZON.StartOverIntent': function() {
+    resetVariables.call(this); // reset all variables
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Sorry, I didn't get that. Please say yes or no.").listen("Please say yes or no.");
+    this.emit(":responseReady");
   },
 });
 
@@ -1031,7 +1406,7 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
 // HANDLE RIVER CROSSINGS
 const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
   'CrossingChoice': function() {
-    this.response.speak("You have arrived at the " + mapLocation + ". The river is " + riverDepth + " feet deep. You can buy a ferry for $" + ferryCost + ", or you can try to float across on your own. Do you want to ferry or float across the river?").listen("Do you want to ferry or float across the river?");
+    this.response.speak("You have arrived at the " + mapLocation + ". The river is " + riverDepth + " feet deep. You can buy a ferry for $" + ferryCost + ", or you can try to float across on your own. Do you want to ferry, or do you want to float?").listen("Do you want to ferry, or do you want to float?");
     this.emit(":responseReady");
   },
   'GetRiverCrossing': function() {
@@ -1112,7 +1487,7 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
   },
   'Unhandled': function() {
     if (this.event.request.intent.slots.crossing.value !== "ferry" && this.event.request.intent.slots.crossing.value !== "float") {
-      this.response.speak("I'm sorry, I didn't understand your choice. Do you want to ferry or float across the river?").listen("Please say ferry or float.");
+      this.response.speak("I'm sorry, I didn't understand your choice. Do you want to ferry, or do you want to float?").listen("Please say ferry or float.");
       this.emit(":responseReady");
     }
   },
@@ -1146,6 +1521,11 @@ var riverDepth = 0; // tracks river's depth
 var ferryCost = 0; // tracks cost to ferry across river
 var sinkChance = 0; // tracks likelihood of sinking if floating across river
 var mapLocation; // follows map, remembers choices at split trails
+var currentlyBuyingWhat; // tracks what user is buying
+var currentlyBuyingHowMany; // tracks how much a user is buying
+var itemPrice = 0; // tracks cost of item user is buying
+var total; // tracks user's total purchase
+var purchaseChoice; // tracks if user is buying or trading
 var alreadyTradedAtThisFort = false; // tracks trading at each fort
 var fate; // adds randomness to the game and changes every day
 var gameOverMessage; // tracks the reason for game over
@@ -1187,19 +1567,24 @@ var resetVariables = function () {
   invalid = undefined;
   victim = undefined;
   guess = 0;
+  lostDays = undefined;
   daysWithoutFood = 0;
   daysWithoutGrass = 0;
+  riverDepth = 0;
+  ferryCost = 0;
+  sinkChance = 0;
   mapLocation = undefined;
   alreadyTradedAtThisFort = false;
   fate = 0;
+  gameOverMessage = undefined;
   hasChosenProfession = false;
   hasBeenToGeneralStore = false;
-  currentlyBuying;
+  currentlyBuyingWhat = undefined;
+  currentlyBuyingHowMany = 0;
   itemPrice = 0;
   boughtFood = false;
   boughtOxen = false;
   boughtParts = false;
-  amountToBuy = 0;
   hasChosenMonth = false;
 };
 
@@ -1263,17 +1648,14 @@ const PARTS_REPROMPT = "Each spare part costs $30. How many spare parts do you w
 var TRY_BUYING_AGAIN;
 
 var hasBeenToGeneralStore = false;
-var currentlyBuying;
-var itemPrice = 0;
 var boughtFood = false;
 var boughtOxen = false;
 var boughtParts = false;
-var amountToBuy = 0;
 
 var generalStore = function () {
   hasBeenToGeneralStore = true;
   var buyFood = function() {
-    currentlyBuying = "pounds of food";
+    currentlyBuyingWhat = "pounds of food";
     itemPrice = 0.5;
     TRY_BUYING_AGAIN = FOOD_REPROMPT;
     if (profession.toLowerCase() === "banker") {
@@ -1298,19 +1680,19 @@ var generalStore = function () {
   };
 
   var buyOxen = function() {
-    currentlyBuying = "oxen";
+    currentlyBuyingWhat = "oxen";
     itemPrice = 50;
     TRY_BUYING_AGAIN = OXEN_REPROMPT;
-    this.response.speak("You bought " + amountToBuy + " pounds of food and have $" + money + " left. Now let's buy oxen. You will need these oxen to pull your wagon. Each ox costs $50. I recommend at least six oxen. You currently have " + oxen + " oxen. How many oxen do you want to buy?").listen(OXEN_REPROMPT);
+    this.response.speak("You bought " + currentlyBuyingHowMany + " pounds of food and have $" + money + " left. Now let's buy oxen. You will need these oxen to pull your wagon. Each ox costs $50. I recommend at least six oxen. You currently have " + oxen + " oxen. How many oxen do you want to buy?").listen(OXEN_REPROMPT);
     this.response.cardRenderer("Your total money: $" + money + "\nOne ox: $50" + "\n\nYou current have " + oxen + "oxen. It is recommend to have at least 6 oxen.");
     this.emit(':responseReady');
   };
 
   var buyParts = function() {
-    currentlyBuying = "spare parts";
+    currentlyBuyingWhat = "spare parts";
     itemPrice = 30;
     TRY_BUYING_AGAIN = PARTS_REPROMPT;
-    this.response.speak("You bought " + amountToBuy + " oxen and have $" + money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. Each spare part costs $30. I recommend at least three spare parts. You currently have " + parts + " spare parts. How many spare parts do you want to buy?").listen(PARTS_REPROMPT);
+    this.response.speak("You bought " + currentlyBuyingHowMany + " oxen and have $" + money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. Each spare part costs $30. I recommend at least three spare parts. You currently have " + parts + " spare parts. How many spare parts do you want to buy?").listen(PARTS_REPROMPT);
     this.response.cardRenderer("Your total money: $" + money + "\nOne spare part: $30" + "\n\nYou current have " + parts + "spare parts. It is recommend to have 3 spare parts.");
     this.emit(':responseReady');
   };
@@ -1336,14 +1718,6 @@ var mustBuyOxen = function() {
   this.response.speak("Sorry, you must buy at least one ox to pull your wagon. " + OXEN_REPROMPT).listen(OXEN_REPROMPT);
   this.emit(':responseReady');
 };
-
-/*
-TODO give user the option to buy more
-var buyMore = prompt("Do you want to buy anything else?");
-if (buyMore === "yes") {
-  goShopping();
-}
-*/
 
 // WHEN TO LEAVE
 var hasChosenMonth = false;
@@ -1392,70 +1766,6 @@ var setDays = function() {
 // ======================
 // EVENTS ALONG THE TRAIL
 // ======================
-var goShopping = function() {
-  var tradeInstead;
-  if (money > 0) {
-    if (mapLocation !== "Independence") {
-      days++;
-      trailDays++;
-      food -= (peopleHealthy.length + peopleSick.length);
-    }
-    var toBuy = prompt("What do you want to buy? Type 'food', 'oxen' or 'parts'.");
-    if (toBuy === "food") {
-      var pounds = +prompt("Pound of food: 50 cents\nHow many pounds of food do you want to buy?");
-      if (pounds * 0.5 > money) {
-        pounds = +prompt("Sorry, you only have $ " + money + ". Each pound of food costs 50 cents. How many pounds of food do you want to buy?");
-      } else {
-        food += pounds;
-        money -= pounds * 0.5;
-        alert("You have $" + money + " left.");
-      }
-    } else if (toBuy === "oxen") {
-      var beasts = +prompt("Ox: $50\nHow many oxen do you want to buy?");
-      if (beasts * 50 > money) {
-        beasts = +prompt("Sorry, you only have $" + money + ". Each ox costs $50. How many oxen do you want to buy?");
-      } else {
-        oxen += beasts;
-        money -= beasts * 50;
-        alert("You have $" + money + " left.");
-      }
-    } else if (toBuy === "parts") {
-      var spares = +prompt("Spare part: $30\nHow many spare parts do you want to buy?");
-      if (spares * 30 > money) {
-        spares = +prompt("Sorry, you only have $" + money + ". Each spare part costs $30. How many spare parts do you want to buy?");
-      } else {
-        parts += spares;
-        money -= spares * 30;
-      }
-    }
-    var toBuyMore = prompt("Money: $" + money + "\nFood: " + food + "\nOxen: " + oxen + "\nSpare parts: " + parts + "\n\nDo you want to buy anything else? Type 'yes' or 'no'.");
-    if (toBuyMore === "yes") {
-      goShopping();
-    }
-    if (alreadyTradedAtThisFort === false && mapLocation !== "Independence") {
-      tradeInstead = prompt("Instead of buying suplies, do you want to try trading? Type 'yes' or 'no'.");
-      if (tradeInstead === "yes") {
-        tradeItems(1);
-      }
-    }
-  } else {
-    if (alreadyTradedAtThisFort === false) {
-      tradeInstead = prompt("Sorry, you don't have any money to buy supplies. Do you want to try trading instead? Type 'yes' or 'no'.");
-      if (tradeInstead === "yes" && mapLocation !== "Independence") {
-        if (mapLocation === "Fort Bridger") {
-          tradeItems(3);
-        } else if (mapLocation === "Fort Laramie" || mapLocation === "Fort Hall") {
-          tradeItems(2);
-        } else {
-          tradeItems(1);
-        }
-      }
-    } else {
-      alert("Sorry, you don't have any money to buy items, and you already tried trading at this fort. It's time to move on.");
-    }
-  }
-};
-
 var tradeItems = function(tradeChances) {
   alreadyTradedAtThisFort = true;
   var tradeAttempts = 0;
@@ -1837,16 +2147,16 @@ var travel = function(distance) {
 // THE OREGON TRAIL GAME
 // =====================
 var theOregonTrail = function() {
-  days--;
-  for (miles = 15; miles <= 1845 + extraMiles; miles += 15) {
+  while (miles <= 1845 + extraMiles) {
     // DAILY CHANGES
+    miles += 15;
     days++;
     trailDays++;
     fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
 
     // TRAVELING
     // travel(miles);
-    // TODO setup handlers for forts, shopping, trading, crossing rivers, choosing directions
+    // TODO setup handlers for choosing directions
 
     // FOOD STATUS
     if (food <= 0) {
@@ -1940,6 +2250,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, landmarkHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, landmarkHandlers, fortHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
   alexa.execute();
 };

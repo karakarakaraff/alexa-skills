@@ -55,7 +55,8 @@
               "value": "buy",
               "synonyms": [
                 "buy something",
-                "go shopping"
+                "go shopping",
+                "buying"
               ]
             }
           },
@@ -65,7 +66,8 @@
               "value": "trade",
               "synonyms": [
                 "trade something",
-                "go trading"
+                "go trading",
+                "trading"
               ]
             }
           }
@@ -116,7 +118,9 @@
             "id": null,
             "name": {
               "value": "oxen",
-              "synonyms": []
+              "synonyms": [
+                "ox"
+              ]
             }
           },
           {
@@ -130,7 +134,11 @@
             "id": null,
             "name": {
               "value": "parts",
-              "synonyms": []
+              "synonyms": [
+                "spare parts",
+                "spare part",
+                "part"
+              ]
             }
           }
         ]
@@ -266,7 +274,7 @@
         ]
       },
       {
-        "name": "GetBuyOrTrade",
+        "name": "GetBuyOrTradeItem",
         "samples": [
           "{buy_or_trade}",
           "I want to {buy_or_trade}",
@@ -275,55 +283,31 @@
           "Do {buy_or_trade}",
           "How about {buy_or_trade}",
           "I need to {buy_or_trade}",
-          "{buy_or_trade} oxen",
-          "{buy_or_trade} parts",
-          "{buy_or_trade} food",
-          "I want to {buy_or_trade} oxen",
-          "I want to {buy_or_trade} parts",
-          "I want to {buy_or_trade} food",
-          "Let's {buy_or_trade} oxen",
-          "Let's {buy_or_trade} parts",
-          "Let's {buy_or_trade} food",
-          "I would like to {buy_or_trade} oxen",
-          "I would like to {buy_or_trade} parts",
-          "I would like to {buy_or_trade} food",
-          "How about {buy_or_trade} oxen",
-          "How about {buy_or_trade} parts",
-          "How about {buy_or_trade} food",
-          "I need to {buy_or_trade} oxen",
-          "I need to {buy_or_trade} parts",
-          "I need to {buy_or_trade} food",
           "{buy_or_trade} supplies",
           "I want to {buy_or_trade} supplies",
           "Let's {buy_or_trade} supplies",
           "I would like to {buy_or_trade} supplies",
           "How about {buy_or_trade} supplies",
-          "I need to {buy_or_trade} supplies"
+          "I need to {buy_or_trade} supplies",
+          "{buy_or_trade} {item}",
+          "I want to {buy_or_trade} {item}",
+          "Let's {buy_or_trade} {item}",
+          "I would like to {buy_or_trade} {item}",
+          "How about {buy_or_trade} {item}",
+          "{item}",
+          "I want {item}",
+          "I need {item}",
+          "{item} please",
+          "Get {item}",
+          "Give me {item}",
+          "I'm going to get {item}",
+          "I must get {item}"
         ],
         "slots": [
           {
             "name": "buy_or_trade",
             "type": "BUY_OR_TRADE"
-          }
-        ]
-      },
-      {
-        "name": "GetItem",
-        "samples": [
-          "{item}",
-          "I want {item}",
-          "I need {item}",
-          "I want to buy {item}",
-          "I'm going to buy {item}",
-          "Buy {item}",
-          "I'm gonna buy {item}",
-          "{item} please",
-          "Get {item}",
-          "I'm going to get {item}",
-          "I must buy {item}",
-          "I must get {item}"
-        ],
-        "slots": [
+          },
           {
             "name": "item",
             "type": "ITEMS"
