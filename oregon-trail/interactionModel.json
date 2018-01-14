@@ -176,38 +176,70 @@
             "id": null,
             "name": {
               "value": "Fort Bridger",
-              "synonyms": [
-                "bridger"
-              ]
+              "synonyms": []
             }
           },
           {
             "id": null,
             "name": {
               "value": "Soda Springs",
-              "synonyms": [
-                "springs",
-                "the springs"
-              ]
+              "synonyms": []
             }
           },
           {
             "id": null,
             "name": {
               "value": "The Dalles",
-              "synonyms": [
-                "dalles"
-              ]
+              "synonyms": []
             }
           },
           {
             "id": null,
             "name": {
               "value": "Fort Walla Walla",
-              "synonyms": [
-                "walla walla",
-                "walla"
-              ]
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "shortcut",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "fort",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Walla Walla",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Springs",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Bridger",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Dalles",
+              "synonyms": []
             }
           }
         ]
@@ -468,7 +500,16 @@
           "let's head toward {direction}",
           "how about {direction}",
           "{direction} is good",
-          "let's do {direction}"
+          "let's do {direction}",
+          "take the {direction}",
+          "go to the {direction}",
+          "head toward the {direction}",
+          "the {direction}",
+          "the {direction} please",
+          "let's go to the {direction}",
+          "let's head toward the {direction}",
+          "the {direction} is good",
+          "let's do the {direction}"
         ],
         "slots": [
           {

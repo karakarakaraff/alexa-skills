@@ -43,8 +43,8 @@ const newSessionHandlers = {
     oxen = 6;
     parts = 3;
     days = 153;
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.handler.state = GAME_STATES.FIRST_TRAIL_SPLIT;
+    this.emitWithState('ChooseDirection');
     // END TEST
 
     // this.handler.state = GAME_STATES.USER_SETUP;
@@ -969,11 +969,11 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
     this.emit(":responseReady");
   },
   'GetTrailSplit': function() {
-    if (this.event.request.intent.slots.direction.value === "Fort Bridger") {
+    if (this.event.request.intent.slots.direction.value.toLowerCase() === "fort bridger" || this.event.request.intent.slots.direction.value.toLowerCase() === "bridger" || this.event.request.intent.slots.direction.value.toLowerCase() === "fort") {
       mapLocation = "Fort Bridger";
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseFortBridger');
-    } else if (this.event.request.intent.slots.direction.value === "Soda Springs") {
+    } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "soda springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "shortcut") {
       mapLocation === "Soda Springs";
       extraMiles -= 105;
       this.handler.state = GAME_STATES.EVENT;
@@ -1018,11 +1018,11 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
     this.emit(":responseReady");
   },
   'GetTrailSplit': function() {
-    if (this.event.request.intent.slots.direction.value === "Fort Walla Walla") {
+    if (this.event.request.intent.slots.direction.value.toLowerCase() === "fort walla walla" || this.event.request.intent.slots.direction.value.toLowerCase() === "walla walla" || this.event.request.intent.slots.direction.value.toLowerCase() === "fort") {
       mapLocation = "Fort Walla Walla";
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseFortWallaWalla');
-    } else if (this.event.request.intent.slots.direction.value === "The Dalles") {
+    } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "the dalles" || this.event.request.intent.slots.direction.value.toLowerCase() === "dalles" || this.event.request.intent.slots.direction.value.toLowerCase() === "shortcut") {
       mapLocation === "The Dalles";
       extraMiles -= 150;
       this.handler.state = GAME_STATES.EVENT;
