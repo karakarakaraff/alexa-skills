@@ -35,8 +35,20 @@ const CANCEL_MESSAGE = "Ok, let's play again soon.";
 // ==============
 const newSessionHandlers = {
   'LaunchRequest': function() {
-    this.handler.state = GAME_STATES.USER_SETUP;
-    this.emitWithState('StartGame');
+    // BEGIN TEST
+    mainPlayer = "Kara";
+    peopleHealthy = ["kevin", "ashley", "kate", "april"];
+    profession = "banker";
+    food = 1000;
+    oxen = 6;
+    parts = 3;
+    days = 153;
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
+    // END TEST
+
+    // this.handler.state = GAME_STATES.USER_SETUP;
+    // this.emitWithState('StartGame');
   },
   'AMAZON.StartOverIntent': function() {
     this.handler.state = GAME_STATES.USER_SETUP;
@@ -513,46 +525,176 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'Fire': function() {
-    var destroyedItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
+    var destroyedItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
     var itemIndex = Math.floor(Math.random() * destroyedItems.length);
-    if (oxen === 1 && window[destroyedItems[itemIndex][0]] === "oxen") {
-      gameOverMessage = "no more oxen -- fire";
-      gameOver.call(this);
-    } else if (window[destroyedItems[itemIndex][0]] > destroyedItems[itemIndex][1]) {
-      window[destroyedItems[itemIndex][0]] -= destroyedItems[itemIndex][1];
-      this.response.speak("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " " + destroyedItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-      this.emit(":responseReady");
-    } else if (window[destroyedItems[itemIndex][0]] > 0) {
-      window[destroyedItems[itemIndex][0]] = 0;
-      this.response.speak("A fire broke out in your wagon and destroyed your remaining " + destroyedItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-      this.emit(":responseReady");
+    if (destroyedItems[itemIndex][0] == "food") {
+      if (food > destroyedItems[itemIndex][1]) {
+        food -= destroyedItems[itemIndex][1];
+        this.response.speak("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else if (food > 0) {
+        food = 0;
+        this.response.speak("A fire broke out in your wagon and destroyed the rest of your food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
+    } else if (destroyedItems[itemIndex][0] == "oxen") {
+      if (oxen > destroyedItems[itemIndex][1]) {
+        oxen -= destroyedItems[itemIndex][1];
+        if (destroyedItems[itemIndex][1] === 1) {
+          this.response.speak("A fire broke out in your wagon and killed an ox. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        } else {
+          this.response.speak("A fire broke out in your wagon and killed " + destroyedItems[itemIndex][1] + " oxen. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        }
+      } else if (oxen > 0) {
+        gameOverMessage = "no more oxen -- fire";
+        gameOver.call(this);
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
+    } else if (destroyedItems[itemIndex][0] == "parts") {
+      if (parts > destroyedItems[itemIndex][1]) {
+        parts -= destroyedItems[itemIndex][1];
+        if (destroyedItems[itemIndex][1] === 1) {
+          this.response.speak("A fire broke out in your wagon and destroyed a spare part. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        } else {
+          this.response.speak("A fire broke out in your wagon and destroyed " + destroyedItems[itemIndex][1] + " spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        }
+      } else if (parts > 0) {
+        parts = 0;
+        this.response.speak("A fire broke out in your wagon and destroyed your remaining spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
+    } else if (destroyedItems[itemIndex][0] == "money") {
+      if (money > destroyedItems[itemIndex][1]) {
+        money -= destroyedItems[itemIndex][1];
+        this.response.speak("A fire broke out in your wagon and destroyed $" + destroyedItems[itemIndex][1] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else if (money > 0) {
+        money = 0;
+        this.response.speak("A fire broke out in your wagon and destroyed the rest of your money. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
     } else {
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   },
   'Thief': function() {
-    var stolenItems = [["food", 20, "pounds of food"],["oxen", 1, "ox"],["money", 25, "dollars"],["parts", 1, "spare part"],["money", 10, "dollars"]];
+    var stolenItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
     var itemIndex = Math.floor(Math.random() * stolenItems.length);
-    if (oxen === 1 && window[stolenItems[itemIndex][0]] === "oxen") {
-      gameOverMessage = "no more oxen -- thief";
-      gameOver.call(this);
-    } else if (window[stolenItems[itemIndex][0]] > stolenItems[itemIndex][1]) {
-      window[stolenItems[itemIndex][0]] -= stolenItems[itemIndex][1];
-      this.response.speak("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " " + stolenItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-      this.emit(":responseReady");
-    } else if (window[stolenItems[itemIndex][0]] > 0) {
-      window[stolenItems[itemIndex][0]] = 0;
-      this.response.speak("A thief broke into your wagon and stole your remaining " + stolenItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
-      this.emit(":responseReady");
+    if (stolenItems[itemIndex][0] == "food") {
+      if (food > stolenItems[itemIndex][1]) {
+        food -= stolenItems[itemIndex][1];
+        this.response.speak("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else if (food > 0) {
+        food = 0;
+        this.response.speak("A thief broke into your wagon and stole the rest of your food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
+    } else if (stolenItems[itemIndex][0] == "oxen") {
+      if (oxen > stolenItems[itemIndex][1]) {
+        oxen -= stolenItems[itemIndex][1];
+        if (stolenItems[itemIndex][1] === 1) {
+          this.response.speak("A thief stole an ox when you weren't looking. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        } else {
+          this.response.speak("A thief stole " + stolenItems[itemIndex][1] + " oxen when you weren't looking. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        }
+      } else if (oxen > 0) {
+        gameOverMessage = "no more oxen -- fire";
+        gameOver.call(this);
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
+    } else if (stolenItems[itemIndex][0] == "parts") {
+      if (parts > stolenItems[itemIndex][1]) {
+        parts -= stolenItems[itemIndex][1];
+        if (stolenItems[itemIndex][1] === 1) {
+          this.response.speak("A thief broke into your wagon and stole a spare part. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        } else {
+          this.response.speak("A thief broke into your wagon and stole " + stolenItems[itemIndex][1] + " spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+          this.emit(":responseReady");
+        }
+      } else if (parts > 0) {
+        parts = 0;
+        this.response.speak("A thief broke into your wagon and stole your remaining spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
+    } else if (stolenItems[itemIndex][0] == "money") {
+      if (money > stolenItems[itemIndex][1]) {
+        money -= stolenItems[itemIndex][1];
+        this.response.speak("A thief broke into your wagon and stole $" + stolenItems[itemIndex][1] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else if (money > 0) {
+        money = 0;
+        this.response.speak("A thief broke into your wagon and stole the rest of your money. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
+      }
     } else {
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   },
   'FindItems': function() {
-    var foundItems = [["food", 50, "pounds of food"],["oxen", 2, "oxen"],["money", 50, "dollars"],["parts", 1, "spare part"],["money", 100, "dollars"]];
+    var foundItems = [["food", 50],["oxen", 2],["money", 50],["parts", 1],["money", 100]];
     var itemIndex = Math.floor(Math.random() * foundItems.length);
+    if (foundItems[itemIndex][0] == "food") {
+      food += foundItems[itemIndex][1];
+      this.response.speak("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else if (foundItems[itemIndex][0] == "oxen") {
+      oxen += foundItems[itemIndex][1];
+      if (foundItems[itemIndex][1] === 1) {
+        this.response.speak("You found an abandoned wagon on the trail. After looking around, you found an ox. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " oxen. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else if (foundItems[itemIndex][0] == "parts") {
+      parts += foundItems[itemIndex][1];
+      if (foundItems[itemIndex][1] === 1) {
+        this.response.speak("You found an abandoned wagon on the trail. After looking around, you found a spare part. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+        this.emit(":responseReady");
+      }
+    } else if (foundItems[itemIndex][0] == "money") {
+      money += foundItems[itemIndex][1];
+      this.response.speak("You found an abandoned wagon on the trail. After looking around, you found $" + foundItems[itemIndex][1] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('PlayGame');
+    }
     window[foundItems[itemIndex][0]] += foundItems[itemIndex][1];
     this.response.speak("You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " " + foundItems[itemIndex][2] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
@@ -2052,13 +2194,25 @@ var gameOver = function() {
     this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
     this.emit(':responseReady');
   } else if (gameOverMessage === "no more oxen -- fire") {
-    this.response.speak(randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
-    this.emit(':responseReady');
+    if (oxen === 1) {
+      this.response.speak("A fire broke out and killed your last ox. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    } else {
+      this.response.speak("A fire broke out and killed your last oxen. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    }
   } else if (gameOverMessage === "no more oxen -- thief") {
-    this.response.speak(randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
-    this.emit(':responseReady');
+    if (oxen === 1) {
+      this.response.speak("A thief stole your last ox. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    } else {
+      this.response.speak("A thief stole your last oxen. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    }
   } else if (gameOverMessage === "no more oxen -- thunderstorm") {
     this.response.speak("You got caught in a major thunderstorm and your last ox ran away. This is as far as you can go. Good luck homesteading!");
     this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
@@ -2175,7 +2329,9 @@ var travel = function() {
 // =====================
 var theOregonTrail = function() {
   while (miles <= 1845 + extraMiles) {
+    console.log("OREGON TRAIL FUNCTION LOOPED! days: " + days + ", miles: " + miles); // TEST
     // DAILY CHANGES
+
     miles += 15;
     days++;
     trailDays++;
