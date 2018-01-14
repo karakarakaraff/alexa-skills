@@ -964,6 +964,7 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
 // HANDLE FIRST TRAIL SPLIT
 const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL_SPLIT, {
   'ChooseDirection': function() {
+    hasChosenFirstDirection = true;
     this.response.speak("The trail splits here. You can go to Fort Bridger, or you can take the shortcut to Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger or Soda Springs?");
     this.emit(":responseReady");
   },
@@ -1012,6 +1013,7 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
 // HANDLE SECOND TRAIL SPLIT
 const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRAIL_SPLIT, {
   'ChooseDirection': function() {
+    hasChosenFirstDirection = true;
     this.response.speak("The trail splits here. You can go to Fort Walla Walla, or you can take the shortcut to The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
     this.emit(":responseReady");
   },
@@ -1942,6 +1944,87 @@ var setDays = function() {
 // ======================
 // EVENTS ALONG THE TRAIL
 // ======================
+// RANDOM EVENTS
+var randomEvents = function() {
+  if (trailDays > 2) {
+    // HUNTING
+    if (fate < 3 && trailDays % 4 === 0) {
+      this.handler.state = GAME_STATES.HUNT;
+      this.emitWithState('ChooseToHunt');
+    // SICKNESS/INJURY
+    } else if (fate % 4 === 0 && trailDays % 4 === 0) {
+      this.handler.state = GAME_STATES.SICK;
+      this.emitWithState('Alert');
+    // DEATH OF SICK/INJURED
+    } else if (fate === 10) {
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('Death');
+    // WEATHER
+    } else if (fate === 3 && trailDays % 2 === 0) {
+      if (days < 122 || (days > 306 && days < 487) || days > 671) {
+        lostDays = Math.floor(Math.random() * (7 - 4 + 1)) + 1;
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('Snow');
+      } else if ((days > 122 && days < 153) || (days > 487 && days < 518)) {
+        lostDays = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('Storm');
+      }
+    // GREAT AMERICAN DESERT
+    } else if (fate === 9) {
+      if (mapLocation === "Kansas River" || mapLocation === "Fort Kearny" || mapLocation === "Chimney Rock") {
+        if (days < 122 || (days > 365 && days < 487)) {
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('NoGrass');
+        } else if (days > 183 && days < 214) {
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('BuffaloStampede');
+        }
+      }
+    // GOOD THINGS
+    } else if (fate === 7 && trailDays % 2 === 1) {
+      var goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
+      if (goodThing === 1) {
+        if ((days > 122 && days < 275) || (days > 487 && days < 640)) {
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('FindBerries');
+        } else {
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('FindItems');
+        }
+      } else if (goodThing === 2 && peopleSick.length > 0) {
+        howManyToHeal = 1;
+        recovery.call(this);
+      }
+    // BAD THINGS
+    } else if (fate === 6 && trailDays % 2 === 1) {
+      var badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
+      if (badThing === 1) {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('OxProblem');
+      } else if (badThing === 2) {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('Fire');
+      } else if (badThing === 3) {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('Thief');
+      } else if (badThing === 4) {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('BrokenWagon');
+      } else if (badThing === 5) {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('GetLost');
+      }
+    } else {
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('PlayGame');
+    }
+  } else {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('PlayGame');
+  }
+};
+
 // TRADING
 var evaluateOffer = function() {
   if (tradeDeal === 1) {
@@ -2319,120 +2402,45 @@ var travel = function() {
     mapLocation = "Oregon City";
     gameOverMessage = "winner";
     gameOver.call(this);
+  } else {
+    randomEvents.call(this);
   }
 };
 
 
 
-// =====================
-// THE OREGON TRAIL GAME
-// =====================
+// ================
+// THE OREGON TRAIL
+// ================
 var theOregonTrail = function() {
-  while (miles <= 1845 + extraMiles) {
-    console.log("OREGON TRAIL FUNCTION LOOPED! days: " + days + ", miles: " + miles); // TEST
-    // DAILY CHANGES
+  console.log("MILES: " + miles + ", WHERE: " + mapLocation + ", HEALTHY: " + peopleHealthy.join() + "SICK: " + peopleSick.join()); // TEST
+  // DAILY CHANGES
+  miles += 15;
+  days++;
+  trailDays++;
+  fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
 
-    miles += 15;
-    days++;
-    trailDays++;
-    fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-
-    // TRAVELING
-    if (mapLocation === "Green River" && hasChosenFirstDirection === false) {
-      this.handler.state = GAME_STATES.FIRST_TRAIL_SPLIT;
-      this.emitWithState('ChooseDirection');
-    } else if (mapLocation === "Fort Boise" && hasChosenSecondDirection === false) {
-      this.handler.state = GAME_STATES.SECOND_TRAIL_SPLIT;
-      this.emitWithState('ChooseDirection');
+  if (food <= 0) {
+    daysWithoutFood++;
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('Starve');
+  } else {
+    if (food >= (peopleHealthy.length + peopleSick.length)) {
+      food -= (peopleHealthy.length + peopleSick.length); // each person eats 1 lb/day
     } else {
-      travel.call(this);
+      food = 0;
     }
+  }
 
-    // FOOD STATUS
-    if (food <= 0) {
-      daysWithoutFood++;
-      this.handler.state = GAME_STATES.EVENT;
-      this.emitWithState('Starve');
-    } else {
-      if (food >= (peopleHealthy.length + peopleSick.length)) {
-        food -= (peopleHealthy.length + peopleSick.length); // each person eats 1 lb/day
-      } else {
-        food = 0;
-      }
-    }
-
-    // RANDOM EVENTS
-    if (trailDays > 2) {
-      // HUNTING
-      if (fate < 3 && trailDays % 4 === 0) {
-        this.handler.state = GAME_STATES.HUNT;
-        this.emitWithState('ChooseToHunt');
-      // SICKNESS/INJURY
-      } else if (fate % 4 === 0 && trailDays % 4 === 0) {
-        this.handler.state = GAME_STATES.SICK;
-        this.emitWithState('Alert');
-      // DEATH OF SICK/INJURED
-      } else if (fate === 10) {
-        this.handler.state = GAME_STATES.EVENT;
-        this.emitWithState('Death');
-      // WEATHER
-      } else if (fate === 3 && trailDays % 2 === 0) {
-        if (days < 122 || (days > 306 && days < 487) || days > 671) {
-          lostDays = Math.floor(Math.random() * (7 - 4 + 1)) + 1;
-          this.handler.state = GAME_STATES.EVENT;
-          this.emitWithState('Snow');
-        } else if ((days > 122 && days < 153) || (days > 487 && days < 518)) {
-          lostDays = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
-          this.handler.state = GAME_STATES.EVENT;
-          this.emitWithState('Storm');
-        }
-      // GREAT AMERICAN DESERT
-      } else if (fate === 9) {
-        if (mapLocation === "Kansas River" || mapLocation === "Fort Kearny" || mapLocation === "Chimney Rock") {
-          if (days < 122 || (days > 365 && days < 487)) {
-            this.handler.state = GAME_STATES.EVENT;
-            this.emitWithState('NoGrass');
-          } else if (days > 183 && days < 214) {
-            this.handler.state = GAME_STATES.EVENT;
-            this.emitWithState('BuffaloStampede');
-          }
-        }
-      // GOOD THINGS
-      } else if (fate === 7 && trailDays % 2 === 1) {
-        var goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
-        if (goodThing === 1) {
-          if ((days > 122 && days < 275) || (days > 487 && days < 640)) {
-            this.handler.state = GAME_STATES.EVENT;
-            this.emitWithState('FindBerries');
-          } else {
-            this.handler.state = GAME_STATES.EVENT;
-            this.emitWithState('FindItems');
-          }
-        } else if (goodThing === 2 && peopleSick.length > 0) {
-          howManyToHeal = 1;
-          recovery.call(this);
-        }
-      // BAD THINGS
-      } else if (fate === 6 && trailDays % 2 === 1) {
-        var badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
-        if (badThing === 1) {
-          this.handler.state = GAME_STATES.EVENT;
-          this.emitWithState('OxProblem');
-        } else if (badThing === 2) {
-          this.handler.state = GAME_STATES.EVENT;
-          this.emitWithState('Fire');
-        } else if (badThing === 3) {
-          this.handler.state = GAME_STATES.EVENT;
-          this.emitWithState('Thief');
-        } else if (badThing === 4) {
-          this.handler.state = GAME_STATES.EVENT;
-          this.emitWithState('BrokenWagon');
-        } else if (badThing === 5) {
-          this.handler.state = GAME_STATES.EVENT;
-          this.emitWithState('GetLost');
-        }
-      }
-    }
+  // TRAVELING
+  if (mapLocation === "Green River" && hasChosenFirstDirection === false) {
+    this.handler.state = GAME_STATES.FIRST_TRAIL_SPLIT;
+    this.emitWithState('ChooseDirection');
+  } else if (mapLocation === "Fort Boise" && hasChosenSecondDirection === false) {
+    this.handler.state = GAME_STATES.SECOND_TRAIL_SPLIT;
+    this.emitWithState('ChooseDirection');
+  } else {
+    travel.call(this);
   }
 };
 
