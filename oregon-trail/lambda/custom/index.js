@@ -37,8 +37,9 @@ const newSessionHandlers = {
   'LaunchRequest': function() {
     // BEGIN TEST
     mainPlayer = "Kara";
-    peopleHealthy = ["kevin", "ashley", "kate", "april"];
+    peopleHealthy = ["Kara", "Kevin", "Ashley", "Kate", "April"];
     profession = "banker";
+    money = 310;
     food = 1000;
     oxen = 6;
     parts = 3;
@@ -364,6 +365,11 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'Recovery': function() {
     console.log("RECOVERY");
+    this.response.speak(recoveredMessage + " Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.emit(":responseReady");
+  },
+  'RestRecovery': function() {
+    console.log("REST RECOVERY");
     if (howManyToHeal === 0 && daysOfRest > 1) {
       if (peopleHealthy.length === 0) {
         this.response.speak("You rested for " + daysOfRest + " days, but you still aren't feeling any better. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -985,7 +991,7 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseFortBridger');
     } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "soda springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "shortcut") {
-      mapLocation === "Soda Springs";
+      mapLocation = "Soda Springs";
       extraMiles -= 105;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseSodaSprings');
@@ -1024,7 +1030,7 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
 // HANDLE SECOND TRAIL SPLIT
 const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRAIL_SPLIT, {
   'ChooseDirection': function() {
-    hasChosenFirstDirection = true;
+    hasChosenSecondDirection = true;
     this.response.speak("The trail splits here. You can go to Fort Walla Walla, or you can take the shortcut to The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
     this.emit(":responseReady");
   },
@@ -1034,7 +1040,7 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseFortWallaWalla');
     } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "the dalles" || this.event.request.intent.slots.direction.value.toLowerCase() === "dalles" || this.event.request.intent.slots.direction.value.toLowerCase() === "shortcut") {
-      mapLocation === "The Dalles";
+      mapLocation = "The Dalles";
       extraMiles -= 150;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseTheDalles');
@@ -1431,13 +1437,8 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    if (this.event.request.intent.name !== "AMAZON.YesIntent" && this.event.request.intent.name !== "AMAZON.NoIntent") {
       this.response.speak("Do you want to go hunting for more food? Please say yes or no.").listen("Do you want to go hunting for more food? Please say yes or no.");
       this.emit(":responseReady");
-    } else {
-      this.handler.state = GAME_STATES.HUNT;
-      this.emitWithState('AMAZON.HelpIntent');
-    }
   },
 });
 
@@ -1494,12 +1495,14 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     var issue = healthIssues[Math.floor(Math.random() * healthIssues.length)];
     if (peopleHealthy.length > 1) {
       sickness.call(this);
+      console.log("HEALTHY: " + peopleHealthy.join(" ") + "SICK: " + peopleSick.join(" "));
       this.response.speak(invalid + " has " + issue + ". Do you want to rest to see if " + invalid + " feels better?").listen("Do you want to rest to see if " + invalid + " feels better?");
       this.response.cardRenderer(invalid + " has " + issue + ".");
       this.emit(":responseReady");
     } else {
       sickness.call(this);
-      this.response.speak("You have " + issue + ". Do you want to rest to see if " + invalid + " feels better?").listen("Do you want to rest to see if you feel better?");
+      console.log("HEALTHY: " + peopleHealthy.join(" ") + "SICK: " + peopleSick.join(" "));
+      this.response.speak("You have " + issue + ". Do you want to rest to see if you feel better?").listen("Do you want to rest to see if you feel better?");
       this.response.cardRenderer("You have " + issue + ".");
       this.emit(":responseReady");
     }
@@ -1546,7 +1549,7 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
     this.emit(":responseReady");
   },
   'GetNumber': function() {
-    daysOfRest = this.event.request.intent.slots.number.value;
+    daysOfRest = +this.event.request.intent.slots.number.value;
     rest.call(this);
   },
   'AMAZON.HelpIntent': function() {
@@ -1980,7 +1983,7 @@ var randomEvents = function() {
       this.handler.state = GAME_STATES.SICK;
       this.emitWithState('Alert');
     // DEATH OF SICK/INJURED
-    } else if (fate === 10) {
+    } else if (fate === 10 && trailDays % 2 === 0) {
       console.log("RANDOM EVENT -- DEATH OF SICK/INJURED");
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('Death');
@@ -1997,6 +2000,9 @@ var randomEvents = function() {
         console.log("RANDOM EVENT -- STORM");
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('Storm');
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
       }
     // GREAT AMERICAN DESERT
     } else if (fate === 9) {
@@ -2010,7 +2016,13 @@ var randomEvents = function() {
           console.log("RANDOM EVENT -- STAMPEDE");
           this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('BuffaloStampede');
+        } else {
+          this.handler.state = GAME_STATES.EVENT;
+          this.emitWithState('PlayGame');
         }
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
       }
     // GOOD THINGS
     } else if (fate === 7 && trailDays % 2 === 1) {
@@ -2028,8 +2040,10 @@ var randomEvents = function() {
         }
       } else if (goodThing === 2 && peopleSick.length > 0) {
         console.log("RANDOM EVENT -- RECOVERY");
-        howManyToHeal = 1;
         recovery.call(this);
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
       }
     // BAD THINGS
     } else if (fate === 6 && trailDays % 2 === 1) {
@@ -2055,6 +2069,9 @@ var randomEvents = function() {
         console.log("RANDOM EVENT -- GET LOST");
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('GetLost');
+      } else {
+        this.handler.state = GAME_STATES.EVENT;
+        this.emitWithState('PlayGame');
       }
     } else {
       console.log("RANDOM EVENT -- NONE! PLAY GAME 1");
@@ -2183,55 +2200,79 @@ var rest = function() {
     trailDays += daysOfRest;
     food -= daysOfRest*(peopleHealthy.length + peopleSick.length);
     howManyToHeal = 3;
-    recovery.call(this);
+    restRecovery.call(this);
   } else if (daysOfRest >= 5 && chanceOfRecovery % 2 === 0) {
     days += daysOfRest;
     trailDays += daysOfRest;
     food -= daysOfRest*(peopleHealthy.length + peopleSick.length);
     howManyToHeal = 2;
-    recovery.call(this);
+    restRecovery.call(this);
   } else if (daysOfRest >= 2 && chanceOfRecovery % 2 === 0) {
     days += daysOfRest;
     trailDays += daysOfRest;
     food -= daysOfRest*(peopleHealthy.length + peopleSick.length);
     howManyToHeal = 1;
-    recovery.call(this);
+    restRecovery.call(this);
   } else {
     days++;
     trailDays++;
     food -= (peopleHealthy.length + peopleSick.length);
     howManyToHeal = 0;
-    recovery.call(this);
+    restRecovery.call(this);
   }
 };
 
 // RECOVERY
 var recoveredMessage;
 var recovery = function() {
-  var peopleCured = 0;
   var message = [];
 
   var healThem = function() {
-    peopleCured++;
-
     var recoveredIndex = Math.floor(Math.random() * peopleSick.length);
     if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
       peopleSick.shift();
       peopleHealthy.unshift(mainPlayer);
       message.push("You are feeling much better.");
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('Recovery');
     } else {
       var recoveredPerson = peopleSick[recoveredIndex];
       peopleSick.splice(recoveredIndex, 1);
       peopleHealthy.push(recoveredPerson);
       message.push(recoveredPerson + " is feeling much better.");
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('Recovery');
     }
+  };
 
+  healThem.call(this);
+};
+
+// REST RECOVERY
+var restRecovery = function() {
+  var peopleCured = 0;
+  var message = [];
+
+  var healThem = function() {
+    peopleCured++;
+    var recoveredIndex = Math.floor(Math.random() * peopleSick.length);
     if (peopleCured < howManyToHeal && peopleSick.length > 0) {
-      healThem.call(this);
+      if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
+        peopleSick.shift();
+        peopleHealthy.unshift(mainPlayer);
+        message.push("You are feeling much better.");
+        healThem.call(this);
+      } else {
+        var recoveredPerson = peopleSick[recoveredIndex];
+        peopleSick.splice(recoveredIndex, 1);
+        peopleHealthy.push(recoveredPerson);
+        message.push(recoveredPerson + " is feeling much better.");
+        healThem.call(this);
+      }
     } else {
       recoveredMessage = message.join(" ");
       this.handler.state = GAME_STATES.EVENT;
-      this.emitWithState('Recovery');
+      this.emitWithState('RestRecovery');
     }
   };
 
@@ -2403,6 +2444,7 @@ var travel = function() {
     this.handler.state = GAME_STATES.RIVER;
     this.emitWithState('CrossingChoice');
   } else if (miles === 1200) {
+    console.log("ARRIVING AT FIRST SPLIT CHOICE");
     if (mapLocation === "Fort Bridger") {
       tradeChances = 3;
       tradeAttempts = 0;
@@ -2457,13 +2499,14 @@ var travel = function() {
 // THE OREGON TRAIL
 // ================
 var theOregonTrail = function() {
-  console.log("DAYS: " + days + ", WHERE: " + mapLocation + ", HEALTHY: " + peopleHealthy.join() + "SICK: " + peopleSick.join()); // TEST
   // DAILY CHANGES
   travelingSFX = travelingSFX + wagonWheelsSFX;
   miles += 15;
   days++;
   trailDays++;
   fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+
+  console.log("MILES: " + miles + ", DAYS: " + days + ", WHERE: " + mapLocation + "FATE: " + fate + ", HEALTHY: " + peopleHealthy.join(" ") + "SICK: " + peopleSick.join(" ")); // TEST
 
   if (food <= 0) {
     daysWithoutFood++;
