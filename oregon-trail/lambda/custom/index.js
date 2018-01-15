@@ -37,16 +37,18 @@ const newSessionHandlers = {
   'LaunchRequest': function() {
     // BEGIN TEST
     mainPlayer = "Kara";
-    peopleHealthy = ["Kara", "Kevin", "Ashley", "Kate", "April"];
+    peopleHealthy = ["Kara", "Kevin", "Kilgore", "Delilah"];
+    peopleSick = ["Ashley", "Kate", "April", "Dahlie"];
     profession = "banker";
     money = 310;
     food = 1000;
     oxen = 6;
     parts = 3;
     days = 153;
+    miles = 0;
     mapLocation = "Independence";
     this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.emitWithState('TestGame');
     // END TEST
 
     // this.handler.state = GAME_STATES.USER_SETUP;
@@ -331,6 +333,12 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
 
 // HANDLE GAME EVENTS
 const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
+  // BEGIN TEST
+  'TestGame': function() {
+    this.response.speak("Test: eight-person party").listen("Say OK to continue on the trail.");
+    this.emit(':responseReady');
+  },
+  // END TEST
   'PlayGame': function() {
     theOregonTrail.call(this);
   },
@@ -1995,7 +2003,7 @@ var randomEvents = function() {
         console.log("RANDOM EVENT -- SNOW");
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('Snow');
-      } else if ((days > 122 && days < 153) || (days > 487 && days < 518)) {
+      } else if ((days > 122 && days < 214) || (days > 487 && days < 579)) {
         lostDays = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
         console.log("RANDOM EVENT -- STORM");
         this.handler.state = GAME_STATES.EVENT;
@@ -2222,50 +2230,41 @@ var rest = function() {
   }
 };
 
-// RECOVERY
-var recoveredMessage;
-var recovery = function() {
-  var message = [];
-
-  var healThem = function() {
-    var recoveredIndex = Math.floor(Math.random() * peopleSick.length);
-    if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
-      peopleSick.shift();
-      peopleHealthy.unshift(mainPlayer);
-      message.push("You are feeling much better.");
-      this.handler.state = GAME_STATES.EVENT;
-      this.emitWithState('Recovery');
-    } else {
-      var recoveredPerson = peopleSick[recoveredIndex];
-      peopleSick.splice(recoveredIndex, 1);
-      peopleHealthy.push(recoveredPerson);
-      message.push(recoveredPerson + " is feeling much better.");
-      this.handler.state = GAME_STATES.EVENT;
-      this.emitWithState('Recovery');
-    }
-  };
-
-  healThem.call(this);
-};
-
 // REST RECOVERY
+var recoveredMessage;
 var restRecovery = function() {
   var peopleCured = 0;
+  var recoveredPerson;
   var message = [];
 
   var healThem = function() {
-    peopleCured++;
     var recoveredIndex = Math.floor(Math.random() * peopleSick.length);
-    if (peopleCured < howManyToHeal && peopleSick.length > 0) {
-      if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
+    if (peopleCured === 0) {
+      if (peopleSick.length === 1 && peopleSick.indexOf(mainPlayer) === 0) {
         peopleSick.shift();
         peopleHealthy.unshift(mainPlayer);
+        peopleCured++;
         message.push("You are feeling much better.");
         healThem.call(this);
       } else {
-        var recoveredPerson = peopleSick[recoveredIndex];
+        recoveredPerson = peopleSick.pop();
+        peopleHealthy.push(recoveredPerson);
+        peopleCured++;
+        message.push(invalid + " is feeling much better.");
+        healThem.call(this);
+      }
+    } else if (peopleCured < howManyToHeal && peopleSick.length > 0) {
+      if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
+        peopleSick.shift();
+        peopleHealthy.unshift(mainPlayer);
+        peopleCured++;
+        message.push("You are feeling much better.");
+        healThem.call(this);
+      } else {
+        recoveredPerson = peopleSick[recoveredIndex];
         peopleSick.splice(recoveredIndex, 1);
         peopleHealthy.push(recoveredPerson);
+        peopleCured++;
         message.push(recoveredPerson + " is feeling much better.");
         healThem.call(this);
       }
@@ -2277,6 +2276,25 @@ var restRecovery = function() {
   };
 
   healThem.call(this);
+};
+
+// RECOVERY
+var recovery = function() {
+  var recoveredIndex = Math.floor(Math.random() * peopleSick.length);
+  if (recoveredIndex === 0 && peopleSick.indexOf(mainPlayer) === 0) {
+    peopleSick.shift();
+    peopleHealthy.unshift(mainPlayer);
+    recoveredMessage = "You are feeling much better.";
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('Recovery');
+  } else {
+    var recoveredPerson = peopleSick[recoveredIndex];
+    peopleSick.splice(recoveredIndex, 1);
+    peopleHealthy.push(recoveredPerson);
+    recoveredMessage = recoveredPerson + " is feeling much better.";
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('Recovery');
+  }
 };
 
 // SICKNESS
@@ -2506,7 +2524,7 @@ var theOregonTrail = function() {
   trailDays++;
   fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
 
-  console.log("MILES: " + miles + ", DAYS: " + days + ", WHERE: " + mapLocation + "FATE: " + fate + ", HEALTHY: " + peopleHealthy.join(" ") + "SICK: " + peopleSick.join(" ")); // TEST
+  console.log("MILES: " + miles + ", DAYS: " + days + ", WHERE: " + mapLocation + ", FATE: " + fate + ", HEALTHY: " + peopleHealthy.join(" ") + ", SICK: " + peopleSick.join(" ")); // TEST
 
   if (food <= 0) {
     daysWithoutFood++;
