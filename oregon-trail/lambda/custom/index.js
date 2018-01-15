@@ -1464,12 +1464,10 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     if (peopleHealthy.length > 1) {
       sickness.call(this);
       this.response.speak(badNewsSFX + invalid + " has " + issue + ". Do you want to rest to see if " + invalid + " feels better?").listen("Do you want to rest to see if " + invalid + " feels better?");
-      this.response.cardRenderer(invalid + " has " + issue + ".");
       this.emit(":responseReady");
     } else {
       sickness.call(this);
       this.response.speak(badNewsSFX + "You have " + issue + ". Do you want to rest to see if you feel better?").listen("Do you want to rest to see if you feel better?");
-      this.response.cardRenderer("You have " + issue + ".");
       this.emit(":responseReady");
     }
   },
@@ -1800,7 +1798,6 @@ var chooseProfession = function() {
   if (profession === undefined) {
     hasChosenProfession = true;
     this.response.speak("Great! Now let's choose your profession. You can be a banker, a carpenter, or a farmer. What do you want to be?").listen("You must choose to be a banker, a carpenter, or a farmer. What do you want to be?");
-    this.response.cardRenderer("Banker (easy mode): Start with a lot of money, but receive zero bonus points.\nCarpenter (intermediate mode): Start with tools, supplies and some money, plus receive a few bonus points.\nFarmer (hard mode): Start with food, a few oxen and a little bit of money, and earn high bonus points.");
     this.emit(':responseReady');
   } else {
     this.handler.state = GAME_STATES.SUPPLIES_SETUP;
@@ -1834,20 +1831,17 @@ var generalStore = function () {
     if (profession.toLowerCase() === "banker") {
       money += 1200;
       this.response.speak("You are a banker. You have $" + money + ". " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend at least 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
-      this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + "pounds of food. It is recommend to start with at least 1,000 pounds.");
       this.emit(':responseReady');
     } else if (profession.toLowerCase() === "carpenter") {
       money += 800;
       parts += 4;
       this.response.speak("You are a carpenter. You have $" + money + " and " + parts + " spare parts. " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend at least 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
-      this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + "pounds of food. It is recommend to start with at least 1,000 pounds.");
       this.emit(':responseReady');
     } else if (profession.toLowerCase() === "farmer") {
       money += 400;
       food += 500;
       oxen += 4;
       this.response.speak("You are a farmer. You have $" + money + ", " + food + " pounds of food, and " + oxen + " oxen. " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend at least 1,000 pounds. You currently have " + food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
-      this.response.cardRenderer("Your money: $" + money + "\nOne pound of food: 50 cents" + "\n\nYou currently have " + food + " pounds of food. It is recommend to start with at least 1,000 pounds.");
       this.emit(':responseReady');
     }
   };
@@ -1895,7 +1889,6 @@ var hasChosenMonth = false;
 var chooseMonth = function() {
   hasChosenMonth = true;
   this.response.speak(cashSFX + "Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare parts. You also have $" + money + " left in your pocket. " + peopleHealthy[1] + ", " + peopleHealthy[2] + ", " + peopleHealthy[3] + ", and " + peopleHealthy[4] + " are ready to go. When do you want to start your journey? Choose a month between March and August.").listen("You can start your journey in March, April, May, June, July, or August. Which month do you want?");
-  this.response.cardRenderer("It's time to start your journey. You can begin anytime between March and August. If you start too soon, there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. If you leave too late, you won't make it to Oregon before winter. Choose wisely!");
   this.emit(':responseReady');
 };
 
