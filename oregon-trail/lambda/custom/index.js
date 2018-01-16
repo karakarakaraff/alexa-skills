@@ -35,23 +35,8 @@ const CANCEL_MESSAGE = "Ok, let's play again soon.";
 // ==============
 const newSessionHandlers = {
   'LaunchRequest': function() {
-    // BEGIN TEST
-    mainPlayer = "Kara";
-    peopleHealthy = ["Kara", "Kevin", "Kilgore", "Delilah", "Bill"];
-    profession = "banker";
-    money = 310;
-    food = 1000;
-    oxen = 6;
-    parts = 3;
-    days = 153;
-    miles = 0;
-    mapLocation = "Independence";
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
-    // END TEST
-
-    // this.handler.state = GAME_STATES.USER_SETUP;
-    // this.emitWithState('StartGame');
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGame');
   },
   'AMAZON.StartOverIntent': function() {
     this.handler.state = GAME_STATES.USER_SETUP;
@@ -223,7 +208,7 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
           boughtFood = true;
           generalStore.call(this);
         } else if (currentlyBuyingWhat === "oxen") {
-          if (oxen === 0 && currentlyBuyingHowMany > 0) {
+          if ((oxen === 0 && currentlyBuyingHowMany > 0) || oxen > 1) {
             oxen += currentlyBuyingHowMany;
             boughtOxen = true;
             generalStore.call(this);
