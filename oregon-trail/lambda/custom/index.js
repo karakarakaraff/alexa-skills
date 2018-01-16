@@ -421,6 +421,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.emit(":responseReady");
       }
     } else {
+      trailDaysWithoutIncident++;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -436,6 +437,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
       this.response.speak(travelingSFX + deathSFX + victim + " has died of " + fatality + ". Rest in peace " + victim + ". Now, it's time to move on. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     } else {
+      trailDaysWithoutIncident++;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -509,6 +511,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.emit(":responseReady");
       }
     } else {
+      trailDaysWithoutIncident++;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -538,6 +541,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.response.speak(travelingSFX + badNewsSFX + "A fire broke out in your wagon and destroyed the rest of your food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -555,6 +559,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         gameOverMessage = "no more oxen -- fire";
         gameOver.call(this);
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -573,6 +578,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.response.speak(travelingSFX + badNewsSFX + "A fire broke out in your wagon and destroyed your remaining spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -586,10 +592,12 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.response.speak(travelingSFX + badNewsSFX + "A fire broke out in your wagon and destroyed the rest of your money. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
     } else {
+      trailDaysWithoutIncident++;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -607,6 +615,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.response.speak(travelingSFX + badNewsSFX + "A thief broke into your wagon and stole the rest of your food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -624,6 +633,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         gameOverMessage = "no more oxen -- fire";
         gameOver.call(this);
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -642,6 +652,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.response.speak(travelingSFX + badNewsSFX + "A thief broke into your wagon and stole your remaining spare parts. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -655,10 +666,12 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.response.speak(travelingSFX + badNewsSFX + "A thief broke into your wagon and stole the rest of your money. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
     } else {
+      trailDaysWithoutIncident++;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -693,6 +706,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
       this.response.speak(travelingSFX + goodNewsSFX + "You found an abandoned wagon on the trail. After looking around, you found $" + foundItems[itemIndex][1] + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     } else {
+      trailDaysWithoutIncident++;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -737,7 +751,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.emit(":responseReady");
   },
   'RiverAccident': function() {
-    this.response.speak(riverSFX + "You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.speak(riverSFX + badNewsSFX + "You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
   'RiverDeath': function() {
@@ -745,15 +759,15 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.emit(":responseReady");
   },
   'NoFerryMoneyRiverSuccess': function() {
-    this.response.speak(riverSFX + goodNewsSFX + "Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river. <break time='2s'/> Congratulations! You safely crossed the river. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + goodNewsSFX + "Congratulations! You safely crossed the river. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
   'NoFerryMoneyRiverAccident': function() {
-    this.response.speak(riverSFX + "Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river. <break time='2s'/> You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + baddNewsSFX + "You made it across, but water seeped in. You lost " + fate * 3 + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
   'NoFerryMoneyRiverDeath': function() {
-    this.response.speak(riverSFX + deathSFX + "Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river. <break time='2s'/> Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + deathSFX + "Your wagon was overtaken by water, and " + victim + " drowned. You also lost " + fate * 10 + " pounds of food. Rest in peace " + victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
   'ChimneyRock': function() {
@@ -797,7 +811,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.emit(":responseReady");
   },
   'ContinueGame': function() {
-    travelingSFX = wagonWheels1SFX;
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -925,6 +939,7 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
       this.handler.state = GAME_STATES.CHANGE_PURCHASE;
       this.emitWithState('TradeInstead');
     } else {
+      trailDaysWithoutIncident = 0;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -938,6 +953,7 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1206,12 +1222,22 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
         this.emit(":responseReady");
       } else if (currentlyBuyingWhat === "oxen") {
         oxen += currentlyBuyingHowMany;
-        this.response.speak(cashSFX + "Great! You bought " + currentlyBuyingHowMany + " oxen. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
-        this.emit(":responseReady");
+        if (currentlyBuyingHowMany === 1) {
+          this.response.speak(cashSFX + "Great! You bought " + currentlyBuyingHowMany + " ox. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.emit(":responseReady");
+        } else {
+          this.response.speak(cashSFX + "Great! You bought " + currentlyBuyingHowMany + " oxen. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.emit(":responseReady");
+        }
       } else if (currentlyBuyingWhat === "parts" || currentlyBuyingWhat === "spare parts") {
         parts += currentlyBuyingHowMany;
-        this.response.speak(cashSFX + "Great! You bought " + currentlyBuyingHowMany + " spare parts. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
-        this.emit(":responseReady");
+        if (currentlyBuyingHowMany === 1) {
+          this.response.speak(cashSFX + "Great! You bought " + currentlyBuyingHowMany + " spare part. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.emit(":responseReady");
+        } else {
+          this.response.speak(cashSFX + "Great! You bought " + currentlyBuyingHowMany + " spare parts. You have $" + money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.emit(":responseReady");
+        }
       }
     }
   },
@@ -1306,6 +1332,7 @@ const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1360,6 +1387,7 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
     }
   },
   'AMAZON.NoIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1372,6 +1400,7 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1396,6 +1425,7 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emitWithState('ChooseRandomNumber');
   },
   'AMAZON.NoIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1408,6 +1438,7 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1449,6 +1480,7 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1487,6 +1519,7 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emitWithState('HowManyDays');
   },
   'AMAZON.NoIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1499,6 +1532,7 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1536,6 +1570,7 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
+    trailDaysWithoutIncident = 0;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1658,6 +1693,7 @@ var extraMiles = 255; // tracks shortcuts
 var month; // tracks starting month
 var days = 0; // tracks calendar
 var trailDays = 0; // tracks daily usage of supplies
+var trailDaysWithoutIncident = 0; // tracks sound effects for days with no events
 var invalid; // tracks people as they get sick
 var victim; // tracks people as they die
 var guess = 0; // track player's random number guess for hunting
@@ -1702,26 +1738,26 @@ var statusCard = dateFrom1836(days).toDateString()
 ;
 
 // SOUND EFFECTS
-const wagonWheels1SFX = "eh ";
-const wagonWheels2SFX = "ehh ";
-const wagonWheels3SFX = "ehhh ";
-const wagonWheels4SFX = "ehhhh ";
-const wagonWheels5SFX = "ehhhhh ";
-const goodNewsSFX = "hurray! ";
-const badNewsSFX = "boo. ";
-const fortSFX = "creak. ";
-const riverSFX = "woosh! ";
-const stormSFX = "rumble! ";
-const gunShotSFX = "bang! ";
-const hungrySFX = "gurgle. ";
-const stampedeSFX = "roar! ";
-const cashSFX = "ca-ching! ";
-const wildlifeSFX = "tweet, tweet! ";
-const deathSFX = "ugh. ";
-const winnerSFX = "woo hoo! ";
-const loserSFX = "womp womp. ";
+const wagonWheels1SFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/wagonwheels1.mp3' />";
+const wagonWheels2SFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/wagonwheels2.mp3' />";
+const wagonWheels3SFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/wagonwheels3.mp3' />";
+const wagonWheels4SFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/wagonwheels4.mp3' />";
+const wagonWheels5SFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/wagonwheels5.mp3' />";
+const goodNewsSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/goodnews.mp3' />";
+const badNewsSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/badnews.mp3' />";
+const fortSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/fort.mp3' />";
+const riverSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/river.mp3' />";
+const stormSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/storm.mp3' />";
+const gunShotSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/gunshot.mp3' />";
+const hungrySFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/hungry.mp3' />";
+const stampedeSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/stampede.mp3' />";
+const cashSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/cash.mp3' />";
+const wildlifeSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/wildlife.mp3' />";
+const deathSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/death.mp3' />";
+const winnerSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/winner.mp3' />";
+const loserSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/loser.mp3' />";
 
-var travelingSFX = wagonWheels1SFX;
+var travelingSFX; // will be updated according to how many days go by without incident
 
 // RESET ALL STARTING VARIABLES TO OVERRIDE ALEXA'S DEFAULT PERSISTENCE
 var resetVariables = function () {
@@ -1971,6 +2007,7 @@ var randomEvents = function() {
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('Storm');
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -1984,10 +2021,12 @@ var randomEvents = function() {
           this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('BuffaloStampede');
         } else {
+          trailDaysWithoutIncident++;
           this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('PlayGame');
         }
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -2005,6 +2044,7 @@ var randomEvents = function() {
       } else if (goodThing === 2 && peopleSick.length > 0) {
         recovery.call(this);
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
@@ -2027,14 +2067,17 @@ var randomEvents = function() {
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('GetLost');
       } else {
+        trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
     } else {
+      trailDaysWithoutIncident++;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
   } else {
+    trailDaysWithoutIncident++;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   }
@@ -2304,11 +2347,11 @@ var gameOver = function() {
     this.response.cardRenderer("Game over! You have died of " + fatality);
     this.emit(':responseReady');
   } else if (gameOverMessage === "you drowned") {
-    this.response.speak(loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
+    this.response.speak(riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
     this.response.cardRenderer("Game over! You drowned trying to cross the " + mapLocation + ".");
     this.emit(':responseReady');
   } else if (gameOverMessage === "no ferry money you drowned") {
-    this.response.speak(loserSFX + "Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river. <break time='2s'/> Your wagon was overtaken by water, and you drowned. Game over!");
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
     this.response.cardRenderer("Game over! You drowned trying to cross the " + mapLocation + ".");
     this.emit(':responseReady');
   } else if (gameOverMessage === "you starved") {
@@ -2463,16 +2506,26 @@ var travel = function() {
 // ================
 var theOregonTrail = function() {
   // TRAVEL SOUND EFFECTS
-  if (days % 5 === 0) {
-    travelingSFX = travelingSFX + wagonWheels5SFX;
-  } else if (days % 4 === 0) {
-    travelingSFX = travelingSFX + wagonWheels4SFX;
-  } else if (days % 3 === 0) {
-    travelingSFX = travelingSFX + wagonWheels3SFX;
-  } else if (days % 2 === 0) {
-    travelingSFX = travelingSFX + wagonWheels2SFX;
+  if (trailDaysWithoutIncident >= 10) {
+    travelingSFX = wagonWheels5SFX + wagonWheels5SFX;
+  } else if (trailDaysWithoutIncident === 9) {
+    travelingSFX = wagonWheels4SFX + wagonWheels5SFX;
+  } else if (trailDaysWithoutIncident === 8) {
+    travelingSFX = wagonWheels3SFX + wagonWheels5SFX;
+  } else if (trailDaysWithoutIncident === 7) {
+    travelingSFX = wagonWheels2SFX + wagonWheels5SFX;
+  } else if (trailDaysWithoutIncident === 6) {
+    travelingSFX = wagonWheels1SFX + wagonWheels5SFX;
+  } else if (trailDaysWithoutIncident === 5) {
+    travelingSFX = wagonWheels5SFX;
+  } else if (trailDaysWithoutIncident === 4) {
+    travelingSFX = wagonWheels4SFX;
+  } else if (trailDaysWithoutIncident === 3) {
+    travelingSFX = wagonWheels3SFX;
+  } else if (trailDaysWithoutIncident === 2) {
+    travelingSFX = wagonWheels2SFX;
   } else {
-    travelingSFX = travelingSFX + wagonWheels1SFX;
+    travelingSFX = wagonWheels1SFX;
   }
 
   // DAILY CHANGES
