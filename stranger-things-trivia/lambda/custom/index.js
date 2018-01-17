@@ -137,6 +137,7 @@ function isAnswerSlotValid(intent) {
 }
 
 function handleUserGuess(userGaveUp) {
+    var userGuess = this.event.request.intent.slots.Answer.value;
     const answerSlotValid = isAnswerSlotValid(this.event.request.intent);
     let speechOutput = '';
     let speechOutputAnalysis = '';
@@ -160,7 +161,8 @@ function handleUserGuess(userGaveUp) {
 
     // Check if we can exit the game session after GAME_LENGTH questions (zero-indexed)
     if (this.attributes['currentQuestionIndex'] === GAME_LENGTH - 1) {
-        speechOutput = userGaveUp ? '' : this.t('ANSWER_IS_MESSAGE');
+        speechOutput = 'You guessed ' + userGuess + '. ';
+        speechOutput += userGaveUp ? '' : this.t('ANSWER_IS_MESSAGE');
         speechOutput += speechOutputAnalysis + this.t('GAME_OVER_MESSAGE', currentScore.toString(), GAME_LENGTH.toString());
 
         this.response.speak(speechOutput);
@@ -179,6 +181,7 @@ function handleUserGuess(userGaveUp) {
             repromptText += `${i + 1}. ${roundAnswers[i]}. `;
         }
 
+        speechOutput += 'You guessed ' + userGuess + '. ';
         speechOutput += userGaveUp ? '' : this.t('ANSWER_IS_MESSAGE');
         speechOutput += speechOutputAnalysis + this.t('SCORE_IS_MESSAGE', currentScore.toString()) + repromptText;
 

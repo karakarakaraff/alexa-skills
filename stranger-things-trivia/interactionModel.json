@@ -19,12 +19,7 @@
       },
       {
         "name": "AMAZON.StartOverIntent",
-        "samples": [
-          "start game",
-          "new game",
-          "start",
-          "start new game"
-        ]
+        "samples": []
       },
       {
         "name": "AMAZON.StopIntent",
@@ -64,6 +59,23 @@
           {
             "name": "Answer",
             "type": "AMAZON.NUMBER"
+          }
+        ]
+      },
+      {
+        "name": "Random",
+        "samples": [
+          "whatever you said",
+          "purple",
+          "dog",
+          "cat",
+          "yellow",
+          "i like lamp"
+        ],
+        "slots": [
+          {
+            "name": "literal",
+            "type": "AMAZON.LITERAL"
           }
         ]
       }
