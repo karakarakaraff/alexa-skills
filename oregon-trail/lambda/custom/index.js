@@ -9,8 +9,9 @@ const GAME_STATES = {
   MONTH_SETUP: '_MONTHSETUP', // setting up user's preferred starting month
   EVENT: '_EVENTMODE', // events within the game
   FORT: '_FORTMODE', // handles user's choices at forts
-  FIRST_TRAIL_SPLIT: '_FIRSTTRAILSPLITMODE', // handles player's direction choice
-  SECOND_TRAIL_SPLIT: '_SECONDTRAILSPLITMODE', // handles player's direction choice
+  FIRST_TRAIL_SPLIT: '_FIRSTTRAILSPLITMODE', // handles player's choice between Fort Bridger and Soda Springs
+  SECOND_TRAIL_SPLIT: '_SECONDTRAILSPLITMODE', // handles player's choice between Fort Walla Walla and The Dalles
+  THIRD_TRAIL_SPLIT: '_THIRDTRAILSPLIT', // handles player's choice between Barlow Toll Road and Columbia River
   SHOPPING: '_SHOPPINGMODE', // choosing which supplies to buy
   SHOPPING_AMOUNT: '_SHOPPINGAMOUNTMODE', // choosing how much to buy
   SHOPPING_SUCCESS: '_SHOPPINGSUCCESSMODE', // getting total, choosing to buy more
@@ -21,11 +22,12 @@ const GAME_STATES = {
   SICK: '_SICKMODE', // when a person gets sick or injured
   REST: '_RESTMODE', // resting for potential recovery
   RIVER: '_RIVERMODE', // crossing rivers
+  COLUMBIA_RIVER: '_COLUMBIARIVERMODE', // floating down the Columbia River
 };
 
 const GAME_NAME = "Oregon Trail";
 const WELCOME_MESSAGE = "Welcome to the Oregon Trail Game!";
-const START_GAME_MESSAGE = "It's 1836 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail.";
+const START_GAME_MESSAGE = "It's 1846 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail.";
 const EXIT_SKILL_MESSAGE = "Thanks for joining me on the Oregon Trail. Let's play again soon!";
 const STOP_MESSAGE =  "Would you like to keep playing?";
 const CANCEL_MESSAGE = "Ok, let's play again soon.";
@@ -166,7 +168,7 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("Being a banker makes the game easier because you have a lot of money. Being a farmer is the hardest. If you want to play on intermediate mode, be a carpenter. Do you want to be a banker, a carpenter, or a farmer?").listen("Do you want to be a banker, a carpenter, or a farmer?");
+    this.response.speak("Being a banker makes the game easier because you have a lot of money. Being a farmer is the hardest, but you'll earn the most bonus points. If you want to play on intermediate mode, be a carpenter. So, do you want to be a banker, a carpenter, or a farmer?").listen("Do you want to be a banker, a carpenter, or a farmer?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -227,14 +229,19 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
   },
   'AMAZON.HelpIntent': function() {
     if (currentlyBuyingWhat === "pounds of food") {
-      this.response.speak("I recommend buying 1000 pounds of food. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy?");
+      this.response.speak("I recommend buying " + (1000 - food) + " pounds of food. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy?");
       this.emit(":responseReady");
     } else if (currentlyBuyingWhat === "oxen") {
-      this.response.speak("I recommend buying 6 oxen. How many oxen do you want to buy?").listen("How many oxen do you want to buy?");
+      this.response.speak("I recommend buying " + (6 - oxen) + " oxen. How many oxen do you want to buy?").listen("How many oxen do you want to buy?");
       this.emit(":responseReady");
     } else if (currentlyBuyingWhat === "spare parts") {
-      this.response.speak("I recommend buying 3 spare parts. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
-      this.emit(":responseReady");
+      if (profession === "carpenter") {
+        this.response.speak("I recommend buying 0 spare parts. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("I recommend buying " + (3 - parts) + " spare parts. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
+        this.emit(":responseReady");
+      }
     } else {
       this.response.speak("Say a number, and that's the amount you will buy.").listen("Please say a number.");
       this.emit(":responseReady");
@@ -289,7 +296,7 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you start too early, there won't be enough grass for the oxen. However, if you start too late, you risk getting caught in snow storms. I recommend leaving in May or June. When do you want to leave?").listen("When do you want to leave?");
+    this.response.speak("If you start too soon, there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. If you leave too late, you won't make it to Oregon before winter. I recommend leaving in May or June. When do you want to leave?").listen("When do you want to leave?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -320,6 +327,10 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   'PlayGame': function() {
     theOregonTrail.call(this);
   },
+  'BeginJourney': function() {
+    this.response.speak(goodNewsSFX + "Alright, it's " + month + "! Say OK to begin your journey.").listen("Say OK to begin your journey.");
+    this.emit(":responseReady");
+  },
   'Hunting': function() {
     var randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
     if (guess === randomNumber - 3 || guess === randomNumber + 3) {
@@ -344,7 +355,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.emit(':responseReady');
       }
     } else {
-      this.response.speak(gunShotSFX + "You guessed " + guess + ". The secret number was " + randomNumber + " Sorry, you missed your target. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.response.speak(gunShotSFX + "You guessed " + guess + ". The secret number was " + randomNumber + ". Sorry, you missed your target. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(':responseReady');
     }
   },
@@ -772,7 +783,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.emit(":responseReady");
   },
   'TheDalles': function() {
-    this.response.speak(travelingSFX + goodNewsSFX + "You have arrived at The Dalles. Congratulations! Located in northern Oregon, the Dalles is where the trail stops. You are blocked by the cascade mountains, and the only way to finish your journey is by floating down the Colombia River gorge. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    mapLocation = "Columbia River";
+    this.response.speak(travelingSFX + goodNewsSFX + "You have arrived at The Dalles. Congratulations! Located in northern Oregon, the Dalles is where the trail stops. You are blocked by the cascade mountains, and the only way to finish your journey is by floating down the Colombia River. It's going to be a treacherous last stretch. Say OK to continue.").listen("Say OK to continue.");
     this.emit(":responseReady");
   },
   'ChoseFortBridger': function() {
@@ -791,14 +803,31 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     this.response.speak("Great! You're going to The Dalles. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
+  'ChoseBarlowTollRoad': function() {
+    if (money >= 30) {
+      money -= 30;
+      this.response.speak("Great! You're taking the Barlow Toll Road to Oregon City. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+      this.emit(":responseReady");
+    } else {
+      this.handler.state = GAME_STATES.COLUMBIA_RIVER;
+      this.emitWithState('NoMoneyColumbiaRiver');
+    }
+  },
   'LeaveFort': function() {
     this.response.speak("Sorry, you don't have any money to buy anything, and no one else wants to trade with you. It's time to move on. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
   'ContinueGame': function() {
     trailDaysWithoutIncident = 0;
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    if (mapLocation === "Columbia River") {
+      this.handler.state = GAME_STATES.COLUMBIA_RIVER;
+      this.emitWithState('TimeToFloat');
+    } else if (mapLocation === "Fort Walla Walla") {
+      mapLocation = "Exit Fort Walla Walla";
+    } else {
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('PlayGame');
+    }
   },
   'AMAZON.HelpIntent': function() {
     this.response.speak("If you want to start the game from the beginning, say start over. If you want to quit, say stop. Otherwise, say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -925,6 +954,9 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
       this.emitWithState('TradeInstead');
     } else {
       trailDaysWithoutIncident = 0;
+      if (mapLocation === "Fort Walla Walla") {
+        mapLocation = "Exit Fort Walla Walla";
+      }
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('PlayGame');
     }
@@ -939,6 +971,9 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
   },
   'AMAZON.CancelIntent': function() {
     trailDaysWithoutIncident = 0;
+    if (mapLocation === "Fort Walla Walla") {
+      mapLocation = "Exit Fort Walla Walla";
+    }
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -961,12 +996,12 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
   },
   'GetTrailSplit': function() {
     if (this.event.request.intent.slots.direction.value.toLowerCase() === "fort bridger" || this.event.request.intent.slots.direction.value.toLowerCase() === "bridger" || this.event.request.intent.slots.direction.value.toLowerCase() === "fort") {
-      mapLocation = "Fort Bridger";
+      shortcut1 = false;
+      extraMiles += 105;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseFortBridger');
-    } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "soda springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "shortcut") {
-      mapLocation = "Soda Springs";
-      extraMiles -= 105;
+    } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "soda springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "soda" || this.event.request.intent.slots.direction.value.toLowerCase() === "springs" || this.event.request.intent.slots.direction.value.toLowerCase() === "shortcut") {
+      shortcut1 = true;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseSodaSprings');
     } else {
@@ -1010,12 +1045,12 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
   },
   'GetTrailSplit': function() {
     if (this.event.request.intent.slots.direction.value.toLowerCase() === "fort walla walla" || this.event.request.intent.slots.direction.value.toLowerCase() === "walla walla" || this.event.request.intent.slots.direction.value.toLowerCase() === "fort") {
-      mapLocation = "Fort Walla Walla";
+      shortcut2 = false;
+      extraMiles += 60;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseFortWallaWalla');
     } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "the dalles" || this.event.request.intent.slots.direction.value.toLowerCase() === "dalles" || this.event.request.intent.slots.direction.value.toLowerCase() === "shortcut") {
-      mapLocation = "The Dalles";
-      extraMiles -= 150;
+      shortcut2 = true;
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('ChoseTheDalles');
     } else {
@@ -1046,6 +1081,51 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
   },
   'Unhandled': function() {
     this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Walla Walla or The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+    this.emit(":responseReady");
+  },
+});
+
+// HANDLE THIRD TRAIL SPLIT
+const thirdTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.THIRD_TRAIL_SPLIT, {
+  'ChooseDirection': function() {
+    hasChosenThirdDirection = true;
+    this.response.speak("The trail ends here. There are two ways to go to Oregon City: You can take the Barlow Toll Road for $30, or you can float down the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road or the Columbia River?");
+    this.emit(":responseReady");
+  },
+  'GetTrailSplit': function() {
+    if (this.event.request.intent.slots.direction.value.toLowerCase() === "columbia river" || this.event.request.intent.slots.direction.value.toLowerCase() === "columbia" || this.event.request.intent.slots.direction.value.toLowerCase() === "river") {
+      mapLocation = "Columbia River";
+      shortcut3 = true;
+      this.handler.state = GAME_STATES.COLUMBIA_RIVER;
+      this.emitWithState('ChoseColumbiaRiver');
+    } else if (this.event.request.intent.slots.direction.value.toLowerCase() === "barlow toll road" || this.event.request.intent.slots.direction.value.toLowerCase() === "barlow" || this.event.request.intent.slots.direction.value.toLowerCase() === "toll road" || this.event.request.intent.slots.direction.value.toLowerCase() === "road") {
+      extraMiles += 90;
+      shortcut3 = false;
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('ChoseBarlowTollRoad');
+    } else {
+      this.handler.state = GAME_STATES.THIRD_TRAIL_SPLIT;
+      this.emitWithState('Unhandled');
+    }
+  },
+  'AMAZON.HelpIntent': function() {
+    this.response.speak("The Barlow Toll Road costs $30. It's a rough, mountainous road, and it's 90 miles long. Floating down the Columbia River is much shorter, but it's also much more dangerous. Do you want to take the Barlow Toll Road or the Columbia River?").listen("Do you want to take the Barlow Toll Road or the Columbia River?");
+    this.emit(":responseReady");
+  },
+  'AMAZON.StartOverIntent': function() {
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGameAgain');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.THIRD_TRAIL_SPLIT;
+    this.emitWithState('AMAZON.HelpIntent');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("Sorry, I didn't get that. You must choose to take the Barlow Toll Road or the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road or the Columbia River?");
     this.emit(":responseReady");
   },
 });
@@ -1317,9 +1397,8 @@ const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
-    trailDaysWithoutIncident = 0;
-    this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('Status');
   },
   'AMAZON.StopIntent': function() {
     this.response.speak(EXIT_SKILL_MESSAGE);
@@ -1373,6 +1452,9 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
   },
   'AMAZON.NoIntent': function() {
     trailDaysWithoutIncident = 0;
+    if (mapLocation === "Fort Walla Walla") {
+      mapLocation = "Exit Fort Walla Walla";
+    }
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1386,6 +1468,9 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
   },
   'AMAZON.CancelIntent': function() {
     trailDaysWithoutIncident = 0;
+    if (mapLocation === "Fort Walla Walla") {
+      mapLocation = "Exit Fort Walla Walla";
+    }
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('PlayGame');
   },
@@ -1660,6 +1745,129 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
   },
 });
 
+// HANDLE COLUMBIA RIVER
+var obstacles = 1;
+var crashes = 0;
+const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVER, {
+  'TimeToFloat': function() {
+    this.response.speak("Ok, here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+    this.emit(":responseReady");
+  },
+  'ChoseColumbiaRiver': function() {
+    miles += 75;
+    days += 5;
+    trailDays += 5;
+    if (food <= (peopleHealthy.length + peopleSick.length) * 5) {
+      food = 0;
+    } else {
+      food -= (peopleHealthy.length + peopleSick.length) * 5;
+    }
+    this.response.speak("Great! You chose to float down the Columbia River. Let's go to the river." + wagonWheels3SFX + "Congratulations! You made it to the Columbia River. Are you ready to float to Oregon City? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+    this.emit(":responseReady");
+  },
+  'NoMoneyColumbiaRiver': function() {
+    this.response.speak("Sorry, but you don't have enough money to take the Barlow Toll Road. You will have to float down the Columbia River to Oregon City. Are you ready? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+    this.emit(":responseReady");
+  },
+  'GetLeftOrRight': function() {
+    if (obstacles === 1) {
+      obstacles++;
+      if (this.event.request.intent.slots.leftorright.value === "left") {
+        this.response.speak(goodNewsSFX + "Great job! You missed the boulder." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+        this.emit(":responseReady");
+      } else {
+        crashes += 1;
+        if (oxen >= 1) {
+          oxen -= 1;
+          this.response.speak(badNewsSFX + "Oh no! You hit the boulder. An ox fell off your raft and was swept away by the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.emit(":responseReady");
+        } else if (food >= 25) {
+          food -= 25;
+          this.response.speak(badNewsSFX + "Oh no! You hit the boulder. 25 pounds of food fell off your raft and into the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.emit(":responseReady");
+        } else if (parts >= 1 && food >= 15) {
+          parts -= 1;
+          food -= 15;
+          this.response.speak(badNewsSFX + "Oh no! You hit the boulder. A spare part and 15 pounds of food fell off your raft and into the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.emit(":responseReady");
+        } else {
+          columbiaRiverDamage += 50;
+          this.response.speak(badNewsSFX + "Oh no! You hit the boulder. You raft got damaged, but you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.emit(":responseReady");
+        }
+      }
+    } else if (obstacles === 2) {
+      obstacles++;
+      if (this.event.request.intent.slots.leftorright.value === "left") {
+        this.response.speak(goodNewsSFX + "Great job! You made it around the logs and rocks." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+        this.emit(":responseReady");
+      } else {
+        crashes += 1;
+        if (peopleSick.length > 1) {
+          deathPeopleSick.call(this);
+          this.response.speak(deathSFXNewsSFX + "Oh no! You hit a stray log. The crash caused " + victim + " to fall off the raft and get swept away in the river. Rest in peace " + victim + "." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.emit(":responseReady");
+        } else if (peopleHealthy.length > 1) {
+          sickness.call(this);
+          this.response.speak(badNewsSFX + "Oh no! You hit a stray log. " + invalid + " was injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.emit(":responseReady");
+        } else {
+          if (peopleHealthy.includes(mainPlayer)) {
+            sickness.call(this);
+            this.response.speak(badNewsSFX + "Oh no! You hit a stray log and got injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.emit(":responseReady");
+          } else {
+            columbiaRiverDamage += 50;
+            this.response.speak(badNewsSFX + "Oh no! You hit a stray log and got injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.emit(":responseReady");
+          }
+        }
+      }
+    } else {
+      if (this.event.request.intent.slots.leftorright.value === "right") {
+        gameOverMessage = "columbia river winner";
+        gameOver.call(this);
+      } else {
+        crashes += 1;
+        if (peopleSick.includes(mainPlayer) && (peopleHealthy.length + peopleSick.length === 1)) {
+          gameOverMessage = "columbia river you drowned";
+          gameOver.call(this);
+        } else if (crashes === 3) {
+          gameOverMessage = "columbia river raft sank";
+          gameOver.call(this);
+        } else {
+          food = 0;
+          oxen = 0;
+          parts = 0;
+          money = 0;
+          gameOverMessage = "columbia river barely winner";
+          gameOver.call(this);
+        }
+      }
+    }
+  },
+  'AMAZON.HelpIntent': function() {
+    this.response.speak("If you want to start the game from the beginning, say start over. If you want to quit, say stop. Otherwise, please choose to paddle to the left or to the right.").listen("Do you want to paddle to the left or to the right?");
+    this.emit(":responseReady");
+  },
+  'AMAZON.StartOverIntent': function() {
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGameAgain');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.handler.state = GAME_STATES.COLUMBIA_RIVER;
+    this.emitWithState('AMAZON.HelpIntent');
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak("You must choose left or right. Which way do you want to paddle?").listen("Do you want to paddle to the left or to the right?");
+    this.emit(":responseReady");
+  },
+});
+
 
 
 // =====================
@@ -1674,7 +1882,7 @@ var food = 0; // tracks player's total food
 var oxen = 0; // tracks player's total oxen
 var parts = 0; // tracks player's total parts
 var miles = 0; // tracks distance traveled on map
-var extraMiles = 255; // tracks shortcuts
+var extraMiles = 0; // tracks shortcuts
 var month; // tracks starting month
 var days = 0; // tracks calendar
 var trailDays = 0; // tracks daily usage of supplies
@@ -1691,6 +1899,10 @@ var sinkChance = 0; // tracks likelihood of sinking if floating across river
 var mapLocation; // tracks player's location on map
 var hasChosenFirstDirection = false; // tracks player's choice at split trail
 var hasChosenSecondDirection = false; // tracks player's choice at split trail
+var hasChosenThirdDirection = false; // tracks player's choice at split trail
+var shortcut1 = false; // tracks player's shortcuts
+var shortcut2 = false; // tracks player's shortcuts
+var shortcut3 = false; // tracks player's shortcuts
 var currentlyBuyingWhat; // tracks what player is buying
 var currentlyBuyingHowMany; // tracks how much a user is buying
 var itemPrice = 0; // tracks cost of item player is buying
@@ -1703,23 +1915,23 @@ var tradeAllowed = true; // tracks if player can still trade at fort
 var fate; // adds randomness to the game and changes every day
 var gameOverMessage; // tracks the reason for game over
 
-// 1836 CALENDAR
-function dateFrom1836(day){
-  var date = new Date(1836, 0);
+// 1846 CALENDAR
+function dateFrom1846(day){
+  var date = new Date(1846, 0);
   return new Date(date.setDate(day));
 }
 
 // STATUS UPDATE FOR CARD RENDERER
-var statusCard = dateFrom1836(days).toDateString()
+var statusCard = dateFrom1846(days).toDateString()
   + "\n-----------------"
   + "\nDays on the trail: " + trailDays
-  + "\nMiles: " + miles + "/" + (1845 + extraMiles)
+  + "\nMiles: " + miles + "/" + (1740 + extraMiles)
   + "\nMoney: " + money
   + "\nFood: " + food
   + "\nOxen: " + oxen
   + "\nParts: " + parts
-  + "\nPeople healthy: " + peopleHealthy
-  + "\nPeople sick: " + peopleSick
+  + "\nPeople healthy: " + peopleHealthy.join(", ")
+  + "\nPeople sick: " + peopleSick.join(", ")
 ;
 
 // SOUND EFFECTS
@@ -1755,10 +1967,11 @@ var resetVariables = function () {
   oxen = 0;
   parts = 0;
   miles = 0;
-  extraMiles = 255;
+  extraMiles = 0;
   month = undefined;
   days = 0;
   trailDays = 0;
+  trailDaysWithoutIncident = 0;
   invalid = undefined;
   victim = undefined;
   guess = 0;
@@ -1771,6 +1984,10 @@ var resetVariables = function () {
   mapLocation = undefined;
   hasChosenFirstDirection = false;
   hasChosenSecondDirection = false;
+  hasChosenThirdDirection = false;
+  shortcut1 = false;
+  shortcut2 = false;
+  shortcut3 = false;
   currentlyBuyingWhat = undefined;
   currentlyBuyingHowMany = 0;
   itemPrice = 0;
@@ -1778,6 +1995,8 @@ var resetVariables = function () {
   purchaseChoice = undefined;
   tradeChances = 0;
   tradeAttempts = 0;
+  tradeDeal = 0;
+  tradeAllowed = true;
   fate = 0;
   gameOverMessage = undefined;
   hasChosenProfession = false;
@@ -1786,6 +2005,11 @@ var resetVariables = function () {
   boughtOxen = false;
   boughtParts = false;
   hasChosenMonth = false;
+  daysOfRest = 0;
+  howManyToHeal = 0;
+  recoveredMessage = undefined;
+  columbiaRiverDamage = 0;
+  bonus = 0;
 };
 
 
@@ -1847,7 +2071,7 @@ var chooseProfessionAgain = function() {
 };
 
 // SUPPLIES
-const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store and buy food, oxen, and spare parts.";
+const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store and buy food, oxen, and spare parts." + fortSFX;
 const FOOD_REPROMPT = "Food costs 50 cents per pound. How many pounds of food do you want to buy?";
 const OXEN_REPROMPT = "Each ox costs $50. How many oxen do you want to buy?";
 const PARTS_REPROMPT = "Each spare part costs $30. How many spare parts do you want to buy?";
@@ -1924,8 +2148,19 @@ var mustBuyOxen = function() {
 var hasChosenMonth = false;
 var chooseMonth = function() {
   hasChosenMonth = true;
-  this.response.speak(cashSFX + "Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare parts. You also have $" + money + " left in your pocket. " + peopleHealthy[1] + ", " + peopleHealthy[2] + ", " + peopleHealthy[3] + ", and " + peopleHealthy[4] + " are ready to go. When do you want to start your journey? Choose a month between March and August.").listen("You can start your journey in March, April, May, June, July, or August. Which month do you want?");
-  this.emit(':responseReady');
+  if (oxen === 1 && parts === 1) {
+    this.response.speak(cashSFX + "Great! You have " + food + " pounds of food, " + oxen + " ox, and " + parts + " spare part. You also have $" + money + " left in your pocket. " + peopleHealthy[1] + ", " + peopleHealthy[2] + ", " + peopleHealthy[3] + ", and " + peopleHealthy[4] + " are ready to go. When do you want to start your journey? Choose a month between March and August.").listen("You can start your journey in March, April, May, June, July, or August. Which month do you want?");
+    this.emit(':responseReady');
+  } else if (oxen === 1 && parts > 1) {
+    this.response.speak(cashSFX + "Great! You have " + food + " pounds of food, " + oxen + " ox, and " + parts + " spare parts. You also have $" + money + " left in your pocket. " + peopleHealthy[1] + ", " + peopleHealthy[2] + ", " + peopleHealthy[3] + ", and " + peopleHealthy[4] + " are ready to go. When do you want to start your journey? Choose a month between March and August.").listen("You can start your journey in March, April, May, June, July, or August. Which month do you want?");
+    this.emit(':responseReady');
+  } else if (oxen > 1 && parts === 1) {
+    this.response.speak(cashSFX + "Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare part. You also have $" + money + " left in your pocket. " + peopleHealthy[1] + ", " + peopleHealthy[2] + ", " + peopleHealthy[3] + ", and " + peopleHealthy[4] + " are ready to go. When do you want to start your journey? Choose a month between March and August.").listen("You can start your journey in March, April, May, June, July, or August. Which month do you want?");
+    this.emit(':responseReady');
+  } else {
+    this.response.speak(cashSFX + "Great! You have " + food + " pounds of food, " + oxen + " oxen, and " + parts + " spare parts. You also have $" + money + " left in your pocket. " + peopleHealthy[1] + ", " + peopleHealthy[2] + ", " + peopleHealthy[3] + ", and " + peopleHealthy[4] + " are ready to go. When do you want to start your journey? Choose a month between March and August.").listen("You can start your journey in March, April, May, June, July, or August. Which month do you want?");
+    this.emit(':responseReady');
+  }
 };
 
 var chooseMonthAgain = function() {
@@ -1937,27 +2172,27 @@ var setDays = function() {
   if (month.toLowerCase() === "march") {
     days = 61;
     this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.emitWithState('BeginJourney');
   } else if (month.toLowerCase() === "april") {
     days = 92;
     this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.emitWithState('BeginJourney');
   } else if (month.toLowerCase() === "may") {
     days = 122;
     this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.emitWithState('BeginJourney');
   } else if (month.toLowerCase() === "june") {
     days = 153;
     this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.emitWithState('BeginJourney');
   } else if (month.toLowerCase() === "july") {
     days = 183;
     this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.emitWithState('BeginJourney');
   } else if (month.toLowerCase() === "august") {
     days = 214;
     this.handler.state = GAME_STATES.EVENT;
-    this.emitWithState('PlayGame');
+    this.emitWithState('BeginJourney');
   }
 };
 
@@ -2311,19 +2546,36 @@ var deathPeopleHealthy = function() {
 };
 
 // GAME OVER
+var columbiaRiverDamage = 0;
+var bonus = 0;
+var getBonus = function () {
+  if (profession === "banker") {
+    bonus = 1;
+  } else if (profession === "carpenter") {
+    bonus = 2;
+  } else if (profession === "farmer") {
+    bonus = 3;
+  } else {
+    bonus = 1;
+  }
+};
+var points = bonus*((peopleHealthy.length * 100) + (peopleSick.length * 50) + (oxen * 50) + (food * 2) + (parts * 10) + money - trailDays - columbiaRiverDamage);
+
 var gameOver = function() {
   if (gameOverMessage === "winner") {
-    var bonus;
-    if (profession.toLowerCase() === "banker") {
-      bonus = 1;
-    } else if (profession.toLowerCase() === "carpenter") {
-      bonus = 2;
-    } else if (profession.toLowerCase() === "farmer") {
-      bonus = 3;
-    }
-    var points = bonus*((peopleHealthy.length * 100) + (peopleSick.length * 50) + (oxen * 20) + (food * 2) + (parts * 2) + money - trailDays);
+    getBonus.call(this);
     this.response.speak(travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of " + points + " points.");
-    this.response.cardRenderer("Congratulations, you reach Oregon City! FINAL SCORE: " + points);
+    this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + points);
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "columbia river winner") {
+    getBonus.call(this);
+    this.response.speak(riverSFX + winnerSFX + "Congratulations, you reached the dock at Oregon City! You finished the game with a score of " + points + " points.");
+    this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + points);
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "columbia river barely winner") {
+    getBonus.call(this);
+    this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached the Oregon City! You finished the game with a score of " + points + " points.");
+    this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + points);
     this.emit(':responseReady');
   } else if (gameOverMessage === "you died") {
     var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
@@ -2334,6 +2586,14 @@ var gameOver = function() {
   } else if (gameOverMessage === "you drowned") {
     this.response.speak(riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
     this.response.cardRenderer("Game over! You drowned trying to cross the " + mapLocation + ".");
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "columbia river you drowned") {
+    this.response.speak(loserSFX + "Your raft capsized in the rapids, and you drowned. Game over!");
+    this.response.cardRenderer("Game over! You drowned in the Columbia River.");
+    this.emit(':responseReady');
+  } else if (gameOverMessage === "columbia river raft sank") {
+    this.response.speak(loserSFX + "Your raft was so badly damaged, it capsized in the rapids and you drowned. Game over!");
+    this.response.cardRenderer("Game over! You drowned in the Columbia River.");
     this.emit(':responseReady');
   } else if (gameOverMessage === "no ferry money you drowned") {
     this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
@@ -2437,45 +2697,82 @@ var travel = function() {
     this.handler.state = GAME_STATES.RIVER;
     this.emitWithState('CrossingChoice');
   } else if (miles === 1200) {
-    if (mapLocation === "Fort Bridger") {
+    if (shortcut1 === true) {
+      mapLocation = "Soda Springs";
+      this.handler.state = GAME_STATES.EVENT;
+      this.emitWithState('SodaSprings');
+    } else {
+      mapLocation = "Fort Bridger";
       tradeChances = 3;
       tradeAttempts = 0;
       this.handler.state = GAME_STATES.FORT;
       this.emitWithState('WelcomeToFort');
-    } else if (mapLocation === "Soda Springs") {
-      this.handler.state = GAME_STATES.EVENT;
-      this.emitWithState('SodaSprings');
     }
-  } else if (miles === 1260) {
+  } else if (miles === 1260 && shortcut1 === true) {
     mapLocation = "Fort Hall";
     tradeChances = 2;
     tradeAttempts = 0;
     this.handler.state = GAME_STATES.FORT;
     this.emitWithState('WelcomeToFort');
-  } else if (miles === 1440) {
+  } else if (miles === 1305 && shortcut1 === false) {
+    mapLocation = "Soda Springs";
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('SodaSprings');
+  } else if (miles === 1365 && shortcut1 === false) {
+    mapLocation = "Fort Hall";
+    tradeChances = 2;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
+  } else if (miles === 1440 && shortcut1 === true) {
     mapLocation = "Snake River";
     riverDepth = 5;
     ferryCost = 7;
     sinkChance = 5;
     this.handler.state = GAME_STATES.RIVER;
     this.emitWithState('CrossingChoice');
-  } else if (miles === 1560 && mapLocation !== "Fort Walla Walla") {
+  } else if (miles === 1545 && shortcut1 === false) {
+    mapLocation = "Snake River";
+    riverDepth = 5;
+    ferryCost = 7;
+    sinkChance = 5;
+    this.handler.state = GAME_STATES.RIVER;
+    this.emitWithState('CrossingChoice');
+  } else if (miles === 1560 && shortcut1 === true) {
     mapLocation = "Fort Boise";
     tradeChances = 1;
     tradeAttempts = 0;
     this.handler.state = GAME_STATES.FORT;
     this.emitWithState('WelcomeToFort');
-  } else if (miles === 1710) {
-    if (mapLocation === "Fort Walla Walla") {
-      tradeChances = 1;
-      tradeAttempts = 0;
-      this.handler.state = GAME_STATES.FORT;
-      this.emitWithState('WelcomeToFort');
-    } else if (mapLocation === "The Dalles") {
-      this.handler.state = GAME_STATES.EVENT;
-      this.emitWithState('TheDalles');
-    }
-  } else if (miles === 1845) {
+  } else if (miles === 1665 && shortcut1 === false) {
+    mapLocation = "Fort Boise";
+    tradeChances = 1;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
+  } else if (miles === 1740 && shortcut1 === true && shortcut2 === true) {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('TheDalles');
+  } else if (miles === 1800 && shortcut1 === true && shortcut2 === false) {
+    mapLocation = "Fort Walla Walla";
+    tradeChances = 1;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
+  } else if (miles === 1845 && shortcut1 === false && shortcut2 === true) {
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('TheDalles');
+  } else if (miles === 1890 && shortcut1 === true && shortcut2 === false && shortcut3 === false) {
+    mapLocation = "Oregon City";
+    gameOverMessage = "winner";
+    gameOver.call(this);
+  } else if (miles === 1905 && shortcut1 === false && shortcut2 === false) {
+    mapLocation = "Fort Walla Walla";
+    tradeChances = 1;
+    tradeAttempts = 0;
+    this.handler.state = GAME_STATES.FORT;
+    this.emitWithState('WelcomeToFort');
+  } else if (miles === 1995 && shortcut1 === false && shortcut2 === false && shortcut3 == false) {
     mapLocation = "Oregon City";
     gameOverMessage = "winner";
     gameOver.call(this);
@@ -2538,6 +2835,9 @@ var theOregonTrail = function() {
   } else if (mapLocation === "Fort Boise" && hasChosenSecondDirection === false) {
     this.handler.state = GAME_STATES.SECOND_TRAIL_SPLIT;
     this.emitWithState('ChooseDirection');
+  } else if (mapLocation === "Exit Fort Walla Walla" && hasChosenThirdDirection === false) {
+    this.handler.state = GAME_STATES.THIRD_TRAIL_SPLIT;
+    this.emitWithState('ChooseDirection');
   } else {
     travel.call(this);
   }
@@ -2547,6 +2847,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, fortHandlers, firstTrailSplitHandlers, secondTrailSplitHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, fortHandlers, firstTrailSplitHandlers, secondTrailSplitHandlers, thirdTrailSplitHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers, columbiaRiverHandlers);
   alexa.execute();
 };

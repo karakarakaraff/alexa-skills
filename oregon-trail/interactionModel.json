@@ -151,6 +151,25 @@
         ]
       },
       {
+        "name": "LEFT_OR_RIGHT",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "left",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "right",
+              "synonyms": []
+            }
+          }
+        ]
+      },
+      {
         "name": "RIVER_CROSSINGS",
         "values": [
           {
@@ -239,6 +258,62 @@
             "id": null,
             "name": {
               "value": "Dalles",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "soda",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Columbia River",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "columbia",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "river",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Barlow Toll Road",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "toll road",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "barlow",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "road",
               "synonyms": []
             }
           }
@@ -333,6 +408,25 @@
           {
             "name": "item",
             "type": "ITEMS"
+          }
+        ]
+      },
+      {
+        "name": "GetLeftOrRight",
+        "samples": [
+          "{leftorright}",
+          "go {leftorright}",
+          "take {leftorright}",
+          "take a {leftorright}",
+          "turn {leftorright}",
+          "go to the {leftorright}",
+          "paddle {leftorright}",
+          "paddle to the {leftorright}"
+        ],
+        "slots": [
+          {
+            "name": "leftorright",
+            "type": "LEFT_OR_RIGHT"
           }
         ]
       },
