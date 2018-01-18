@@ -1,0 +1,29 @@
+{
+  "skillManifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "It's 1846 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail. Will you make it to Oregon City?",
+          "examplePhrases": [
+            "Alexa, open Oregon Trail.",
+            "I want to be a banker.",
+            "Let's float across the river.",
+          ],
+          "name": "Oregon Trail",
+          "description": "Packed with fun just like the classic game, the Oregon Trail takes you on a journey across the West with historic landmarks and forts along the way. Hunt for big game, cross rivers your way, take a chance with shortcuts, and most of all, hope that fate is on your side."
+        }
+      },
+      "isAvailableWorldwide": true,
+      "category": "GAMES",
+      "distributionCountries": []
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sourceDir": "lambda/custom"
+        }
+      }
+    },
+    "manifestVersion": "1.0"
+  }
+}
