@@ -13,5 +13,6 @@
 
 
 ## Oregon Trail
-*Status: work in progress*
-Try playing the game in vanilla JavaScript --> [repl.it/@karakarakaraff/theOregonTrail](https://repl.it/@karakarakaraff/theOregonTrail)
+**It's 1846 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail. Will you make it to Oregon City?** Packed with fun just like the classic game, the Oregon Trail takes you on a journey across the West with historic landmarks and forts along the way. Hunt for big game, cross rivers your way, take a chance with shortcuts, and most of all, hope that fate is on your side.
+
+*Status: certification*
