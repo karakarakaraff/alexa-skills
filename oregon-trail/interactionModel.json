@@ -50,7 +50,7 @@
         "name": "BUY_OR_TRADE",
         "values": [
           {
-            "id": null,
+            "id": "BUY",
             "name": {
               "value": "buy",
               "synonyms": [
@@ -61,7 +61,7 @@
             }
           },
           {
-            "id": null,
+            "id": "TRADE",
             "name": {
               "value": "trade",
               "synonyms": [
@@ -80,19 +80,14 @@
             "id": null,
             "name": {
               "value": "OK",
-              "synonyms": [
-                "okay"
-              ]
+              "synonyms": []
             }
           },
           {
             "id": null,
             "name": {
               "value": "continue",
-              "synonyms": [
-                "keep going",
-                "go"
-              ]
+              "synonyms": []
             }
           },
           {
@@ -108,6 +103,69 @@
               "value": "fine",
               "synonyms": []
             }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "okie dokie",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "yep",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "yup",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "alrighty",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "okay",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "go",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "keep going",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "go on the trail",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "continue on the trail",
+              "synonyms": []
+            }
           }
         ]
       },
@@ -115,7 +173,7 @@
         "name": "ITEMS",
         "values": [
           {
-            "id": null,
+            "id": "OXEN",
             "name": {
               "value": "oxen",
               "synonyms": [
@@ -124,27 +182,20 @@
             }
           },
           {
-            "id": null,
+            "id": "FOOD",
             "name": {
               "value": "food",
               "synonyms": []
             }
           },
           {
-            "id": null,
-            "name": {
-              "value": "parts",
-              "synonyms": [
-                "part"
-              ]
-            }
-          },
-          {
-            "id": null,
+            "id": "PARTS",
             "name": {
               "value": "spare parts",
               "synonyms": [
-                "spare part"
+                "spare part",
+                "part",
+                "parts"
               ]
             }
           }
@@ -192,31 +243,41 @@
         "name": "SPLIT_CHOICES",
         "values": [
           {
-            "id": null,
+            "id": "BRIDGER",
             "name": {
               "value": "Fort Bridger",
-              "synonyms": []
+              "synonyms": [
+                "Bridger"
+              ]
             }
           },
           {
-            "id": null,
+            "id": "SPRINGS",
             "name": {
               "value": "Soda Springs",
-              "synonyms": []
+              "synonyms": [
+                "Soda",
+                "Springs"
+              ]
             }
           },
           {
-            "id": null,
+            "id": "DALLES",
             "name": {
               "value": "The Dalles",
-              "synonyms": []
+              "synonyms": [
+                "Dalles"
+              ]
             }
           },
           {
-            "id": null,
+            "id": "WALLA",
             "name": {
               "value": "Fort Walla Walla",
-              "synonyms": []
+              "synonyms": [
+                "Walla Walla",
+                "Walla"
+              ]
             }
           },
           {
@@ -234,87 +295,24 @@
             }
           },
           {
-            "id": null,
-            "name": {
-              "value": "Walla Walla",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "Springs",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "Bridger",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "Dalles",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "soda",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
+            "id": "COLUMBIA",
             "name": {
               "value": "Columbia River",
-              "synonyms": []
+              "synonyms": [
+                "Columbia",
+                "river"
+              ]
             }
           },
           {
-            "id": null,
-            "name": {
-              "value": "columbia",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "river",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
+            "id": "BARLOW",
             "name": {
               "value": "Barlow Toll Road",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "toll road",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "barlow",
-              "synonyms": []
-            }
-          },
-          {
-            "id": null,
-            "name": {
-              "value": "road",
-              "synonyms": []
+              "synonyms": [
+                "toll road",
+                "barlow",
+                "road"
+              ]
             }
           }
         ]
@@ -552,7 +550,15 @@
           "I want to {crossing} across",
           "I'm going to {crossing} across",
           "I'm gonna {crossing} across",
-          "I wanna {crossing} across"
+          "I wanna {crossing} across",
+          "{crossing} across the river",
+          "I'll {crossing} across the river",
+          "Let's {crossing} across the river",
+          "How about {crossing} across the river",
+          "I want to {crossing} across the river",
+          "I'm going to {crossing} across the river",
+          "I'm gonna {crossing} across the river",
+          "I wanna {crossing} across the river"
         ],
         "slots": [
           {
