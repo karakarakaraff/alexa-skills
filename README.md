@@ -1,7 +1,7 @@
 ## Kurt Vonnegut Quotes
 **Kurt Vonnegut once said, "And so it goes." And so it goes.** Kurt Vonnegut Quotes brings all of your favorite thoughts, musings, and excerpts from the famous author to your fingertips. Fart around, learn something, and maybe laugh a little as you gain insight from the mind who wrote such classics as "Slaughter-House Five" and "Cat's Cradle" in addition to numerous essays, short stories, plays, and more. It's a dose of dark humor mixed with philosophy and a bit of absurdity — it's everything and nothing, with a twist.
 
-*Status: live* --> [Alexa Skills Store: Kurt Vonnegut Quotes](https://www.amazon.com/Kara-Flaherty-Kurt-Vonnegut-Quotes/dp/B076VRMNM5)
+*Status: live* --> [Alexa Skills Store: Kurt Vonnegut Quotes](https://www.amazon.com/dp/B076VRMNM5)
 
 
 
@@ -13,6 +13,6 @@
 
 
 ## Oregon Trail
-**It's 1846 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail. Will you make it to Oregon City?** Packed with fun just like the classic game, the Oregon Trail takes you on a journey across the West with historic landmarks and forts along the way. Hunt for big game, cross rivers your way, take a chance with shortcuts, and most of all, hope that fate is on your side.
+**It's 1846 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail. Will you make it to Oregon City?** Packed with fun just like the classic game, the Oregon Trail takes you on a journey across the West with historic landmarks and forts along the way. Hunt for big game, cross major rivers, take a chance with shortcuts, and most of all, hope that fate is on your side.
 
 *Status: certification*
