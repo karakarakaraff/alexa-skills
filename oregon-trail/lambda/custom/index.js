@@ -177,29 +177,39 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     gameIntroStartOver.call(this);
   },
   'GetName': function() {
-    if (this.event.session.attributes.peopleHealthy.length === 0) {
-      let mainPlayer = this.event.request.intent.slots.name.value;
-      this.event.session.attributes.mainPlayer = capitalizeFirstLetter(mainPlayer);
-      this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(mainPlayer));
-      setupParty.call(this);
-    } else if (this.event.session.attributes.peopleHealthy.length === 1) {
-      let person2 = this.event.request.intent.slots.name.value;
-      this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person2));
-      setupParty.call(this);
-    } else if (this.event.session.attributes.peopleHealthy.length === 2) {
-      let person3 = this.event.request.intent.slots.name.value;
-      this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person3));
-      setupParty.call(this);
-    } else if (this.event.session.attributes.peopleHealthy.length === 3) {
-      let person4 = this.event.request.intent.slots.name.value;
-      this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person4));
-      setupParty.call(this);
-    } else if (this.event.session.attributes.peopleHealthy.length === 4) {
-      let person5 = this.event.request.intent.slots.name.value;
-      this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person5));
-      setupParty.call(this);
+    if (this.event.request.intent && this.event.request.intent.slots && this.event.request.intent.slots.name && this.event.request.intent.slots.name.value) {
+      if (this.event.session.attributes.peopleHealthy.length === 0) {
+        var mainPlayer = this.event.request.intent.slots.name.value;
+        this.event.session.attributes.mainPlayer = capitalizeFirstLetter(mainPlayer);
+        this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(mainPlayer));
+        setupParty.call(this);
+      } else if (this.event.session.attributes.peopleHealthy.length === 1) {
+        var person2 = this.event.request.intent.slots.name.value;
+        this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person2));
+        setupParty.call(this);
+      } else if (this.event.session.attributes.peopleHealthy.length === 2) {
+        var person3 = this.event.request.intent.slots.name.value;
+        this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person3));
+        setupParty.call(this);
+      } else if (this.event.session.attributes.peopleHealthy.length === 3) {
+        var person4 = this.event.request.intent.slots.name.value;
+        this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person4));
+        setupParty.call(this);
+      } else if (this.event.session.attributes.peopleHealthy.length === 4) {
+        var person5 = this.event.request.intent.slots.name.value;
+        this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person5));
+        setupParty.call(this);
+      } else {
+        setupParty.call(this);
+      }
     } else {
-      setupParty.call(this);
+      if (this.event.session.attributes.mainPlayer === undefined) {
+        this.response.speak("I'm sorry, I didn't get that. What is your name?").listen("What is your name?");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak("I'm sorry, I didn't get that. What is the name?").listen("What is the name?");
+        this.emit(":responseReady");
+      }
     }
   },
   'AMAZON.HelpIntent': function() {
@@ -245,24 +255,24 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
       // Allow people to register a name that is also a month
       if (this.event.request.intent.name === "GetStartingMonth") {
         if (this.event.session.attributes.peopleHealthy.length === 0) {
-          let mainPlayer = this.event.request.intent.slots.month.value;
+          var mainPlayer = this.event.request.intent.slots.month.value;
           this.event.session.attributes.mainPlayer = mainPlayer;
           this.event.session.attributes.peopleHealthy.push(mainPlayer);
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 1) {
-          let person2 = this.event.request.intent.slots.month.value;
+          var person2 = this.event.request.intent.slots.month.value;
           this.event.session.attributes.peopleHealthy.push(person2);
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 2) {
-          let person3 = this.event.request.intent.slots.month.value;
+          var person3 = this.event.request.intent.slots.month.value;
           this.event.session.attributes.peopleHealthy.push(person3);
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 3) {
-          let person4 = this.event.request.intent.slots.month.value;
+          var person4 = this.event.request.intent.slots.month.value;
           this.event.session.attributes.peopleHealthy.push(person4);
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 4) {
-          let person5 = this.event.request.intent.slots.month.value;
+          var person5 = this.event.request.intent.slots.month.value;
           this.event.session.attributes.peopleHealthy.push(person5);
           setupParty.call(this);
         } else {
@@ -282,7 +292,7 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     if (this.event.session.attributes.hasChosenProfession === false) {
       chooseProfession.call(this);
     } else if (this.event.request.intent && this.event.request.intent.slots && this.event.request.intent.slots.profession && this.event.request.intent.slots.profession.value) {
-      let profession = this.event.request.intent.slots.profession.value;
+      var profession = this.event.request.intent.slots.profession.value;
       this.event.session.attributes.profession = profession;
       if (this.event.session.attributes.profession.toLowerCase() !== "banker" && this.event.session.attributes.profession.toLowerCase() !== "carpenter" && this.event.session.attributes.profession.toLowerCase() !== "farmer") {
         chooseProfessionAgain.call(this);
@@ -459,11 +469,11 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'BeginJourney': function() {
     this.response.speak(goodNewsSFX + "Alright, it's " + this.event.session.attributes.month + "! Say OK to begin your journey.").listen("Say OK to begin your journey.");
-    this.response.cardRenderer(statusCard.call(this));
+    // this.response.cardRenderer(statusCard.call(this));
     this.emit(":responseReady");
   },
   'Hunting': function() {
-    let randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+    var randomNumber = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
     if (this.event.session.attributes.guess === randomNumber - 3 || this.event.session.attributes.guess === randomNumber + 3) {
       this.event.session.attributes.food += 2;
       this.response.speak(gunShotSFX + "You guessed " + this.event.session.attributes.guess + ". The secret number was " + randomNumber + ". Congratulations! You shot a squirrel and brought back 2 pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -544,8 +554,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'Death': function() {
-    let diseases = ["a fever", "dysentery", "an infection", "dehydration"];
-    let fatality = diseases[Math.floor(Math.random() * diseases.length)];
+    var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
+    var fatality = diseases[Math.floor(Math.random() * diseases.length)];
     if (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length === 1) {
       this.event.session.attributes.peopleHealthy = [];
       this.event.session.attributes.peopleSick = [];
@@ -620,7 +630,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'BuffaloStampede': function() {
-    let stampedeChance = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+    var stampedeChance = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
     if (stampedeChance === 9 && this.event.session.attributes.peopleSick.length + this.event.session.attributes.peopleHealthy.length > 1) {
       if (this.event.session.attributes.peopleHealthy.length > 1) {
         deathPeopleHealthy.call(this);
@@ -638,8 +648,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'OxProblem': function() {
-    let allOxProblems = ["An ox has wandered off.", "An ox has died."];
-    let randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
+    var allOxProblems = ["An ox has wandered off.", "An ox has died."];
+    var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
     if (this.event.session.attributes.oxen > 1) {
       this.event.session.attributes.oxen -= 1;
       this.response.speak(this.event.session.attributes.travelingSFX + badNewsSFX + randomOxProblem + " Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -650,8 +660,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'Fire': function() {
-    let destroyedItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
-    let itemIndex = Math.floor(Math.random() * destroyedItems.length);
+    var destroyedItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
+    var itemIndex = Math.floor(Math.random() * destroyedItems.length);
     if (destroyedItems[itemIndex][0] == "food") {
       if (this.event.session.attributes.food > destroyedItems[itemIndex][1]) {
         this.event.session.attributes.food -= destroyedItems[itemIndex][1];
@@ -724,8 +734,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'Thief': function() {
-    let stolenItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
-    let itemIndex = Math.floor(Math.random() * stolenItems.length);
+    var stolenItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
+    var itemIndex = Math.floor(Math.random() * stolenItems.length);
     if (stolenItems[itemIndex][0] == "food") {
       if (this.event.session.attributes.food > stolenItems[itemIndex][1]) {
         this.event.session.attributes.food -= stolenItems[itemIndex][1];
@@ -798,8 +808,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'FindItems': function() {
-    let foundItems = [["food", 50],["oxen", 2],["money", 50],["parts", 1],["money", 100]];
-    let itemIndex = Math.floor(Math.random() * foundItems.length);
+    var foundItems = [["food", 50],["oxen", 2],["money", 50],["parts", 1],["money", 100]];
+    var itemIndex = Math.floor(Math.random() * foundItems.length);
     if (foundItems[itemIndex][0] == "food") {
       this.event.session.attributes.food += foundItems[itemIndex][1];
       this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You found an abandoned wagon on the trail. After looking around, you found " + foundItems[itemIndex][1] + " pounds of food. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -837,7 +847,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'FindBerries': function() {
     this.event.session.attributes.daysWithoutFood = 0;
-    let berries = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+    var berries = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
     this.event.session.attributes.food += 3*berries;
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You found wild berries, and you harvested " + berries + " pounds. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
@@ -861,7 +871,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'GetLost': function() {
-    let howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
+    var howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
     this.event.session.attributes.days += howLong;
     this.event.session.attributes.trailDays += howLong;
     this.event.session.attributes.food -= howLong*(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
@@ -988,19 +998,19 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     this.event.session.attributes.tradeAllowed = true;
     if (this.event.session.attributes.oxen === 1 && this.event.session.attributes.parts === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " ox, " + this.event.session.attributes.parts + " spare part, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      this.response.cardRenderer(statusCard.call(this));
+      // this.response.cardRenderer(statusCard.call(this));
       this.emit(":responseReady");
     } else if (this.event.session.attributes.oxen === 1 && this.event.session.attributes.parts > 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " ox, " + this.event.session.attributes.parts + " spare parts, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      this.response.cardRenderer(statusCard.call(this));
+      // this.response.cardRenderer(statusCard.call(this));
       this.emit(":responseReady");
     } else if (this.event.session.attributes.oxen > 1 && this.event.session.attributes.parts === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " oxen, " + this.event.session.attributes.parts + " spare part, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      this.response.cardRenderer(statusCard.call(this));
+      // this.response.cardRenderer(statusCard.call(this));
       this.emit(":responseReady");
     } else {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " oxen, " + this.event.session.attributes.parts + " spare parts, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      this.response.cardRenderer(statusCard.call(this));
+      // this.response.cardRenderer(statusCard.call(this));
       this.emit(":responseReady");
     }
   },
@@ -1753,8 +1763,8 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
 // HANDLE SICKNESS AND INJURY
 const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
   'Alert': function() {
-    let healthIssues = ["the flu", "cholera", "exhaustion", "typhoid fever", "a snake bite", "a broken arm", "a broken leg"];
-    let issue = healthIssues[Math.floor(Math.random() * healthIssues.length)];
+    var healthIssues = ["the flu", "cholera", "exhaustion", "typhoid fever", "a snake bite", "a broken arm", "a broken leg"];
+    var issue = healthIssues[Math.floor(Math.random() * healthIssues.length)];
     if (this.event.session.attributes.peopleHealthy.length > 1) {
       sickness.call(this);
       this.response.speak(this.event.session.attributes.travelingSFX + badNewsSFX + this.event.session.attributes.invalid + " has " + issue + ". Do you want to rest to see if " + this.event.session.attributes.invalid + " feels better?").listen("Do you want to rest to see if " + this.event.session.attributes.invalid + " feels better?");
@@ -2072,7 +2082,7 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
 // ====================
 // 1846 CALENDAR
 var dateFrom1846 = function(day){
-  let date = new Date(1846, 0);
+  var date = new Date(1846, 0);
   return new Date(date.setDate(day));
 };
 
@@ -2383,7 +2393,7 @@ var randomEvents = function() {
       }
     // GOOD THINGS
     } else if (this.event.session.attributes.fate === 7 && this.event.session.attributes.trailDays % 2 === 1) {
-      let goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
+      var goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
       if (goodThing === 1) {
         if ((this.event.session.attributes.days > 122 && this.event.session.attributes.days < 275) || (this.event.session.attributes.days > 487 && this.event.session.attributes.days < 640)) {
           this.handler.state = GAME_STATES.EVENT;
@@ -2401,7 +2411,7 @@ var randomEvents = function() {
       }
     // BAD THINGS
     } else if (this.event.session.attributes.fate === 6 && this.event.session.attributes.trailDays % 2 === 1) {
-      let badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
+      var badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
       if (badThing === 1) {
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('OxProblem');
@@ -2571,12 +2581,12 @@ var rest = function() {
 
 // REST RECOVERY
 var restRecovery = function() {
-  let peopleCured = 0;
-  let recoveredPerson;
-  let message = [];
+  var peopleCured = 0;
+  var recoveredPerson;
+  var message = [];
 
   var healThem = function() {
-    let recoveredIndex = Math.floor(Math.random() * ((this.event.session.attributes.peopleSick.length - 1) - 1 + 1)) + 1;
+    var recoveredIndex = Math.floor(Math.random() * ((this.event.session.attributes.peopleSick.length - 1) - 1 + 1)) + 1;
     if (peopleCured === 0) {
       if (this.event.session.attributes.peopleSick.includes(this.event.session.attributes.mainPlayer)) {
         this.event.session.attributes.peopleSick.shift();
@@ -2618,7 +2628,7 @@ var restRecovery = function() {
 
 // RECOVERY
 var recovery = function() {
-  let recoveredIndex = Math.floor(Math.random() * this.event.session.attributes.peopleSick.length);
+  var recoveredIndex = Math.floor(Math.random() * this.event.session.attributes.peopleSick.length);
   if (this.event.session.attributes.peopleSick.includes(this.event.session.attributes.mainPlayer)) {
     this.event.session.attributes.peopleSick.shift();
     this.event.session.attributes.peopleHealthy.unshift(this.event.session.attributes.mainPlayer);
@@ -2626,7 +2636,7 @@ var recovery = function() {
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('Recovery');
   } else {
-    let recoveredPerson = this.event.session.attributes.peopleSick[recoveredIndex];
+    var recoveredPerson = this.event.session.attributes.peopleSick[recoveredIndex];
     this.event.session.attributes.peopleSick.splice(recoveredIndex, 1);
     this.event.session.attributes.peopleHealthy.push(recoveredPerson);
     this.event.session.attributes.recoveredMessage = recoveredPerson + " is feeling much better.";
@@ -2638,7 +2648,7 @@ var recovery = function() {
 // SICKNESS
 var sickness = function() {
   if (this.event.session.attributes.peopleHealthy.length > 1) {
-    let invalidIndex = Math.floor(Math.random() * (this.event.session.attributes.peopleHealthy.length - 1 - 1 + 1)) + 1;
+    var invalidIndex = Math.floor(Math.random() * (this.event.session.attributes.peopleHealthy.length - 1 - 1 + 1)) + 1;
     this.event.session.attributes.invalid = this.event.session.attributes.peopleHealthy[invalidIndex];
     this.event.session.attributes.peopleHealthy.splice(invalidIndex, 1);
     this.event.session.attributes.peopleSick.push(this.event.session.attributes.invalid);
@@ -2652,7 +2662,7 @@ var sickness = function() {
 // DEATH OF SICK PERSON
 var deathPeopleSick = function() {
   if (this.event.session.attributes.peopleSick.length > 0) {
-    let victimIndex;
+    var victimIndex;
     if (this.event.session.attributes.peopleSick.includes(this.event.session.attributes.mainPlayer)) {
       victimIndex = Math.floor(Math.random() * ((this.event.session.attributes.peopleSick.length - 1) - 1 + 1)) + 1;
     } else {
@@ -2666,7 +2676,7 @@ var deathPeopleSick = function() {
 // DEATH OF HEALTHY PERSON
 var deathPeopleHealthy = function() {
   if (this.event.session.attributes.peopleSick.length > 0) {
-    let victimIndex;
+    var victimIndex;
     if (this.event.session.attributes.peopleHealthy.includes(this.event.session.attributes.mainPlayer)) {
       victimIndex = Math.floor(Math.random() * ((this.event.session.attributes.peopleHealthy.length - 1) - 1 + 1)) + 1;
     } else {
@@ -2679,7 +2689,7 @@ var deathPeopleHealthy = function() {
 
 // GAME OVER
 var gameOver = function() {
-  let points = (this.event.session.attributes.peopleHealthy.length * 100) + (this.event.session.attributes.peopleSick.length * 50) + (this.event.session.attributes.oxen * 50) + (this.event.session.attributes.food * 2) + (this.event.session.attributes.parts * 10) + this.event.session.attributes.money - this.event.session.attributes.trailDays - this.event.session.attributes.columbiaRiverDamage;
+  var points = (this.event.session.attributes.peopleHealthy.length * 100) + (this.event.session.attributes.peopleSick.length * 50) + (this.event.session.attributes.oxen * 50) + (this.event.session.attributes.food * 2) + (this.event.session.attributes.parts * 10) + this.event.session.attributes.money - this.event.session.attributes.trailDays - this.event.session.attributes.columbiaRiverDamage;
   if (this.event.session.attributes.gameOverMessage === "winner") {
     if (this.event.session.attributes.profession === "farmer") {
       this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + 3*points + "</say-as> points.");
@@ -2703,8 +2713,8 @@ var gameOver = function() {
     this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + points);
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "you died") {
-    let diseases = ["a fever", "dysentery", "an infection", "dehydration"];
-    let fatality = diseases[Math.floor(Math.random() * diseases.length)];
+    var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
+    var fatality = diseases[Math.floor(Math.random() * diseases.length)];
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You have died of " + fatality + ". Game over!");
     this.response.cardRenderer("Game over! You have died of " + fatality);
     this.emit(':responseReady');
@@ -2733,8 +2743,8 @@ var gameOver = function() {
     this.response.cardRenderer("Game over! You froze to death.");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- ox probs") {
-    let allOxProblems = ["An ox has wandered off.", "An ox has died."];
-    let randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
+    var allOxProblems = ["An ox has wandered off.", "An ox has died."];
+    var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
     this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
     this.emit(':responseReady');
