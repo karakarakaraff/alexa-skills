@@ -469,7 +469,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'BeginJourney': function() {
     this.response.speak(goodNewsSFX + "Alright, it's " + this.event.session.attributes.month + "! Say OK to begin your journey.").listen("Say OK to begin your journey.");
-    // this.response.cardRenderer(statusCard.call(this));
+    this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
     this.emit(":responseReady");
   },
   'Hunting': function() {
@@ -847,8 +847,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'FindBerries': function() {
     this.event.session.attributes.daysWithoutFood = 0;
-    var berries = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-    this.event.session.attributes.food += 3*berries;
+    var berries = (Math.floor(Math.random() * (10 - 1 + 1)) + 1)*3;
+    this.event.session.attributes.food += berries;
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You found wild berries, and you harvested " + berries + " pounds. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
@@ -909,23 +909,27 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'ChimneyRock': function() {
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You have arrived at Chimney Rock. Congratulations! Located in western Nebraska, Chimney Rock is a prominent geological formation that rises nearly 300 feet above the surrounding plains. For this reason, it is a well-known landmark along the trail, which means you're going the right way. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
     this.emit(":responseReady");
   },
   'IndependenceRock': function() {
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You have arrived at Independence Rock. Congratulations! Located in central Wyoming, Independence Rock is a large granite hill where many pioneers carve their names. It is a well-known landmark along the trail. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
     this.emit(":responseReady");
   },
   'SouthPass': function() {
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You have arrived at South Pass. Congratulations! Located in southwestern Wyoming, South Pass is the lowest point along the continental divide. It's the easiest way to cross the Rocky Mountains. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
     this.emit(":responseReady");
   },
   'SodaSprings': function() {
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You have arrived at Soda Springs. Congratulations! Located in southeastern Idaho, these springs bubble like soda water, which is how they got their name. It's a popular place to bathe and relax, but don't drink the water! You might get sick. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
     this.emit(":responseReady");
   },
   'TheDalles': function() {
-    this.event.session.attributes.mapLocation = "Columbia River";
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You have arrived at The Dalles. Congratulations! Located in northern Oregon, the Dalles is where the trail stops. You are blocked by the cascade mountains, and the only way to finish your journey is by floating down the Colombia River. It's going to be a treacherous last stretch. Say OK to continue.").listen("Say OK to continue.");
+    this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
     this.emit(":responseReady");
   },
   'ChoseFortBridger': function() {
@@ -960,7 +964,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'ContinueGame': function() {
     this.event.session.attributes.trailDaysWithoutIncident = 0;
-    if (this.event.session.attributes.mapLocation === "Columbia River") {
+    if (this.event.session.attributes.mapLocation === "The Dalles") {
+      this.event.session.attributes.mapLocation = "Columbia River";
       this.handler.state = GAME_STATES.COLUMBIA_RIVER;
       this.emitWithState('TimeToFloat');
     } else if (this.event.session.attributes.mapLocation === "Fort Walla Walla") {
@@ -998,19 +1003,19 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     this.event.session.attributes.tradeAllowed = true;
     if (this.event.session.attributes.oxen === 1 && this.event.session.attributes.parts === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " ox, " + this.event.session.attributes.parts + " spare part, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      // this.response.cardRenderer(statusCard.call(this));
+      this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
       this.emit(":responseReady");
     } else if (this.event.session.attributes.oxen === 1 && this.event.session.attributes.parts > 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " ox, " + this.event.session.attributes.parts + " spare parts, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      // this.response.cardRenderer(statusCard.call(this));
+      this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
       this.emit(":responseReady");
     } else if (this.event.session.attributes.oxen > 1 && this.event.session.attributes.parts === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " oxen, " + this.event.session.attributes.parts + " spare part, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      // this.response.cardRenderer(statusCard.call(this));
+      this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
       this.emit(":responseReady");
     } else {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " oxen, " + this.event.session.attributes.parts + " spare parts, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
-      // this.response.cardRenderer(statusCard.call(this));
+      this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
       this.emit(":responseReady");
     }
   },
@@ -1141,7 +1146,7 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
 const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL_SPLIT, {
   'ChooseDirection': function() {
     this.event.session.attributes.hasChosenFirstDirection = true;
-    this.response.speak("The trail splits here. You can go to Fort Bridger, or you can take the shortcut to Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+    this.response.speak("The trail splits here. You can go to Fort Bridger, or you can take the shortcut to Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
     this.emit(":responseReady");
   },
   'GetTrailSplit': function() {
@@ -1166,10 +1171,10 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
   },
   'AMAZON.HelpIntent': function() {
     if (this.event.session.attributes.food <= 15 * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length) || this.event.session.attributes.oxen <= 2 || this.event.session.attributes.parts <= 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Bridger or Soda Springs?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Bridger, or Soda Springs?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
       this.emit(":responseReady");
     } else {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Bridger or Soda Springs?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Bridger, or Soda Springs?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
       this.emit(":responseReady");
     }
   },
@@ -1186,7 +1191,7 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Bridger or Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger or Soda Springs?");
+    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Bridger or Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
     this.emit(":responseReady");
   },
 });
@@ -1195,7 +1200,7 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
 const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRAIL_SPLIT, {
   'ChooseDirection': function() {
     this.event.session.attributes.hasChosenSecondDirection = true;
-    this.response.speak("The trail splits here. You can go to Fort Walla Walla, or you can take the shortcut to The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+    this.response.speak("The trail splits here. You can go to Fort Walla Walla, or you can take the shortcut to The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
     this.emit(":responseReady");
   },
   'GetTrailSplit': function() {
@@ -1220,10 +1225,10 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
   },
   'AMAZON.HelpIntent': function() {
     if (this.event.session.attributes.food <= 19 * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length) || this.event.session.attributes.oxen <= 2 || this.event.session.attributes.parts <= 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Walla Walla or The Dalles?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Walla Walla, or The Dalles?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
       this.emit(":responseReady");
     } else {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Walla Walla or The Dalles?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Walla Walla, or The Dalles?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
       this.emit(":responseReady");
     }
   },
@@ -1240,7 +1245,7 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Walla Walla or The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla or The Dalles?");
+    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Walla Walla or The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
     this.emit(":responseReady");
   },
 });
@@ -1249,7 +1254,7 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
 const thirdTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.THIRD_TRAIL_SPLIT, {
   'ChooseDirection': function() {
     this.event.session.attributes.hasChosenThirdDirection = true;
-    this.response.speak("The trail ends here. There are two ways to go to Oregon City: You can take the Barlow Toll Road for $30, or you can float down the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road or the Columbia River?");
+    this.response.speak("The trail ends here. There are two ways to go to Oregon City: You can take the Barlow Toll Road for $30, or you can float down the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road, or go to the Columbia River?");
     this.emit(":responseReady");
   },
   'GetTrailSplit': function() {
@@ -1274,7 +1279,7 @@ const thirdTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.THIRD_TRAIL
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. The Barlow Toll Road costs $30. It's a rough, mountainous road, and it's 90 miles long. Floating down the Columbia River is much shorter, but it's also much more dangerous. Do you want to take the Barlow Toll Road or the Columbia River?").listen("Do you want to take the Barlow Toll Road or the Columbia River?");
+    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. The Barlow Toll Road costs $30. It's a rough, mountainous road, and it's 90 miles long. Floating down the Columbia River is much shorter, but it's also much more dangerous. Do you want to take the Barlow Toll Road, or go to the Columbia River?").listen("Do you want to take the Barlow Toll Road, or go to the Columbia River?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1290,7 +1295,7 @@ const thirdTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.THIRD_TRAIL
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. You must choose to take the Barlow Toll Road or the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road or the Columbia River?");
+    this.response.speak("Sorry, I didn't get that. You must choose to take the Barlow Toll Road or the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road, or go to the Columbia River?");
     this.emit(":responseReady");
   },
 });
@@ -1854,6 +1859,7 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
 const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
   'CrossingChoice': function() {
     this.response.speak(this.event.session.attributes.travelingSFX + riverSFX + "You have arrived at the " + this.event.session.attributes.mapLocation + ". The river is " + this.event.session.attributes.riverDepth + " feet deep. You can buy a ferry for $" + this.event.session.attributes.ferryCost + ", or you can try to float across on your own. Do you want to ferry, or do you want to float?").listen("Do you want to ferry, or do you want to float?");
+    this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
     this.emit(":responseReady");
   },
   'GetRiverCrossing': function() {
@@ -1948,7 +1954,7 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
 // HANDLE COLUMBIA RIVER
 const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVER, {
   'TimeToFloat': function() {
-    this.response.speak("Ok, here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+    this.response.speak("Ok, here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
     this.emit(":responseReady");
   },
   'ChoseColumbiaRiver': function() {
@@ -1960,11 +1966,11 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
     } else {
       this.event.session.attributes.food -= (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length) * 5;
     }
-    this.response.speak("Great! You chose to float down the Columbia River. Let's go to the river." + wagonWheels3SFX + "Congratulations! You made it to the Columbia River. Are you ready to float to Oregon City? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+    this.response.speak("Great! You chose to float down the Columbia River. Let's go to the river." + wagonWheels3SFX + "Congratulations! You made it to the Columbia River. Are you ready to float to Oregon City? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left, or to the right?");
     this.emit(":responseReady");
   },
   'NoMoneyColumbiaRiver': function() {
-    this.response.speak("Sorry, but you don't have enough money to take the Barlow Toll Road. You will have to float down the Columbia River to Oregon City. Are you ready? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+    this.response.speak("Sorry, but you don't have enough money to take the Barlow Toll Road. You will have to float down the Columbia River to Oregon City. Are you ready? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
     this.emit(":responseReady");
   },
   'GetLeftOrRight': function() {
@@ -1972,52 +1978,52 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
       if (this.event.session.attributes.obstacles === 1) {
         this.event.session.attributes.obstacles++;
         if (this.event.request.intent.slots.leftorright.value === "left") {
-          this.response.speak(goodNewsSFX + "Great job! You missed the boulder." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.response.speak(goodNewsSFX + "Great job! You missed the boulder." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
           this.emit(":responseReady");
         } else {
           this.event.session.attributes.crashes += 1;
           if (this.event.session.attributes.oxen >= 1) {
             this.event.session.attributes.oxen -= 1;
-            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. An ox fell off your raft and was swept away by the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. An ox fell off your raft and was swept away by the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
             this.emit(":responseReady");
           } else if (this.event.session.attributes.food >= 25) {
             this.event.session.attributes.food -= 25;
-            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. 25 pounds of food fell off your raft and into the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. 25 pounds of food fell off your raft and into the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
             this.emit(":responseReady");
           } else if (this.event.session.attributes.parts >= 1 && this.event.session.attributes.food >= 15) {
             this.event.session.attributes.parts -= 1;
             this.event.session.attributes.food -= 15;
-            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. A spare part and 15 pounds of food fell off your raft and into the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. A spare part and 15 pounds of food fell off your raft and into the river. Thankfully, you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
             this.emit(":responseReady");
           } else {
             this.event.session.attributes.columbiaRiverDamage += 50;
-            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. You raft got damaged, but you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.response.speak(badNewsSFX + "Oh no! You hit the boulder. You raft got damaged, but you're ok." + riverSFX + "There are several logs and rocks blocking the center of the river. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
             this.emit(":responseReady");
           }
         }
       } else if (this.event.session.attributes.obstacles === 2) {
         this.event.session.attributes.obstacles++;
         if (this.event.request.intent.slots.leftorright.value === "left") {
-          this.response.speak(goodNewsSFX + "Great job! You made it around the logs and rocks." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+          this.response.speak(goodNewsSFX + "Great job! You made it around the logs and rocks." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
           this.emit(":responseReady");
         } else {
           this.event.session.attributes.crashes += 1;
           if (this.event.session.attributes.peopleSick.length > 1) {
             deathPeopleSick.call(this);
-            this.response.speak(deathSFX + "Oh no! You hit a stray log. The crash caused " + this.event.session.attributes.victim + " to fall off the raft and get swept away in the river. Rest in peace " + this.event.session.attributes.victim + "." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.response.speak(deathSFX + "Oh no! You hit a stray log. The crash caused " + this.event.session.attributes.victim + " to fall off the raft and get swept away in the river. Rest in peace " + this.event.session.attributes.victim + "." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
             this.emit(":responseReady");
           } else if (this.event.session.attributes.peopleHealthy.length > 1) {
             sickness.call(this);
-            this.response.speak(badNewsSFX + "Oh no! You hit a stray log. " + this.event.session.attributes.invalid + " was injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+            this.response.speak(badNewsSFX + "Oh no! You hit a stray log. " + this.event.session.attributes.invalid + " was injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
             this.emit(":responseReady");
           } else {
             if (this.event.session.attributes.peopleHealthy.includes(this.event.session.attributes.mainPlayer)) {
               sickness.call(this);
-              this.response.speak(badNewsSFX + "Oh no! You hit a stray log and got injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+              this.response.speak(badNewsSFX + "Oh no! You hit a stray log and got injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
               this.emit(":responseReady");
             } else {
               this.event.session.attributes.columbiaRiverDamage += 50;
-              this.response.speak(badNewsSFX + "Oh no! You hit a stray log and got injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left or to the right?");
+              this.response.speak(badNewsSFX + "Oh no! You hit a stray log and got injured in the crash." + riverSFX + "You are approaching wild rapids. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
               this.emit(":responseReady");
             }
           }
@@ -2054,7 +2060,7 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please choose to paddle to the left or to the right.").listen("Do you want to paddle to the left or to the right?");
+    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please choose to paddle to the left, or to the right.").listen("Do you want to paddle to the left, or to the right?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -2070,7 +2076,7 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("You must choose left or right. Which way do you want to paddle?").listen("Do you want to paddle to the left or to the right?");
+    this.response.speak("You must choose left or right. Which way do you want to paddle?").listen("Do you want to paddle to the left, or to the right?");
     this.emit(":responseReady");
   },
 });
@@ -2091,19 +2097,51 @@ var capitalizeFirstLetter = function(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-// STATUS UPDATE FOR CARD RENDERER
-var statusCard = function() {
-  return dateFrom1846(this.event.session.attributes.days).toDateString()
-  + "\n-----------------"
-  + "\nCurrent location: " + this.event.session.attributes.mapLocation
-  + "\nDays on the trail: " + this.event.session.attributes.trailDays
-  + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
-  + "\nMoney: " + this.event.session.attributes.money
-  + "\nFood: " + this.event.session.attributes.food
-  + "\nOxen: " + this.event.session.attributes.oxen
-  + "\nParts: " + this.event.session.attributes.parts
-  + "\nPeople healthy: " + this.event.session.attributes.peopleHealthy.join(", ")
-  + "\nPeople sick: " + this.event.session.attributes.peopleSick.join(", ");
+// STATUS CARD TITLE
+var statusCardTitle = function() {
+  return dateFrom1846(this.event.session.attributes.days).toDateString();
+};
+
+// STATUS CARD CONTENT
+var statusCardContent = function() {
+  if (this.event.session.attributes.mapLocation === "Independence") {
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation
+    + "\nDays on the trail: " + this.event.session.attributes.trailDays
+    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
+    + "\nMoney: " + this.event.session.attributes.money
+    + "\nFood: " + this.event.session.attributes.food
+    + "\nOxen: " + this.event.session.attributes.oxen
+    + "\nParts: " + this.event.session.attributes.parts
+    + "\nYour party: " + this.event.session.attributes.peopleHealthy.join(", ");
+  } else if (this.event.session.attributes.peopleSick.length === 0) {
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation
+    + "\nDays on the trail: " + this.event.session.attributes.trailDays
+    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
+    + "\nMoney: " + this.event.session.attributes.money
+    + "\nFood: " + this.event.session.attributes.food
+    + "\nOxen: " + this.event.session.attributes.oxen
+    + "\nParts: " + this.event.session.attributes.parts
+    + "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ");
+  } else if (this.event.session.attributes.peopleHealthy.legnth === 0) {
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation
+    + "\nDays on the trail: " + this.event.session.attributes.trailDays
+    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
+    + "\nMoney: " + this.event.session.attributes.money
+    + "\nFood: " + this.event.session.attributes.food
+    + "\nOxen: " + this.event.session.attributes.oxen
+    + "\nParts: " + this.event.session.attributes.parts
+    + "\nSick/injured: " + this.event.session.attributes.peopleSick.join(", ");
+  } else {
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation
+    + "\nDays on the trail: " + this.event.session.attributes.trailDays
+    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
+    + "\nMoney: " + this.event.session.attributes.money
+    + "\nFood: " + this.event.session.attributes.food
+    + "\nOxen: " + this.event.session.attributes.oxen
+    + "\nParts: " + this.event.session.attributes.parts
+    + "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ")
+    + "\nSick/injured: " + this.event.session.attributes.peopleSick.join(", ");
+  }
 };
 
 // SOUND EFFECTS
@@ -2126,7 +2164,6 @@ const deathSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/d
 const winnerSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/winner.mp3' />";
 const loserSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/loser.mp3' />";
 
-
 // ==========
 // GAME SETUP
 // ==========
@@ -2134,14 +2171,14 @@ const loserSFX = "<audio src='https://s3.amazonaws.com/oregontrailsoundeffects/l
 var gameIntro = function() {
   this.event.session.attributes.mapLocation = "Independence";
   this.response.speak(winnerSFX + WELCOME_MESSAGE + " " + START_GAME_MESSAGE + " Let's begin by setting up your five-person party." + " " + "What is your name?").listen("What is your name?");
-  this.response.cardRenderer(WELCOME_MESSAGE);
+  this.response.cardRenderer(WELCOME_MESSAGE, START_GAME_MESSAGE);
   this.emit(':responseReady');
 };
 
 var gameIntroStartOver = function() {
   this.event.session.attributes.mapLocation = "Independence";
   this.response.speak("Ok, let's start over. What is your name?").listen("What is your name?");
-  this.response.cardRenderer(WELCOME_MESSAGE);
+  this.response.cardRenderer(WELCOME_MESSAGE, START_GAME_MESSAGE);
   this.emit(':responseReady');
 };
 
@@ -2311,27 +2348,27 @@ var chooseMonthAgain = function() {
 
 var setDays = function() {
   if (this.event.session.attributes.month.toLowerCase() === "march") {
-    this.event.session.attributes.days = 61;
+    this.event.session.attributes.days = 60;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('BeginJourney');
   } else if (this.event.session.attributes.month.toLowerCase() === "april") {
-    this.event.session.attributes.days = 92;
+    this.event.session.attributes.days = 91;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('BeginJourney');
   } else if (this.event.session.attributes.month.toLowerCase() === "may") {
-    this.event.session.attributes.days = 122;
+    this.event.session.attributes.days = 121;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('BeginJourney');
   } else if (this.event.session.attributes.month.toLowerCase() === "june") {
-    this.event.session.attributes.days = 153;
+    this.event.session.attributes.days = 152;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('BeginJourney');
   } else if (this.event.session.attributes.month.toLowerCase() === "july") {
-    this.event.session.attributes.days = 183;
+    this.event.session.attributes.days = 182;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('BeginJourney');
   } else if (this.event.session.attributes.month.toLowerCase() === "august") {
-    this.event.session.attributes.days = 214;
+    this.event.session.attributes.days = 213;
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('BeginJourney');
   }
@@ -2359,11 +2396,11 @@ var randomEvents = function() {
       this.emitWithState('Death');
     // WEATHER
     } else if (this.event.session.attributes.fate === 3 && this.event.session.attributes.trailDays % 2 === 0) {
-      if (this.event.session.attributes.days < 122 || (this.event.session.attributes.days > 306 && this.event.session.attributes.days < 487) || this.event.session.attributes.days > 671) {
+      if (this.event.session.attributes.days < 121 || (this.event.session.attributes.days >= 305 && this.event.session.attributes.days < 486) || this.event.session.attributes.days >= 671) {
         this.event.session.attributes.lostDays = Math.floor(Math.random() * (7 - 4 + 1)) + 1;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('Snow');
-      } else if ((this.event.session.attributes.days > 122 && this.event.session.attributes.days < 214) || (this.event.session.attributes.days > 487 && this.event.session.attributes.days < 579)) {
+      } else if ((this.event.session.attributes.days >= 121 && this.event.session.attributes.days < 213) || (this.event.session.attributes.days >= 486 && this.event.session.attributes.days < 578)) {
         this.event.session.attributes.lostDays = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('Storm');
@@ -2375,10 +2412,10 @@ var randomEvents = function() {
     // GREAT AMERICAN DESERT
     } else if (this.event.session.attributes.fate === 9) {
       if (this.event.session.attributes.mapLocation === "Kansas River" || this.event.session.attributes.mapLocation === "Fort Kearny" || this.event.session.attributes.mapLocation === "Chimney Rock") {
-        if (this.event.session.attributes.days < 122 || (this.event.session.attributes.days > 365 && this.event.session.attributes.days < 487)) {
+        if (this.event.session.attributes.days < 121 || (this.event.session.attributes.days >= 364 && this.event.session.attributes.days < 486)) {
           this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('NoGrass');
-        } else if (this.event.session.attributes.days > 183 && this.event.session.attributes.days < 214) {
+        } else if (this.event.session.attributes.days >= 182 && this.event.session.attributes.days < 213) {
           this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('BuffaloStampede');
         } else {
@@ -2395,7 +2432,7 @@ var randomEvents = function() {
     } else if (this.event.session.attributes.fate === 7 && this.event.session.attributes.trailDays % 2 === 1) {
       var goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
       if (goodThing === 1) {
-        if ((this.event.session.attributes.days > 122 && this.event.session.attributes.days < 275) || (this.event.session.attributes.days > 487 && this.event.session.attributes.days < 640)) {
+        if ((this.event.session.attributes.days >= 121 && this.event.session.attributes.days < 274) || (this.event.session.attributes.days >= 486 && this.event.session.attributes.days < 639)) {
           this.handler.state = GAME_STATES.EVENT;
           this.emitWithState('FindBerries');
         } else {
@@ -2690,78 +2727,88 @@ var deathPeopleHealthy = function() {
 // GAME OVER
 var gameOver = function() {
   var points = (this.event.session.attributes.peopleHealthy.length * 100) + (this.event.session.attributes.peopleSick.length * 50) + (this.event.session.attributes.oxen * 50) + (this.event.session.attributes.food * 2) + (this.event.session.attributes.parts * 10) + this.event.session.attributes.money - this.event.session.attributes.trailDays - this.event.session.attributes.columbiaRiverDamage;
-  if (this.event.session.attributes.gameOverMessage === "winner") {
+  if (this.event.session.attributes.gameOverMessage === "winner" || this.event.session.attributes.gameOverMessage === "columbia river winner") {
     if (this.event.session.attributes.profession === "farmer") {
-      this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + 3*points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + 3*points);
+      points = points*3;
+      this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
+      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
       this.emit(':responseReady');
     } else if (this.event.session.attributes.profession === "carpenter") {
-      this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + 2*points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + 2*points);
+      points = points*2;
+      this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
+      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
       this.emit(':responseReady');
     } else {
       this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + points);
+      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
       this.emit(':responseReady');
     }
-  } else if (this.event.session.attributes.gameOverMessage === "columbia river winner") {
-    this.response.speak(riverSFX + winnerSFX + "Congratulations, you reached the dock at Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-    this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + points);
-    this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "columbia river barely winner") {
-    this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-    this.response.cardRenderer("Congratulations, you reached Oregon City! FINAL SCORE: " + points);
-    this.emit(':responseReady');
+    if (this.event.session.attributes.profession === "farmer") {
+      points = points*3;
+      this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
+      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
+      this.emit(':responseReady');
+    } else if (this.event.session.attributes.profession === "carpenter") {
+      points = points*2;
+      this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
+      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
+      this.emit(':responseReady');
+    } else {
+      this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
+      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
+      this.emit(':responseReady');
+    }
   } else if (this.event.session.attributes.gameOverMessage === "you died") {
     var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
     var fatality = diseases[Math.floor(Math.random() * diseases.length)];
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You have died of " + fatality + ". Game over!");
-    this.response.cardRenderer("Game over! You have died of " + fatality);
+    this.response.cardRenderer("Game over!", "You have died of " + fatality);
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "you drowned") {
     this.response.speak(riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
-    this.response.cardRenderer("Game over! You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
+    this.response.cardRenderer("Game over!", "You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "columbia river you drowned") {
     this.response.speak(loserSFX + "Your raft capsized in the rapids, and you drowned. Game over!");
-    this.response.cardRenderer("Game over! You drowned in the Columbia River.");
+    this.response.cardRenderer("Game over!", "You drowned in the Columbia River.");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "columbia river raft sank") {
     this.response.speak(loserSFX + "Your raft was so badly damaged, it capsized in the rapids and you drowned. Game over!");
-    this.response.cardRenderer("Game over! You drowned in the Columbia River.");
+    this.response.cardRenderer("Game over!", "You drowned in the Columbia River.");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "no ferry money you drowned") {
     this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
-    this.response.cardRenderer("Game over! You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
+    this.response.cardRenderer("Game over!", "You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "you starved") {
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You have died of starvation. Game over!");
-    this.response.cardRenderer("Game over! You have died of starvation.");
+    this.response.cardRenderer("Game over!", "You have died of starvation.");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "froze to death") {
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You got stuck in a large snow storm for " + this.event.session.attributes.lostDays + " days and froze to death.");
-    this.response.cardRenderer("Game over! You froze to death.");
+    this.response.cardRenderer("Game over!", "You froze to death.");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- ox probs") {
     var allOxProblems = ["An ox has wandered off.", "An ox has died."];
     var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+    this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- fire") {
     if (this.event.session.attributes.oxen === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A fire broke out and killed your last ox. This is as far as you can go. Good luck homesteading!");
-      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
       this.emit(':responseReady');
     } else {
       this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A fire broke out and killed your last oxen. This is as far as you can go. Good luck homesteading!");
-      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
       this.emit(':responseReady');
     }
   } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- thief") {
     if (this.event.session.attributes.oxen === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A thief stole your last ox. This is as far as you can go. Good luck homesteading!");
-      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
       this.emit(':responseReady');
     } else {
       this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A thief stole your last oxen. This is as far as you can go. Good luck homesteading!");
@@ -2770,11 +2817,11 @@ var gameOver = function() {
     }
   } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- thunderstorm") {
     this.response.speak(stormSFX + "You got caught in a major thunderstorm and your last ox ran away. " + loserSFX + "This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+    this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
     this.emit(':responseReady');
   } else if (this.event.session.attributes.gameOverMessage === "broken wagon") {
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over! Your wagon broke, and you don't have any spare parts to fix it.");
+    this.response.cardRenderer("Game over!", "Your wagon broke, and you don't have any spare parts to fix it.");
     this.emit(':responseReady');
   } else {
     this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "Game over!");
@@ -2791,7 +2838,7 @@ var gameOver = function() {
 var travel = function() {
   if (this.event.session.attributes.miles === 105) {
     this.event.session.attributes.mapLocation = "Kansas River";
-    if (this.event.session.attributes.days < 92) {
+    if (this.event.session.attributes.days < 91) {
       this.event.session.attributes.riverDepth = 3;
     } else {
       this.event.session.attributes.riverDepth = 4;
