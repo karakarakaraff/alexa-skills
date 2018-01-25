@@ -15,4 +15,4 @@
 ## Oregon Trail
 **It's 1846 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail. Will you make it to Oregon City?** Packed with fun just like the classic game, the Oregon Trail takes you on a journey across the West with historic landmarks and forts along the way. Hunt for big game, cross major rivers, take a chance with shortcuts, and most of all, hope that fate is on your side.
 
-*Status: certification*
+*Status: live* --> [Alexa Skills Store: Oregon Trail](https://www.amazon.com/dp/B0794D1N99)
