@@ -23,6 +23,7 @@ const GAME_STATES = {
   REST: '_RESTMODE', // resting for potential recovery
   RIVER: '_RIVERMODE', // crossing rivers
   COLUMBIA_RIVER: '_COLUMBIARIVERMODE', // floating down the Columbia River
+  GAME_OVER: '_GAMEOVERMODE', // game over
 };
 
 const GAME_NAME = "Oregon Trail";
@@ -105,7 +106,6 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     this.event.session.attributes.tradeDeal = 0;
     this.event.session.attributes.tradeAllowed = true;
     this.event.session.attributes.fate = 0;
-    this.event.session.attributes.gameOverMessage = undefined;
     this.event.session.attributes.hasChosenProfession = false;
     this.event.session.attributes.hasBeenToGeneralStore = false;
     this.event.session.attributes.boughtFood = false;
@@ -120,6 +120,7 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     this.event.session.attributes.crashes = 0;
     this.event.session.attributes.travelingSFX = undefined;
     this.event.session.attributes.TRY_BUYING_AGAIN = undefined;
+    this.event.session.attributes.finalscore = 0;
     gameIntro.call(this);
   },
   'StartGameAgain': function() {
@@ -163,7 +164,6 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     this.event.session.attributes.tradeDeal = 0;
     this.event.session.attributes.tradeAllowed = true;
     this.event.session.attributes.fate = 0;
-    this.event.session.attributes.gameOverMessage = undefined;
     this.event.session.attributes.hasChosenProfession = false;
     this.event.session.attributes.hasBeenToGeneralStore = false;
     this.event.session.attributes.boughtFood = false;
@@ -174,6 +174,11 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
     this.event.session.attributes.howManyToHeal = 0;
     this.event.session.attributes.recoveredMessage = undefined;
     this.event.session.attributes.columbiaRiverDamage = 0;
+    this.event.session.attributes.obstacles = 1;
+    this.event.session.attributes.crashes = 0;
+    this.event.session.attributes.travelingSFX = undefined;
+    this.event.session.attributes.TRY_BUYING_AGAIN = undefined;
+    this.event.session.attributes.finalscore = 0;
     gameIntroStartOver.call(this);
   },
   'GetName': function() {
@@ -545,8 +550,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     if (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length === 1) {
       this.event.session.attributes.peopleHealthy = [];
       this.event.session.attributes.peopleSick = [];
-      this.event.session.attributes.gameOverMessage = "you starved";
-      gameOver.call(this);
+      this.handler.state = GAME_STATES.GAME_OVER;
+      this.emitWithState('YouStarved');
     } else {
       deathPeopleSick.call(this);
       this.response.speak(this.event.session.attributes.travelingSFX + deathSFX + this.event.session.attributes.victim + " has died of starvation. Rest in peace " + this.event.session.attributes.victim + ". Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -559,8 +564,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     if (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length === 1) {
       this.event.session.attributes.peopleHealthy = [];
       this.event.session.attributes.peopleSick = [];
-      this.event.session.attributes.gameOverMessage = "you died";
-      gameOver.call(this);
+      this.handler.state = GAME_STATES.GAME_OVER;
+      this.emitWithState('YouDied');
     } else if (this.event.session.attributes.peopleSick.length > 0) {
       deathPeopleSick.call(this);
       this.response.speak(this.event.session.attributes.travelingSFX + deathSFX + this.event.session.attributes.victim + " has died of " + fatality + ". Rest in peace " + this.event.session.attributes.victim + ". Now, it's time to move on. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
@@ -591,8 +596,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     } else if (this.event.session.attributes.lostDays >= 5 && this.event.session.attributes.peopleSick.length + this.event.session.attributes.peopleHealthy.length === 1) {
       this.event.session.attributes.peopleHealthy = [];
       this.event.session.attributes.peopleSick = [];
-      this.event.session.attributes.gameOverMessage = "froze to death";
-      gameOver.call(this);
+      this.handler.state = GAME_STATES.GAME_OVER;
+      this.emitWithState('YouFroze');
     } else {
       this.response.speak(this.event.session.attributes.travelingSFX + badNewsSFX + "You got stuck in some snow. You have lost " + this.event.session.attributes.lostDays + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
@@ -605,8 +610,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     if (this.event.session.attributes.lostDays >= 3) {
       this.event.session.attributes.oxen -= 1;
       if (this.event.session.attributes.oxen === 0) {
-        this.event.session.attributes.gameOverMessage = "no more oxen -- thunderstorm";
-        gameOver.call(this);
+        this.handler.state = GAME_STATES.GAME_OVER;
+        this.emitWithState('NoMoreOxenThunderstorm');
       } else {
         this.response.speak(this.event.session.attributes.travelingSFX + stormSFX + "You got caught in a thunderstorm and an ox ran away. You lost " + this.event.session.attributes.lostDays + " days. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
         this.emit(":responseReady");
@@ -655,8 +660,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
       this.response.speak(this.event.session.attributes.travelingSFX + badNewsSFX + randomOxProblem + " Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
     } else if (this.event.session.attributes.oxen === 1) {
-      this.event.session.attributes.gameOverMessage = "no more oxen -- ox probs";
-      gameOver.call(this);
+      this.handler.state = GAME_STATES.GAME_OVER;
+      this.emitWithState('NoMoreOxenOxProbs');
     }
   },
   'Fire': function() {
@@ -687,8 +692,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
           this.emit(":responseReady");
         }
       } else if (this.event.session.attributes.oxen > 0) {
-        this.event.session.attributes.gameOverMessage = "no more oxen -- fire";
-        gameOver.call(this);
+        this.handler.state = GAME_STATES.GAME_OVER;
+        this.emitWithState('NoMoreOxenFire');
       } else {
         this.event.session.attributes.trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
@@ -761,8 +766,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
           this.emit(":responseReady");
         }
       } else if (this.event.session.attributes.oxen > 0) {
-        this.event.session.attributes.gameOverMessage = "no more oxen -- fire";
-        gameOver.call(this);
+        this.handler.state = GAME_STATES.GAME_OVER;
+        this.emitWithState('NoMoreOxenThief');
       } else {
         this.event.session.attributes.trailDaysWithoutIncident++;
         this.handler.state = GAME_STATES.EVENT;
@@ -866,8 +871,8 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
         this.emit(":responseReady");
       }
     } else {
-      this.event.session.attributes.gameOverMessage = "broken wagon";
-      gameOver.call(this);
+      this.handler.state = GAME_STATES.GAME_OVER;
+      this.emitWithState('BrokenWagon');
     }
   },
   'GetLost': function() {
@@ -1873,10 +1878,10 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
           if (this.event.session.attributes.fate <= this.event.session.attributes.sinkChance && this.event.session.attributes.riverDepth > 6) {
             this.event.session.attributes.food -= this.event.session.attributes.fate * 10;
             if (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length === 1) {
-              this.event.session.attributes.gameOverMessage = "no ferry money you drowned";
               this.event.session.attributes.peopleHealthy = [];
               this.event.session.attributes.peopleSick = [];
-              gameOver.call(this);
+              this.handler.state = GAME_STATES.GAME_OVER;
+              this.emitWithState('NoFerryMoneyYouDrowned');
             } else if (this.event.session.attributes.peopleSick.length >= 1) {
               deathPeopleSick.call(this);
               this.handler.state = GAME_STATES.EVENT;
@@ -1899,10 +1904,10 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
         if (this.event.session.attributes.fate <= this.event.session.attributes.sinkChance && this.event.session.attributes.riverDepth > 6) {
           this.event.session.attributes.food -= this.event.session.attributes.fate * 10;
           if (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length === 1) {
-            this.event.session.attributes.gameOverMessage = "you drowned";
             this.event.session.attributes.peopleHealthy = [];
             this.event.session.attributes.peopleSick = [];
-            gameOver.call(this);
+            this.handler.state = GAME_STATES.GAME_OVER;
+            this.emitWithState('YouDrowned');
           } else if (this.event.session.attributes.peopleSick.length >= 1) {
             deathPeopleSick.call(this);
             this.handler.state = GAME_STATES.EVENT;
@@ -2030,27 +2035,27 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
         }
       } else {
         if (this.event.request.intent.slots.leftorright.value === "right") {
-          this.event.session.attributes.gameOverMessage = "columbia river winner";
-          gameOver.call(this);
+          this.handler.state = GAME_STATES.GAME_OVER;
+          this.emitWithState('ColumbiaRiverWinner');
         } else {
           this.event.session.attributes.crashes += 1;
           if (this.event.session.attributes.peopleSick.includes(this.event.session.attributes.mainPlayer) && (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length === 1)) {
-            this.event.session.attributes.gameOverMessage = "columbia river you drowned";
             this.event.session.attributes.peopleHealthy = [];
             this.event.session.attributes.peopleSick = [];
-            gameOver.call(this);
+            this.handler.state = GAME_STATES.GAME_OVER;
+            this.emitWithState('ColumbiaRiverYouDrowned');
           } else if (this.event.session.attributes.crashes === 3) {
             this.event.session.attributes.peopleHealthy = [];
             this.event.session.attributes.peopleSick = [];
-            this.event.session.attributes.gameOverMessage = "columbia river raft sank";
-            gameOver.call(this);
+            this.handler.state = GAME_STATES.GAME_OVER;
+            this.emitWithState('ColumbiaRiverRaftSank');
           } else {
             this.event.session.attributes.food = 0;
             this.event.session.attributes.oxen = 0;
             this.event.session.attributes.parts = 0;
             this.event.session.attributes.money = 0;
-            this.event.session.attributes.gameOverMessage = "columbia river barely winner";
-            gameOver.call(this);
+            this.handler.state = GAME_STATES.GAME_OVER;
+            this.emitWithState('ColumbiaRiverBarelyWinner');
           }
         }
       }
@@ -2081,6 +2086,129 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
   },
 });
 
+// HANDLE GAME OVER
+const gameOverHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME_OVER, {
+  'Winner': function() {
+    getPoints.call(this);
+    this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points.");
+    this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + this.event.session.attributes.finalscore);
+    this.emit(':responseReady');
+  },
+  'ColumbiaRiverWinner': function() {
+    getPoints.call(this);
+    this.response.speak(riverSFX + winnerSFX + "Congratulations, you reached the dock at Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points.");
+    this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + this.event.session.attributes.finalscore);
+    this.emit(':responseReady');
+  },
+  'ColumbiaRiverBarelyWinner': function() {
+    getPoints.call(this);
+    this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points.");
+    this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + this.event.session.attributes.finalscore);
+    this.emit(':responseReady');
+  },
+  'YouDied': function() {
+    var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
+    var fatality = diseases[Math.floor(Math.random() * diseases.length)];
+    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You have died of " + fatality + ". Game over!");
+    this.response.cardRenderer("Game over!", "You have died of " + fatality);
+    this.emit(':responseReady');
+  },
+  'YouDrowned': function() {
+    this.response.speak(riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
+    this.response.cardRenderer("Game over!", "You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
+    this.emit(':responseReady');
+  },
+  'NoFerryMoneyYouDrowned': function() {
+    this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
+    this.response.cardRenderer("Game over!", "You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
+    this.emit(':responseReady');
+  },
+  'ColumbiaRiverYouDrowned': function() {
+    this.response.speak(loserSFX + "Your raft capsized in the rapids, and you drowned. Game over!");
+    this.response.cardRenderer("Game over!", "You drowned in the Columbia River.");
+    this.emit(':responseReady');
+  },
+  'ColumbiaRiverRaftSank': function() {
+    this.response.speak(loserSFX + "Your raft was so badly damaged, it capsized in the rapids and you drowned. Game over!");
+    this.response.cardRenderer("Game over!", "You drowned in the Columbia River.");
+    this.emit(':responseReady');
+  },
+  'YouStarved': function() {
+    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You have died of starvation. Game over!");
+    this.response.cardRenderer("Game over!", "You have died of starvation.");
+    this.emit(':responseReady');
+  },
+  'YouFroze': function() {
+    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You got stuck in a large snow storm for " + this.event.session.attributes.lostDays + " days and froze to death.");
+    this.response.cardRenderer("Game over!", "You froze to death.");
+    this.emit(':responseReady');
+  },
+  'NoMoreOxenOxProbs': function() {
+    var allOxProblems = ["An ox has wandered off.", "An ox has died."];
+    var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
+    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
+    this.emit(':responseReady');
+  },
+  'NoMoreOxenFire': function() {
+    if (this.event.session.attributes.oxen === 1) {
+      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A fire broke out and killed your last ox. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    } else {
+      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A fire broke out and killed your last oxen. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    }
+  },
+  'NoMoreOxenThief': function() {
+    if (this.event.session.attributes.oxen === 1) {
+      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A thief stole your last ox. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    } else {
+      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A thief stole your last oxen. This is as far as you can go. Good luck homesteading!");
+      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
+      this.emit(':responseReady');
+    }
+  },
+  'NoMoreOxenThunderstorm': function() {
+    this.response.speak(stormSFX + "You got caught in a major thunderstorm and your last ox ran away. " + loserSFX + "This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
+    this.emit(':responseReady');
+  },
+  'BrokenWagon': function() {
+    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
+    this.response.cardRenderer("Game over!", "Your wagon broke, and you don't have any spare parts to fix it.");
+    this.emit(':responseReady');
+  },
+  'XXXXX': function() {
+
+  },
+  'XXXXX': function() {
+
+  },
+  'AMAZON.HelpIntent': function() {
+    this.response.speak().listen();
+    this.emit(":responseReady");
+  },
+  'AMAZON.StartOverIntent': function() {
+    this.handler.state = GAME_STATES.USER_SETUP;
+    this.emitWithState('StartGameAgain');
+  },
+  'AMAZON.CancelIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'AMAZON.StopIntent': function() {
+    this.response.speak(EXIT_SKILL_MESSAGE);
+    this.emit(":responseReady");
+  },
+  'Unhandled': function() {
+    this.response.speak().listen();
+    this.emit(":responseReady");
+  },
+});
 
 
 // ====================
@@ -2142,6 +2270,17 @@ var statusCardContent = function() {
     + "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ")
     + "\nSick/injured: " + this.event.session.attributes.peopleSick.join(", ");
   }
+};
+
+var getPoints = function() {
+  var points = (this.event.session.attributes.peopleHealthy.length * 100) + (this.event.session.attributes.peopleSick.length * 50) + (this.event.session.attributes.oxen * 50) + (this.event.session.attributes.food * 2) + (this.event.session.attributes.parts * 10) + this.event.session.attributes.money - this.event.session.attributes.trailDays - this.event.session.attributes.columbiaRiverDamage;
+  if (this.event.session.attributes.profession === "farmer") {
+    points = points*3;
+  } else if (this.event.session.attributes.profession === "carpenter") {
+    points = points*2;
+  }
+  this.event.session.attributes.finalscore = points;
+  return this.event.session.attributes.finalscore;
 };
 
 // SOUND EFFECTS
@@ -2724,113 +2863,6 @@ var deathPeopleHealthy = function() {
   }
 };
 
-// GAME OVER
-var gameOver = function() {
-  var points = (this.event.session.attributes.peopleHealthy.length * 100) + (this.event.session.attributes.peopleSick.length * 50) + (this.event.session.attributes.oxen * 50) + (this.event.session.attributes.food * 2) + (this.event.session.attributes.parts * 10) + this.event.session.attributes.money - this.event.session.attributes.trailDays - this.event.session.attributes.columbiaRiverDamage;
-  if (this.event.session.attributes.gameOverMessage === "winner" || this.event.session.attributes.gameOverMessage === "columbia river winner") {
-    if (this.event.session.attributes.profession === "farmer") {
-      points = points*3;
-      this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
-      this.emit(':responseReady');
-    } else if (this.event.session.attributes.profession === "carpenter") {
-      points = points*2;
-      this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
-      this.emit(':responseReady');
-    } else {
-      this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
-      this.emit(':responseReady');
-    }
-  } else if (this.event.session.attributes.gameOverMessage === "columbia river barely winner") {
-    if (this.event.session.attributes.profession === "farmer") {
-      points = points*3;
-      this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
-      this.emit(':responseReady');
-    } else if (this.event.session.attributes.profession === "carpenter") {
-      points = points*2;
-      this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
-      this.emit(':responseReady');
-    } else {
-      this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + points + "</say-as> points.");
-      this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + points);
-      this.emit(':responseReady');
-    }
-  } else if (this.event.session.attributes.gameOverMessage === "you died") {
-    var diseases = ["a fever", "dysentery", "an infection", "dehydration"];
-    var fatality = diseases[Math.floor(Math.random() * diseases.length)];
-    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You have died of " + fatality + ". Game over!");
-    this.response.cardRenderer("Game over!", "You have died of " + fatality);
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "you drowned") {
-    this.response.speak(riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
-    this.response.cardRenderer("Game over!", "You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "columbia river you drowned") {
-    this.response.speak(loserSFX + "Your raft capsized in the rapids, and you drowned. Game over!");
-    this.response.cardRenderer("Game over!", "You drowned in the Columbia River.");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "columbia river raft sank") {
-    this.response.speak(loserSFX + "Your raft was so badly damaged, it capsized in the rapids and you drowned. Game over!");
-    this.response.cardRenderer("Game over!", "You drowned in the Columbia River.");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "no ferry money you drowned") {
-    this.response.speak("Sorry, you don't have enough money to pay the ferry. You will have to try floating across the river." + riverSFX + loserSFX + "Your wagon was overtaken by water, and you drowned. Game over!");
-    this.response.cardRenderer("Game over!", "You drowned trying to cross the " + this.event.session.attributes.mapLocation + ".");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "you starved") {
-    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You have died of starvation. Game over!");
-    this.response.cardRenderer("Game over!", "You have died of starvation.");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "froze to death") {
-    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "You got stuck in a large snow storm for " + this.event.session.attributes.lostDays + " days and froze to death.");
-    this.response.cardRenderer("Game over!", "You froze to death.");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- ox probs") {
-    var allOxProblems = ["An ox has wandered off.", "An ox has died."];
-    var randomOxProblem = allOxProblems[Math.floor(Math.random() * allOxProblems.length)];
-    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + randomOxProblem + " That was your last ox. This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- fire") {
-    if (this.event.session.attributes.oxen === 1) {
-      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A fire broke out and killed your last ox. This is as far as you can go. Good luck homesteading!");
-      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
-      this.emit(':responseReady');
-    } else {
-      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A fire broke out and killed your last oxen. This is as far as you can go. Good luck homesteading!");
-      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
-      this.emit(':responseReady');
-    }
-  } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- thief") {
-    if (this.event.session.attributes.oxen === 1) {
-      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A thief stole your last ox. This is as far as you can go. Good luck homesteading!");
-      this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
-      this.emit(':responseReady');
-    } else {
-      this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "A thief stole your last oxen. This is as far as you can go. Good luck homesteading!");
-      this.response.cardRenderer("Game over! You don't have an ox to pull your wagon.");
-      this.emit(':responseReady');
-    }
-  } else if (this.event.session.attributes.gameOverMessage === "no more oxen -- thunderstorm") {
-    this.response.speak(stormSFX + "You got caught in a major thunderstorm and your last ox ran away. " + loserSFX + "This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over!", "You don't have an ox to pull your wagon.");
-    this.emit(':responseReady');
-  } else if (this.event.session.attributes.gameOverMessage === "broken wagon") {
-    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "Your wagon broke, and you don't have any spare parts to fix it. This is as far as you can go. Good luck homesteading!");
-    this.response.cardRenderer("Game over!", "Your wagon broke, and you don't have any spare parts to fix it.");
-    this.emit(':responseReady');
-  } else {
-    this.response.speak(this.event.session.attributes.travelingSFX + loserSFX + "Game over!");
-    this.response.cardRenderer("Game over!");
-    this.emit(':responseReady');
-  }
-};
-
-
 
 // =============
 // THE TRAIL MAP
@@ -2933,6 +2965,7 @@ var travel = function() {
     this.handler.state = GAME_STATES.FORT;
     this.emitWithState('WelcomeToFort');
   } else if (this.event.session.attributes.miles === 1740 && this.event.session.attributes.shortcut1 === true && this.event.session.attributes.shortcut2 === true) {
+    this.event.session.attributes.mapLocation = "The Dalles";
     this.handler.state = GAME_STATES.EVENT;
     this.emitWithState('TheDalles');
   } else if (this.event.session.attributes.miles === 1800 && this.event.session.attributes.shortcut1 === true && this.event.session.attributes.shortcut2 === false) {
@@ -2946,8 +2979,8 @@ var travel = function() {
     this.emitWithState('TheDalles');
   } else if (this.event.session.attributes.miles === 1890 && this.event.session.attributes.shortcut1 === true && this.event.session.attributes.shortcut2 === false && this.event.session.attributes.shortcut3 === false) {
     this.event.session.attributes.mapLocation = "Oregon City";
-    this.event.session.attributes.gameOverMessage = "winner";
-    gameOver.call(this);
+    this.handler.state = GAME_STATES.GAME_OVER;
+    this.emitWithState('Winner');
   } else if (this.event.session.attributes.miles === 1905 && this.event.session.attributes.shortcut1 === false && this.event.session.attributes.shortcut2 === false) {
     this.event.session.attributes.mapLocation = "Fort Walla Walla";
     this.event.session.attributes.tradeChances = 1;
@@ -2956,8 +2989,8 @@ var travel = function() {
     this.emitWithState('WelcomeToFort');
   } else if (this.event.session.attributes.miles === 1995 && this.event.session.attributes.shortcut1 === false && this.event.session.attributes.shortcut2 === false && this.event.session.attributes.shortcut3 == false) {
     this.event.session.attributes.mapLocation = "Oregon City";
-    this.event.session.attributes.gameOverMessage = "winner";
-    gameOver.call(this);
+    this.handler.state = GAME_STATES.GAME_OVER;
+    this.emitWithState('Winner');
   } else {
     randomEvents.call(this);
   }
@@ -3041,6 +3074,6 @@ var theOregonTrail = function() {
 exports.handler = function(event, context, callback) {
   const alexa = Alexa.handler(event, context);
   alexa.appId = APP_ID;
-  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, fortHandlers, firstTrailSplitHandlers, secondTrailSplitHandlers, thirdTrailSplitHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers, columbiaRiverHandlers);
+  alexa.registerHandlers(newSessionHandlers, userSetupHandlers, professionSetupHandlers, suppliesSetupHandlers, monthSetupHandlers, eventHandlers, fortHandlers, firstTrailSplitHandlers, secondTrailSplitHandlers, thirdTrailSplitHandlers, shoppingHandlers, shoppingAmountHandlers, shoppingSuccessHandlers, tradingHandlers, changePurchaseHandlers, huntingHandlers, huntingNumberHandlers, sicknessHandlers, daysOfRestHandlers, crossRiverHandlers, columbiaRiverHandlers, gameOverHandlers);
   alexa.execute();
 };
