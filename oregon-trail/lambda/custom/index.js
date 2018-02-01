@@ -32,6 +32,18 @@ const START_GAME_MESSAGE = "It's 1846 in Independence, Missouri. You and your fa
 const EXIT_SKILL_MESSAGE = "Thanks for joining me on the Oregon Trail. Let's play again soon!";
 const STOP_MESSAGE =  "Would you like to keep playing?";
 const CANCEL_MESSAGE = "Ok, let's play again soon.";
+const PRICE_FOOD = 0.5;
+const PRICE_OXEN = 50;
+const PRICE_PARTS = 30;
+const COST_FOOD = "Food costs $" + PRICE_FOOD + " per pound.";
+const COST_OXEN = "Each ox costs $" + PRICE_OXEN + ".";
+const COST_PARTS = "Each spare part costs $" + PRICE_PARTS + ".";
+const Q_HOW_MANY_FOOD = "How many pounds of food do you want to buy?";
+const Q_HOW_MANY_OXEN = "How many oxen do you want to buy?";
+const Q_HOW_MANY_PARTS = "How many spare parts do you want to buy?";
+const Q_BUY_ANYTHING_ELSE = "Do you want to buy anything else?";
+const SORRY = "Sorry, I didn't get that.";
+const QUIT_OR_START_OVER = "If you want to quit the game, say stop. If you want to start over, say start over.";
 
 // ==============
 // STATE HANDLERS
@@ -209,10 +221,10 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
       }
     } else {
       if (this.event.session.attributes.mainPlayer === undefined) {
-        this.response.speak("I'm sorry, I didn't get that. What is your name?").listen("What is your name?");
+        this.response.speak(SORRY + " What is your name?").listen("What is your name?");
         this.emit(":responseReady");
       } else {
-        this.response.speak("I'm sorry, I didn't get that. What is the name?").listen("What is the name?");
+        this.response.speak(SORRY + " What is the name?").listen("What is the name?");
         this.emit(":responseReady");
       }
     }
@@ -222,19 +234,19 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
       this.response.speak("If you don't want to play, say stop. If you want to play, I need to know your name. It can be a real name or a pretend name. What is your name?").listen("What is your name?");
       this.emit(":responseReady");
     } else if (this.event.session.attributes.peopleHealthy.length === 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please say a name, and that person will be added to your party. What is the name of the second person in your party?").listen("What is the name of the second person in your party?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please say a name, and that person will be added to your party. What is the name of the second person in your party?").listen("What is the name of the second person in your party?");
       this.emit(":responseReady");
     } else if (this.event.session.attributes.peopleHealthy.length === 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please say a name, and that person will be added to your party. What is the name of the third person in your party?").listen("What is the name of the third person in your party?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please say a name, and that person will be added to your party. What is the name of the third person in your party?").listen("What is the name of the third person in your party?");
       this.emit(":responseReady");
     } else if (this.event.session.attributes.peopleHealthy.length === 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please say a name, and that person will be added to your party. What is the name of the fourth person in your party?").listen("What is the name of the fourth person in your party?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please say a name, and that person will be added to your party. What is the name of the fourth person in your party?").listen("What is the name of the fourth person in your party?");
       this.emit(":responseReady");
     } else if (this.event.session.attributes.peopleHealthy.length === 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please say a name, and that person will be added to your party. What is the name of the fifth person in your party?").listen("What is the name of the fifth person in your party?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please say a name, and that person will be added to your party. What is the name of the fifth person in your party?").listen("What is the name of the fifth person in your party?");
       this.emit(":responseReady");
     } else {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please say a name, and that person will be added to your party. What name do you want to use?").listen("What name do you want to use?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please say a name, and that person will be added to your party. What name do you want to use?").listen("What name do you want to use?");
       this.emit(":responseReady");
     }
   },
@@ -310,7 +322,7 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you must choose a profession. Being a banker makes the game easier because you have a lot of money. Being a farmer is the hardest, but you'll earn the most bonus points. If you want to play on intermediate mode, be a carpenter. So, do you want to be a banker, a carpenter, or a farmer?").listen("Do you want to be a banker, a carpenter, or a farmer?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, you must choose a profession. Being a banker makes the game easier because you have a lot of money. Being a farmer is the hardest, but you'll earn the most bonus points. If you want to play on intermediate mode, be a carpenter. So, do you want to be a banker, a carpenter, or a farmer?").listen("Do you want to be a banker, a carpenter, or a farmer?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -318,7 +330,7 @@ const professionSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.PROFESSION_
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please choose to be a banker, a carpenter, or a farmer.").listen("Please choose to be a banker, a carpenter, or a farmer.");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, please choose to be a banker, a carpenter, or a farmer.").listen("Please choose to be a banker, a carpenter, or a farmer.");
     this.emit(":responseReady");
   },
   'AMAZON.StopIntent': function() {
@@ -371,21 +383,21 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
   },
   'AMAZON.HelpIntent': function() {
     if (this.event.session.attributes.currentlyBuyingWhat === "pounds of food") {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to buy food. I recommend buying " + (1000 - this.event.session.attributes.food) + " pounds of food. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to buy food. I recommend buying " + (1000 - this.event.session.attributes.food) + " pounds of food. " + Q_HOW_MANY_FOOD).listen(Q_HOW_MANY_FOOD);
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to buy oxen. I recommend buying " + (6 - this.event.session.attributes.oxen) + " oxen. How many oxen do you want to buy?").listen("How many oxen do you want to buy?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to buy oxen. I recommend buying " + (6 - this.event.session.attributes.oxen) + " oxen. " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN);
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "spare parts") {
       if (this.event.session.attributes.profession === "carpenter") {
-        this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to buy spare parts. I recommend buying 0 spare parts. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
+        this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to buy spare parts. I recommend buying 0 spare parts. " + Q_HOW_MANY_PARTS).listen(Q_HOW_MANY_PARTS);
         this.emit(":responseReady");
       } else {
-        this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to buy spare parts. I recommend buying " + (3 - this.event.session.attributes.parts) + " spare parts. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
+        this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to buy spare parts. I recommend buying " + (3 - this.event.session.attributes.parts) + " spare parts. " + Q_HOW_MANY_PARTS).listen(Q_HOW_MANY_PARTS);
         this.emit(":responseReady");
       }
     } else {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, say a number, and that's the amount you will buy. How many do you want to buy?").listen("How many do you want to buy?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, say a number, and that's the amount you will buy. How many do you want to buy?").listen("How many do you want to buy?");
       this.emit(":responseReady");
     }
   },
@@ -395,16 +407,16 @@ const suppliesSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.SUPPLIES_SETU
   },
   'AMAZON.CancelIntent': function() {
     if (this.event.session.attributes.currentlyBuyingWhat === "pounds of food") {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please tell me how many pounds of food you want to buy.").listen("How many pounds of food do you want to buy?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please tell me how many pounds of food you want to buy.").listen(Q_HOW_MANY_FOOD);
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please tell me how many oxen you want to buy.").listen("How many oxen do you want to buy?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please tell me how many oxen you want to buy.").listen(Q_HOW_MANY_OXEN);
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "spare parts") {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please tell me how many spare parts you want to buy.").listen("How many spare parts do you want to buy?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, please tell me how many spare parts you want to buy.").listen(Q_HOW_MANY_PARTS);
       this.emit(":responseReady");
     } else {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, pleast tell me how many you want to buy.").listen("How many do you wan to buy?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, pleast tell me how many you want to buy.").listen("How many do you want to buy?");
       this.emit(":responseReady");
     }
   },
@@ -441,7 +453,7 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, if you want to keep playing, you need to choose a month. Leaving too soon means there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. Leaving too late means you won't make it to Oregon before winter. I recommend leaving in May or June. When do you want to leave?").listen("When do you want to leave?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, if you want to keep playing, you need to choose a month. Leaving too soon means there won't be enough grass for your oxen to eat, and you may encounter late-spring snow storms. Leaving too late means you won't make it to Oregon before winter. I recommend leaving in May or June. When do you want to leave?").listen("When do you want to leave?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -449,7 +461,7 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
     this.emitWithState('StartGameAgain');
   },
   'AMAZON.CancelIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please choose a month between March and August.").listen("Please choose a month between March and August.");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, please choose a month between March and August.").listen("Please choose a month between March and August.");
     this.emit(":responseReady");
   },
   'AMAZON.StopIntent': function() {
@@ -981,7 +993,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, say OK to continue on the trail.").listen("Say OK to continue on the trail.");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1122,7 +1134,7 @@ const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, if you want to buy something from the fort's general store, say buy, and if you want to try trading, say trade. To leave the fort, you can say cancel. What do you want to do?").listen("What do you want to do?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, if you want to buy something from the fort's general store, say buy, and if you want to try trading, say trade. To leave the fort, you can say cancel. What do you want to do?").listen("What do you want to do?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1176,10 +1188,10 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
   },
   'AMAZON.HelpIntent': function() {
     if (this.event.session.attributes.food <= 15 * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length) || this.event.session.attributes.oxen <= 2 || this.event.session.attributes.parts <= 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Bridger, or Soda Springs?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Bridger, or Soda Springs?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
       this.emit(":responseReady");
     } else {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Bridger, or Soda Springs?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Bridger. But if your supplies is ok, you can take the shortcut to Soda Springs, which is 105 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Bridger, or Soda Springs?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
       this.emit(":responseReady");
     }
   },
@@ -1196,7 +1208,7 @@ const firstTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.FIRST_TRAIL
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Bridger or Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
+    this.response.speak(SORRY + " You must choose to go to Fort Bridger or Soda Springs. Which way do you want to go?").listen("Do you want to go to Fort Bridger, or Soda Springs?");
     this.emit(":responseReady");
   },
 });
@@ -1230,10 +1242,10 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
   },
   'AMAZON.HelpIntent': function() {
     if (this.event.session.attributes.food <= 19 * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length) || this.event.session.attributes.oxen <= 2 || this.event.session.attributes.parts <= 1) {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Walla Walla, or The Dalles?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. You seem low on supplies, so I recomment going to the fort. Do you want to go to Fort Walla Walla, or The Dalles?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
       this.emit(":responseReady");
     } else {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Walla Walla, or The Dalles?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
+      this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to choose a direction. If you're low on supplies, it's best to go to Fort Walla Walla. But if your supplies is ok, you can take the shortcut to The Dalles, which is 150 miles shorter. Assuming you don't have any bad events on the trail, I think you can take the shortcut. Do you want to go to Fort Walla Walla, or The Dalles?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
       this.emit(":responseReady");
     }
   },
@@ -1250,7 +1262,7 @@ const secondTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.SECOND_TRA
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. You must choose to go to Fort Walla Walla or The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
+    this.response.speak(SORRY + " You must choose to go to Fort Walla Walla or The Dalles. Which way do you want to go?").listen("Do you want to go to Fort Walla Walla, or The Dalles?");
     this.emit(":responseReady");
   },
 });
@@ -1284,7 +1296,7 @@ const thirdTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.THIRD_TRAIL
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you need to choose a direction. The Barlow Toll Road costs $30. It's a rough, mountainous road, and it's 90 miles long. Floating down the Columbia River is much shorter, but it's also much more dangerous. Do you want to take the Barlow Toll Road, or go to the Columbia River?").listen("Do you want to take the Barlow Toll Road, or go to the Columbia River?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, you need to choose a direction. The Barlow Toll Road costs $30. It's a rough, mountainous road, and it's 90 miles long. Floating down the Columbia River is much shorter, but it's also much more dangerous. Do you want to take the Barlow Toll Road, or go to the Columbia River?").listen("Do you want to take the Barlow Toll Road, or go to the Columbia River?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1300,7 +1312,7 @@ const thirdTrailSplitHandlers = Alexa.CreateStateHandler(GAME_STATES.THIRD_TRAIL
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. You must choose to take the Barlow Toll Road or the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road, or go to the Columbia River?");
+    this.response.speak(SORRY + " You must choose to take the Barlow Toll Road or the Columbia River. Which way do you want to go?").listen("Do you want to take the Barlow Toll Road, or go to the Columbia River?");
     this.emit(":responseReady");
   },
 });
@@ -1340,7 +1352,7 @@ const shoppingHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, you can buy food, oxen, or spare parts. Food will cost 50 cents per pound, oxen will cost $50 each, and spare parts will cost $30 each. If you don't want to buy anything, you can say cancel. You currently have $" + this.event.session.attributes.money + ". What do you want to buy?").listen("What do you want to buy?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, you can buy food, oxen, or spare parts. Food will cost $" + PRICE_FOOD + " per pound, oxen will cost $" + PRICE_OXEN + " each, and spare parts will cost $" + PRICE_PARTS + " each. If you don't want to buy anything, you can say cancel. You currently have $" + this.event.session.attributes.money + ". What do you want to buy?").listen("What do you want to buy?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1358,7 +1370,7 @@ const shoppingHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. You can buy food, oxen, or spare parts. If you changed your mind, you can say cancel. What do you want to buy?").listen("What do you want to buy?");
+    this.response.speak(SORRY + " You can buy food, oxen, or spare parts. If you changed your mind, you can say cancel. What do you want to buy?").listen("What do you want to buy?");
     this.emit(":responseReady");
   },
 });
@@ -1367,16 +1379,16 @@ const shoppingHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING, {
 const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMOUNT, {
   'HowMany': function() {
     if (this.event.session.attributes.currentlyBuyingWhat === "food") {
-      this.event.session.attributes.itemPrice = 0.5;
-      this.response.speak("Ok, let's buy food. Food costs 50 cents per pound. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy?");
+      this.event.session.attributes.itemPrice = PRICE_FOOD;
+      this.response.speak("Ok, let's buy food. " + COST_FOOD + " " + Q_HOW_MANY_FOOD).listen(Q_HOW_MANY_FOOD);
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
-      this.event.session.attributes.itemPrice = 50;
-      this.response.speak("Ok, let's buy oxen. Each ox costs $50. How many oxen do you want to buy?").listen("How many oxen do you want to buy?");
+      this.event.session.attributes.itemPrice = PRICE_OXEN;
+      this.response.speak("Ok, let's buy oxen. " + COST_OXEN + " " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN);
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "parts") {
-      this.event.session.attributes.itemPrice = 30;
-      this.response.speak("Ok, let's buy spare parts. Each spare part costs $30. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy?");
+      this.event.session.attributes.itemPrice = PRICE_PARTS;
+      this.response.speak("Ok, let's buy spare parts. " + COST_PARTS + " " + Q_HOW_MANY_PARTS).listen(Q_HOW_MANY_PARTS);
       this.emit(":responseReady");
     }
   },
@@ -1387,35 +1399,40 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
       this.emitWithState('Total');
     } else {
       if (this.event.session.attributes.currentlyBuyingWhat === "food") {
-        this.response.speak("Sorry, you can't buy zero pounds of food. If you want to cancel your purchase, say cancel. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy? Please say a number.");
+        this.response.speak("Sorry, you can't buy zero pounds of food. If you want to cancel your purchase, say cancel. " + Q_HOW_MANY_FOOD).listen(Q_HOW_MANY_FOOD + " Please say a number.");
         this.emit(":responseReady");
       } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
-        this.response.speak("Sorry, you can't buy zero oxen. If you want to cancel your purchase, say cancel. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.response.speak("Sorry, you can't buy zero oxen. If you want to cancel your purchase, say cancel. " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN + " Please say a number.");
         this.emit(":responseReady");
       } else if (this.event.session.attributes.currentlyBuyingWhat === "parts") {
-        this.response.speak("Sorry, you can't buy zero spare parts. If you want to cancel your purchase, say cancel. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy? Please say a number.");
+        this.response.speak("Sorry, you can't buy zero spare parts. If you want to cancel your purchase, say cancel. " + Q_HOW_MANY_PARTS).listen(Q_HOW_MANY_PARTS + " Please say a number.");
         this.emit(":responseReady");
       }
     }
   },
   'AMAZON.HelpIntent': function() {
     if (this.event.session.attributes.currentlyBuyingWhat === "food") {
-      this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. If you want to cancel your purchase, say cancel. Otherwise, if you want to buy food, it costs 50 cents per pound. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.food + " pounds of food. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy? Please say a number.");
-      this.emit(":responseReady");
-    } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
-      if (this.event.session.attributes.oxen === 1) {
-        this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. If you want to cancel your purchase, say cancel. Otherwise, if you want to buy oxen, they cost $50 each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.oxen + " ox. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+      if (this.event.session.attributes.food === 1) {
+        this.response.speak(QUIT_OR_START_OVER + " If you want to cancel your purchase, say cancel. Otherwise, if you want to buy food, it costs $" + PRICE_FOOD + " per pound. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.food + " pound of food. " + Q_HOW_MANY_FOOD).listen(Q_HOW_MANY_FOOD + " Please say a number.");
         this.emit(":responseReady");
       } else {
-        this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. If you want to cancel your purchase, say cancel. Otherwise, if you want to buy oxen, they cost $50 each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.oxen + " oxen. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.response.speak(QUIT_OR_START_OVER + " If you want to cancel your purchase, say cancel. Otherwise, if you want to buy food, it costs $" + PRICE_FOOD + " per pound. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.food + " pounds of food. " + Q_HOW_MANY_FOOD).listen(Q_HOW_MANY_FOOD + " Please say a number.");
+        this.emit(":responseReady");
+      }
+    } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
+      if (this.event.session.attributes.oxen === 1) {
+        this.response.speak(QUIT_OR_START_OVER + " If you want to cancel your purchase, say cancel. Otherwise, if you want to buy oxen, they cost $" + PRICE_OXEN + " each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.oxen + " ox. " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN + " Please say a number.");
+        this.emit(":responseReady");
+      } else {
+        this.response.speak(QUIT_OR_START_OVER + " If you want to cancel your purchase, say cancel. Otherwise, if you want to buy oxen, they cost $" + PRICE_OXEN + " each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.oxen + " oxen. " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN + " Please say a number.");
         this.emit(":responseReady");
       }
     } else if (this.event.session.attributes.currentlyBuyingWhat === "parts") {
       if (this.event.session.attributes.parts === 1) {
-        this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. If you want to cancel your purchase, say cancel. Otherwise, if you want to buy spare parts, they cost $30 each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.parts + " spare part. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.response.speak(QUIT_OR_START_OVER + " If you want to cancel your purchase, say cancel. Otherwise, if you want to buy spare parts, they cost $" + PRICE_PARTS + " each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.parts + " spare part. " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN + " Please say a number.");
         this.emit(":responseReady");
       } else {
-        this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. If you want to cancel your purchase, say cancel. Otherwise, if you want to buy spare parts, they cost $30 each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.parts + " spare parts. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+        this.response.speak(QUIT_OR_START_OVER + " If you want to cancel your purchase, say cancel. Otherwise, if you want to buy spare parts, they cost $" + PRICE_PARTS + " each. You currently have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.parts + " spare parts. " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN + " Please say a number.");
         this.emit(":responseReady");
       }
     }
@@ -1436,13 +1453,13 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
   },
   'Unhandled': function() {
     if (this.event.session.attributes.currentlyBuyingWhat === "food") {
-      this.response.speak("Sorry, I didnt get that. How many pounds of food do you want to buy?").listen("How many pounds of food do you want to buy? Please say a number.");
+      this.response.speak("Sorry, I didnt get that. " + Q_HOW_MANY_FOOD).listen(Q_HOW_MANY_FOOD + " Please say a number.");
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
-      this.response.speak("Sorry, I didnt get that. How many oxen do you want to buy?").listen("How many oxen do you want to buy? Please say a number.");
+      this.response.speak("Sorry, I didnt get that. " + Q_HOW_MANY_OXEN).listen(Q_HOW_MANY_OXEN + " Please say a number.");
       this.emit(":responseReady");
     } else if (this.event.session.attributes.currentlyBuyingWhat === "parts") {
-      this.response.speak("Sorry, I didnt get that. How many spare parts do you want to buy?").listen("How many spare parts do you want to buy? Please say a number.");
+      this.response.speak("Sorry, I didnt get that. " + Q_HOW_MANY_PARTS).listen(Q_HOW_MANY_PARTS + " Please say a number.");
       this.emit(":responseReady");
     }
   },
@@ -1451,15 +1468,9 @@ const shoppingAmountHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_AMO
 // HANDLE SHOPPING SUCCESS
 const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SUCCESS, {
   'Total': function() {
-    if (this.event.session.attributes.currentlyBuyingWhat === "food") {
-      this.event.session.attributes.itemPrice = this.event.session.attributes.currentlyBuyingHowMany * 0.5;
-    } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
-      this.event.session.attributes.itemPrice = this.event.session.attributes.currentlyBuyingHowMany * 50;
-    } else if (this.event.session.attributes.currentlyBuyingWhat === "parts") {
-      this.event.session.attributes.itemPrice = this.event.session.attributes.currentlyBuyingHowMany * 30;
-    }
+    this.event.session.attributes.total = this.event.session.attributes.currentlyBuyingHowMany * this.event.session.attributes.itemPrice;
 
-    if (this.event.session.attributes.money < this.event.session.attributes.itemPrice) {
+    if (this.event.session.attributes.money < this.event.session.attributes.total) {
       this.handler.state = GAME_STATES.FORT;
       this.emitWithState('NotEnoughMoney');
     } else {
@@ -1469,39 +1480,39 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
       this.event.session.attributes.money -= this.event.session.attributes.currentlyBuyingHowMany * this.event.session.attributes.itemPrice;
       if (this.event.session.attributes.currentlyBuyingWhat === "food") {
         if (this.event.session.attributes.currentlyBuyingHowMany === 0) {
-          this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food. You have still have $" + this.event.session.attributes.money + ". Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food. You have still have $" + this.event.session.attributes.money + ". " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         } else if (this.event.session.attributes.currentlyBuyingHowMany === 1) {
           this.event.session.attributes.food += this.event.session.attributes.currentlyBuyingHowMany;
-          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pound of food. You have $" + this.event.session.attributes.money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pound of food. You have $" + this.event.session.attributes.money + " left over. " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         } else {
           this.event.session.attributes.food += this.event.session.attributes.currentlyBuyingHowMany;
-          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food. You have $" + this.event.session.attributes.money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food. You have $" + this.event.session.attributes.money + " left over. " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         }
       } else if (this.event.session.attributes.currentlyBuyingWhat === "oxen") {
         this.event.session.attributes.oxen += this.event.session.attributes.currentlyBuyingHowMany;
         if (this.event.session.attributes.currentlyBuyingHowMany === 0) {
-          this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen. You still have $" + this.event.session.attributes.money + ". Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen. You still have $" + this.event.session.attributes.money + ". " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         } else if (this.event.session.attributes.currentlyBuyingHowMany === 1) {
-          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " ox. You have $" + this.event.session.attributes.money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " ox. You have $" + this.event.session.attributes.money + " left over. " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         } else {
-          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen. You have $" + this.event.session.attributes.money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen. You have $" + this.event.session.attributes.money + " left over. " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         }
       } else if (this.event.session.attributes.currentlyBuyingWhat === "parts") {
         this.event.session.attributes.parts += this.event.session.attributes.currentlyBuyingHowMany;
         if (this.event.session.attributes.currentlyBuyingHowMany === 0) {
-          this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " spare parts. You still have $" + this.event.session.attributes.money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " spare parts. You still have $" + this.event.session.attributes.money + " left over. " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         } else if (this.event.session.attributes.currentlyBuyingHowMany === 1) {
-          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " spare part. You have $" + this.event.session.attributes.money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " spare part. You have $" + this.event.session.attributes.money + " left over. " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         } else {
-          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " spare parts. You have $" + this.event.session.attributes.money + " left over. Do you want to buy anything else?").listen("Do you want to buy anything else?");
+          this.response.speak(cashSFX + "Great! You bought " + this.event.session.attributes.currentlyBuyingHowMany + " spare parts. You have $" + this.event.session.attributes.money + " left over. " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
           this.emit(":responseReady");
         }
       }
@@ -1516,7 +1527,7 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
     this.emitWithState('TradeInstead');
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. If you want to leave the general store, say cancel. You have $" + this.event.session.attributes.money + ". Do you want to buy anything else?").listen("Do you want to buy anything else?");
+    this.response.speak(QUIT_OR_START_OVER + " If you want to leave the general store, say cancel. You have $" + this.event.session.attributes.money + ". " + Q_BUY_ANYTHING_ELSE).listen(Q_BUY_ANYTHING_ELSE);
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1532,7 +1543,7 @@ const shoppingSuccessHandlers = Alexa.CreateStateHandler(GAME_STATES.SHOPPING_SU
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Do you want to buy anything else? Please say yes or no.").listen("Do you want to buy anything else? Please say yes or no.");
+    this.response.speak(Q_BUY_ANYTHING_ELSE + " Please say yes or no.").listen(Q_BUY_ANYTHING_ELSE + " Please say yes or no.");
     this.emit(":responseReady");
   },
 });
@@ -1590,7 +1601,7 @@ const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
     this.emitWithState('Status');
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, if you want to accept the trade, say yes, or, if you don't like the trade, say no. Say cancel if you don't want to trade anymore. What do you want to do?").listen("Please say yes, no, or cancel. What do you want to do?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, if you want to accept the trade, say yes, or, if you don't like the trade, say no. Say cancel if you don't want to trade anymore. What do you want to do?").listen("Please say yes, no, or cancel. What do you want to do?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1606,7 +1617,7 @@ const tradingHandlers = Alexa.CreateStateHandler(GAME_STATES.TRADING, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. Please say yes or no to the offer.").listen("Please say yes or no to the offer.");
+    this.response.speak(SORRY + " Please say yes or no to the offer.").listen("Please say yes or no to the offer.");
     this.emit(":responseReady");
   },
 });
@@ -1660,7 +1671,7 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, say yes if you need more supplies, or say no if you want to get back on the trail. What do you want to do?").listen("Please say yes, no, or cancel. What do you want to do?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, say yes if you need more supplies, or say no if you want to get back on the trail. What do you want to do?").listen("Please say yes, no, or cancel. What do you want to do?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1680,7 +1691,7 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-    this.response.speak("Sorry, I didn't get that. Please say yes or no.").listen("Please say yes or no.");
+    this.response.speak(SORRY + " Please say yes or no.").listen("Please say yes or no.");
     this.emit(":responseReady");
   },
 });
@@ -1701,7 +1712,7 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, if you want to go hunting, say yes. If not, say no to continue on the trail. Do you want to go hunting?").listen("Do you want to go hunting? Please say yes or no.");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, if you want to go hunting, say yes. If not, say no to continue on the trail. Do you want to go hunting?").listen("Do you want to go hunting? Please say yes or no.");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1743,7 +1754,7 @@ const huntingNumberHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT_NUMBER, 
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, say a number between 1 and 10 to shoot an animal. If you don't want to hunt anymore, you can say cancel. What number do you guess?").listen("Please say a number between 1 and 10, or say cancel. What number do you guess?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, say a number between 1 and 10 to shoot an animal. If you don't want to hunt anymore, you can say cancel. What number do you guess?").listen("Please say a number between 1 and 10, or say cancel. What number do you guess?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1795,7 +1806,7 @@ const sicknessHandlers = Alexa.CreateStateHandler(GAME_STATES.SICK, {
     this.emitWithState('PlayGame');
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, if you take a rest, there's a chance they could feel better. The longer the rest, the better the chance for them to heal. Do you want to rest?").listen("Say yes to rest, or say no to continue on the trail. Do you want to rest?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, if you take a rest, there's a chance they could feel better. The longer the rest, the better the chance for them to heal. Do you want to rest?").listen("Say yes to rest, or say no to continue on the trail. Do you want to rest?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1833,7 +1844,7 @@ const daysOfRestHandlers = Alexa.CreateStateHandler(GAME_STATES.REST, {
     rest.call(this);
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, the more days you rest, the better the chances of recovery. If you don't want to rest, you can say cancel. How many days do you want to rest?").listen("How many days do you want to rest?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, the more days you rest, the better the chances of recovery. If you don't want to rest, you can say cancel. How many days do you want to rest?").listen("How many days do you want to rest?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -1935,7 +1946,7 @@ const crossRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.RIVER, {
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, let's cross this river. If a river is less than three feet deep, it's usually safe to float. If it's over six feet deep, you definitely want a ferry. This river is " + this.event.session.attributes.riverDepth + " feet deep. Do you want to ferry, or do you want to float?").listen("Do you want to ferry, or do you want to float?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, let's cross this river. If a river is less than three feet deep, it's usually safe to float. If it's over six feet deep, you definitely want a ferry. This river is " + this.event.session.attributes.riverDepth + " feet deep. Do you want to ferry, or do you want to float?").listen("Do you want to ferry, or do you want to float?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -2065,7 +2076,7 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
     }
   },
   'AMAZON.HelpIntent': function() {
-    this.response.speak("If you want to quit the game, say stop. If you want to start over, say start over. Otherwise, please choose to paddle to the left, or to the right.").listen("Do you want to paddle to the left, or to the right?");
+    this.response.speak(QUIT_OR_START_OVER + " Otherwise, please choose to paddle to the left, or to the right.").listen("Do you want to paddle to the left, or to the right?");
     this.emit(":responseReady");
   },
   'AMAZON.StartOverIntent': function() {
@@ -2090,19 +2101,19 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
 const gameOverHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME_OVER, {
   'Winner': function() {
     getPoints.call(this);
-    this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points.");
+    this.response.speak(this.event.session.attributes.travelingSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points. " + EXIT_SKILL_MESSAGE);
     this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + this.event.session.attributes.finalscore);
     this.emit(':responseReady');
   },
   'ColumbiaRiverWinner': function() {
     getPoints.call(this);
-    this.response.speak(riverSFX + winnerSFX + "Congratulations, you reached the dock at Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points.");
+    this.response.speak(riverSFX + winnerSFX + "Congratulations, you reached the dock at Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points. " + EXIT_SKILL_MESSAGE);
     this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + this.event.session.attributes.finalscore);
     this.emit(':responseReady');
   },
   'ColumbiaRiverBarelyWinner': function() {
     getPoints.call(this);
-    this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points.");
+    this.response.speak(badNewsSFX + "Your raft nearly capsized in the rapids. You lost all of your belongings, but at least you're still alive." + riverSFX + winnerSFX + "Congratulations, you reached the dock at Oregon City! You finished the game with a score of <say-as interpret-as='cardinal'>" + this.event.session.attributes.finalscore + "</say-as> points. " + EXIT_SKILL_MESSAGE);
     this.response.cardRenderer("Congratulations, you reached Oregon City!", "Final score: " + this.event.session.attributes.finalscore);
     this.emit(':responseReady');
   },
@@ -2182,12 +2193,6 @@ const gameOverHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME_OVER, {
     this.response.cardRenderer("Game over!", "Your wagon broke, and you don't have any spare parts to fix it.");
     this.emit(':responseReady');
   },
-  'XXXXX': function() {
-
-  },
-  'XXXXX': function() {
-
-  },
   'AMAZON.HelpIntent': function() {
     this.response.speak().listen();
     this.emit(":responseReady");
@@ -2250,7 +2255,7 @@ var statusCardContent = function() {
     + "\nOxen: " + this.event.session.attributes.oxen
     + "\nParts: " + this.event.session.attributes.parts
     + "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ");
-  } else if (this.event.session.attributes.peopleHealthy.legnth === 0) {
+  } else if (this.event.session.attributes.peopleHealthy.length === 0) {
     return "\nCurrent location: " + this.event.session.attributes.mapLocation
     + "\nDays on the trail: " + this.event.session.attributes.trailDays
     + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
@@ -2359,63 +2364,60 @@ var chooseProfessionAgain = function() {
 };
 
 // SUPPLIES
-const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store and buy food, oxen, and spare parts." + fortSFX;
-const FOOD_REPROMPT = "Food costs 50 cents per pound. How many pounds of food do you want to buy?";
-const OXEN_REPROMPT = "Each ox costs $50. How many oxen do you want to buy?";
-const PARTS_REPROMPT = "Each spare part costs $30. How many spare parts do you want to buy?";
+const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store and buy food, oxen, and spare parts." + fortSFX + " We'll start with food. " + COST_FOOD + " I recommend at least 1,000 pounds.";
 
 var generalStore = function () {
   this.event.session.attributes.hasBeenToGeneralStore = true;
   var buyFood = function() {
     this.event.session.attributes.currentlyBuyingWhat = "pounds of food";
-    this.event.session.attributes.itemPrice = 0.5;
-    this.event.session.attributes.TRY_BUYING_AGAIN = FOOD_REPROMPT;
+    this.event.session.attributes.itemPrice = PRICE_FOOD;
+    this.event.session.attributes.TRY_BUYING_AGAIN = COST_FOOD + " " + Q_HOW_MANY_FOOD;
     if (this.event.session.attributes.profession.toLowerCase() === "banker") {
       this.event.session.attributes.money += 1200;
-      this.response.speak("You are a banker. You have $" + this.event.session.attributes.money + ". " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend at least 1,000 pounds. You currently have " + this.event.session.attributes.food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.speak("You are a banker. You have $" + this.event.session.attributes.money + ". " + GENERAL_STORE_MESSAGE + " You currently have " + this.event.session.attributes.food + " pounds of food. " + Q_HOW_MANY_FOOD).listen(COST_FOOD + " " + Q_HOW_MANY_FOOD);
       this.emit(':responseReady');
     } else if (this.event.session.attributes.profession.toLowerCase() === "carpenter") {
       this.event.session.attributes.money += 800;
       this.event.session.attributes.parts += 4;
-      this.response.speak("You are a carpenter. You have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.parts + " spare parts. " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend at least 1,000 pounds. You currently have " + this.event.session.attributes.food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.speak("You are a carpenter. You have $" + this.event.session.attributes.money + " and " + this.event.session.attributes.parts + " spare parts. " + GENERAL_STORE_MESSAGE + " You currently have " + this.event.session.attributes.food + " pounds of food. " + Q_HOW_MANY_FOOD).listen(COST_FOOD + " " + Q_HOW_MANY_FOOD);
       this.emit(':responseReady');
     } else if (this.event.session.attributes.profession.toLowerCase() === "farmer") {
       this.event.session.attributes.money += 400;
       this.event.session.attributes.food += 500;
       this.event.session.attributes.oxen += 4;
-      this.response.speak("You are a farmer. You have $" + this.event.session.attributes.money + ", " + this.event.session.attributes.food + " pounds of food, and " + this.event.session.attributes.oxen + " oxen. " + GENERAL_STORE_MESSAGE + " We'll start with food. Food costs 50 cents per pound. I recommend at least 1,000 pounds. You currently have " + this.event.session.attributes.food + " pounds of food. How many pounds of food do you want to buy?").listen(FOOD_REPROMPT);
+      this.response.speak("You are a farmer. You have $" + this.event.session.attributes.money + ", " + this.event.session.attributes.food + " pounds of food, and " + this.event.session.attributes.oxen + " oxen. " + GENERAL_STORE_MESSAGE + " You currently have " + this.event.session.attributes.food + " pounds of food. " + Q_HOW_MANY_FOOD).listen(COST_FOOD + " " + Q_HOW_MANY_FOOD);
       this.emit(':responseReady');
     }
   };
 
   var buyOxen = function() {
     this.event.session.attributes.currentlyBuyingWhat = "oxen";
-    this.event.session.attributes.itemPrice = 50;
-    this.event.session.attributes.TRY_BUYING_AGAIN = OXEN_REPROMPT;
+    this.event.session.attributes.itemPrice = PRICE_OXEN;
+    this.event.session.attributes.TRY_BUYING_AGAIN = COST_OXEN + " " + Q_HOW_MANY_OXEN;
     if (this.event.session.attributes.currentlyBuyingHowMany === 0) {
-      this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food and still have $" + this.event.session.attributes.money + ". Now let's buy oxen. You will need these oxen to pull your wagon. Each ox costs $50. I recommend at least six oxen. You currently have " + this.event.session.attributes.oxen + " oxen. How many oxen do you want to buy?").listen(OXEN_REPROMPT);
+      this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food and still have $" + this.event.session.attributes.money + ". Now let's buy oxen. You will need these oxen to pull your wagon. " + COST_OXEN + " I recommend at least six oxen. You currently have " + this.event.session.attributes.oxen + " oxen. " + Q_HOW_MANY_OXEN).listen(COST_OXEN + " " + Q_HOW_MANY_OXEN);
       this.emit(':responseReady');
     } else if (this.event.session.attributes.currentlyBuyingHowMany === 1) {
-      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pound of food and have $" + this.event.session.attributes.money + " left. Now let's buy oxen. You will need these oxen to pull your wagon. Each ox costs $50. I recommend at least six oxen. You currently have " + this.event.session.attributes.oxen + " oxen. How many oxen do you want to buy?").listen(OXEN_REPROMPT);
+      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pound of food and have $" + this.event.session.attributes.money + " left. Now let's buy oxen. You will need these oxen to pull your wagon. " + COST_OXEN + " I recommend at least six oxen. You currently have " + this.event.session.attributes.oxen + " oxen. " + Q_HOW_MANY_OXEN).listen(COST_OXEN + " " + Q_HOW_MANY_OXEN);
       this.emit(':responseReady');
     } else {
-      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food and have $" + this.event.session.attributes.money + " left. Now let's buy oxen. You will need these oxen to pull your wagon. Each ox costs $50. I recommend at least six oxen. You currently have " + this.event.session.attributes.oxen + " oxen. How many oxen do you want to buy?").listen(OXEN_REPROMPT);
+      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " pounds of food and have $" + this.event.session.attributes.money + " left. Now let's buy oxen. You will need these oxen to pull your wagon. " + COST_OXEN + " I recommend at least six oxen. You currently have " + this.event.session.attributes.oxen + " oxen. " + Q_HOW_MANY_OXEN).listen(COST_OXEN + " " + Q_HOW_MANY_OXEN);
       this.emit(':responseReady');
     }
   };
 
   var buyParts = function() {
     this.event.session.attributes.currentlyBuyingWhat = "spare parts";
-    this.event.session.attributes.itemPrice = 30;
-    this.event.session.attributes.TRY_BUYING_AGAIN = PARTS_REPROMPT;
+    this.event.session.attributes.itemPrice = PRICE_PARTS;
+    this.event.session.attributes.TRY_BUYING_AGAIN = COST_PARTS + " " + Q_HOW_MANY_PARTS;
     if (this.event.session.attributes.currentlyBuyingHowMany === 0) {
-      this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen and still have $" + this.event.session.attributes.money + ". Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. Each spare part costs $30. I recommend at least three spare parts. You currently have " + this.event.session.attributes.parts + " spare parts. How many spare parts do you want to buy?").listen(PARTS_REPROMPT);
+      this.response.speak("Ok, you bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen and still have $" + this.event.session.attributes.money + ". Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. " + COST_PARTS + " I recommend at least three spare parts. You currently have " + this.event.session.attributes.parts + " spare parts. " + Q_HOW_MANY_PARTS).listen(COST_PARTS + " " + Q_HOW_MANY_PARTS);
       this.emit(':responseReady');
     } else if (this.event.session.attributes.currentlyBuyingHowMany === 1) {
-      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " ox and have $" + this.event.session.attributes.money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. Each spare part costs $30. I recommend at least three spare parts. You currently have " + this.event.session.attributes.parts + " spare parts. How many spare parts do you want to buy?").listen(PARTS_REPROMPT);
+      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " ox and have $" + this.event.session.attributes.money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. " + COST_PARTS + " I recommend at least three spare parts. You currently have " + this.event.session.attributes.parts + " spare parts. " + Q_HOW_MANY_PARTS).listen(COST_PARTS + " " + Q_HOW_MANY_PARTS);
       this.emit(':responseReady');
     } else {
-      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen and have $" + this.event.session.attributes.money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. Each spare part costs $30. I recommend at least three spare parts. You currently have " + this.event.session.attributes.parts + " spare parts. How many spare parts do you want to buy?").listen(PARTS_REPROMPT);
+      this.response.speak(cashSFX + "You bought " + this.event.session.attributes.currentlyBuyingHowMany + " oxen and have $" + this.event.session.attributes.money + " left. Now let's buy spare parts. You will need these parts in case your wagon breaks down along the trail. " + COST_PARTS + " I recommend at least three spare parts. You currently have " + this.event.session.attributes.parts + " spare parts. " + Q_HOW_MANY_PARTS).listen(COST_PARTS + " " + Q_HOW_MANY_PARTS);
       this.emit(':responseReady');
     }
   };
@@ -2438,7 +2440,7 @@ var notEnoughMoney = function() {
 };
 
 var mustBuyOxen = function() {
-  this.response.speak("Sorry, you must buy at least one ox to pull your wagon. " + OXEN_REPROMPT).listen(OXEN_REPROMPT);
+  this.response.speak("Sorry, you must buy at least one ox to pull your wagon. " + COST_OXEN + " " + Q_HOW_MANY_OXEN).listen(COST_OXEN + " " + Q_HOW_MANY_OXEN);
   this.emit(':responseReady');
 };
 
@@ -2751,7 +2753,8 @@ var rest = function() {
     this.event.session.attributes.trailDays++;
     this.event.session.attributes.food -= (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
     this.event.session.attributes.howManyToHeal = 0;
-    restRecovery.call(this);
+    this.handler.state = GAME_STATES.EVENT;
+    this.emitWithState('RestRecovery');
   }
 };
 
