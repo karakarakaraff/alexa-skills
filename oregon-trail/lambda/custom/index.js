@@ -2255,7 +2255,7 @@ var statusCardContent = function() {
     + "\nOxen: " + this.event.session.attributes.oxen
     + "\nParts: " + this.event.session.attributes.parts
     + "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ");
-  } else if (this.event.session.attributes.peopleHealthy.legnth === 0) {
+  } else if (this.event.session.attributes.peopleHealthy.length === 0) {
     return "\nCurrent location: " + this.event.session.attributes.mapLocation
     + "\nDays on the trail: " + this.event.session.attributes.trailDays
     + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
