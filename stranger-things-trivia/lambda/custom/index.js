@@ -146,7 +146,7 @@ function handleUserGuess(userGaveUp) {
     let currentScore = parseInt(this.attributes.score, 10);
     let currentQuestionIndex = parseInt(this.attributes.currentQuestionIndex, 10);
     const correctAnswerText = this.attributes.correctAnswerText;
-    const translatedQuestions = this.t('QUESTIONS');
+    const translatedQuestions = this.t('QUESTIONS', {keySeparator: '#'});
 
     if (answerSlotValid && parseInt(this.event.request.intent.slots.Answer.value, 10) === this.attributes['correctAnswerIndex']) {
         currentScore++;
@@ -205,7 +205,7 @@ const startStateHandlers = Alexa.CreateStateHandler(GAME_STATES.START, {
     'StartGame': function (newGame) {
         let speechOutput = newGame ? this.t('NEW_GAME_MESSAGE', this.t('GAME_NAME')) + this.t('WELCOME_MESSAGE', GAME_LENGTH.toString()) : '';
         // Select GAME_LENGTH questions for the game
-        const translatedQuestions = this.t('QUESTIONS');
+        const translatedQuestions = this.t('QUESTIONS', {keySeparator: '#'});
         const gameQuestions = populateGameQuestions(translatedQuestions);
         // Generate a random index for the correct answer, from 0 to 3
         const correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
