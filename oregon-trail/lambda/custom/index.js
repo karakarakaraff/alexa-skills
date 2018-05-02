@@ -470,8 +470,20 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
   },
   'Unhandled': function() {
     if (this.event.request.intent.name !== "GetStartingMonth") {
-      this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
-      this.emit(":responseReady");
+      if (this.event.request.intent.name === "GetName") {
+        if (this.event.request.intent.slots.name.value.toLowerCase() === "march" || this.event.request.intent.slots.name.value.toLowerCase() === "april" || this.event.request.intent.slots.name.value.toLowerCase() === "may" || this.event.request.intent.slots.name.value.toLowerCase() === "june" || this.event.request.intent.slots.name.value.toLowerCase() === "july" || this.event.request.intent.slots.name.value.toLowerCase() === "august") {
+          this.event.session.attributes.month = this.event.request.intent.slots.name.value;
+          setDays.call(this);
+        } else if (this.event.request.intent.slots.name.value.toLowerCase() === "january" || this.event.request.intent.slots.name.value.toLowerCase() === "february" || this.event.request.intent.slots.name.value.toLowerCase() === "september" || this.event.request.intent.slots.name.value.toLowerCase() === "october" || this.event.request.intent.slots.name.value.toLowerCase() === "november" || this.event.request.intent.slots.name.value.toLowerCase() === "december") {
+          chooseMonthAgain.call(this);
+        } else {
+          this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
+          this.emit(":responseReady");
+        }
+      } else {
+        this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
+        this.emit(":responseReady");
+      }
     } else {
       this.handler.state = GAME_STATES.MONTH_SETUP;
       this.emitWithState('AMAZON.HelpIntent');
