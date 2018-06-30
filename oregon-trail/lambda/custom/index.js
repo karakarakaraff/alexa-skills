@@ -30,7 +30,7 @@ const GAME_NAME = "Oregon Trail";
 const WELCOME_MESSAGE = "Welcome to the Oregon Trail Game!";
 const START_GAME_MESSAGE = "It's 1846 in Independence, Missouri. You and your family have decided to become pioneers and travel the Oregon Trail.";
 const EXIT_SKILL_MESSAGE = "Thanks for joining me on the Oregon Trail. Let's play again soon!";
-const STOP_MESSAGE =  "Would you like to keep playing?";
+const STOP_MESSAGE = "Would you like to keep playing?";
 const CANCEL_MESSAGE = "Ok, let's play again soon.";
 const PRICE_FOOD = 0.5;
 const PRICE_OXEN = 50;
@@ -274,23 +274,23 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
         if (this.event.session.attributes.peopleHealthy.length === 0) {
           var mainPlayer = this.event.request.intent.slots.month.value;
           this.event.session.attributes.mainPlayer = mainPlayer;
-          this.event.session.attributes.peopleHealthy.push(mainPlayer);
+          this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(mainPlayer));
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 1) {
           var person2 = this.event.request.intent.slots.month.value;
-          this.event.session.attributes.peopleHealthy.push(person2);
+          this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person2));
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 2) {
           var person3 = this.event.request.intent.slots.month.value;
-          this.event.session.attributes.peopleHealthy.push(person3);
+          this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person3));
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 3) {
           var person4 = this.event.request.intent.slots.month.value;
-          this.event.session.attributes.peopleHealthy.push(person4);
+          this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person4));
           setupParty.call(this);
         } else if (this.event.session.attributes.peopleHealthy.length === 4) {
           var person5 = this.event.request.intent.slots.month.value;
-          this.event.session.attributes.peopleHealthy.push(person5);
+          this.event.session.attributes.peopleHealthy.push(capitalizeFirstLetter(person5));
           setupParty.call(this);
         } else {
           setupParty.call(this);
@@ -299,6 +299,9 @@ const userSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.USER_SETUP, {
         this.response.speak("I'm sorry, but that's not a name I understand. Please choose another name.").listen("Please choose another name.");
         this.emit(":responseReady");
       }
+    } else {
+      this.handler.state = GAME_STATES.USER_SETUP;
+      this.emitWithState('AMAZON.HelpIntent');
     }
   },
 });
@@ -470,8 +473,20 @@ const monthSetupHandlers = Alexa.CreateStateHandler(GAME_STATES.MONTH_SETUP, {
   },
   'Unhandled': function() {
     if (this.event.request.intent.name !== "GetStartingMonth") {
-      this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
-      this.emit(":responseReady");
+      if (this.event.request.intent.name === "GetName") {
+        if (this.event.request.intent.slots.name.value.toLowerCase() === "march" || this.event.request.intent.slots.name.value.toLowerCase() === "april" || this.event.request.intent.slots.name.value.toLowerCase() === "may" || this.event.request.intent.slots.name.value.toLowerCase() === "june" || this.event.request.intent.slots.name.value.toLowerCase() === "july" || this.event.request.intent.slots.name.value.toLowerCase() === "august") {
+          this.event.session.attributes.month = this.event.request.intent.slots.name.value;
+          setDays.call(this);
+        } else if (this.event.request.intent.slots.name.value.toLowerCase() === "january" || this.event.request.intent.slots.name.value.toLowerCase() === "february" || this.event.request.intent.slots.name.value.toLowerCase() === "september" || this.event.request.intent.slots.name.value.toLowerCase() === "october" || this.event.request.intent.slots.name.value.toLowerCase() === "november" || this.event.request.intent.slots.name.value.toLowerCase() === "december") {
+          chooseMonthAgain.call(this);
+        } else {
+          this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
+          this.emit(":responseReady");
+        }
+      } else {
+        this.response.speak("I'm sorry, I didn't understand your month. Please choose a month between March and August.").listen("Please choose a month between March and August.");
+        this.emit(":responseReady");
+      }
     } else {
       this.handler.state = GAME_STATES.MONTH_SETUP;
       this.emitWithState('AMAZON.HelpIntent');
@@ -589,9 +604,9 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'Snow': function() {
-    this.event.session.attributes.days+= this.event.session.attributes.lostDays;
+    this.event.session.attributes.days += this.event.session.attributes.lostDays;
     this.event.session.attributes.trailDays += this.event.session.attributes.lostDays;
-    this.event.session.attributes.food -= this.event.session.attributes.lostDays*(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
+    this.event.session.attributes.food -= this.event.session.attributes.lostDays * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
     if (this.event.session.attributes.lostDays === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + badNewsSFX + "You got stuck in some snow. You have lost 1 day. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
@@ -618,7 +633,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   'Storm': function() {
     this.event.session.attributes.days += this.event.session.attributes.lostDays;
     this.event.session.attributes.trailDays += this.event.session.attributes.lostDays;
-    this.event.session.attributes.food -= this.event.session.attributes.lostDays*(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
+    this.event.session.attributes.food -= this.event.session.attributes.lostDays * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
     if (this.event.session.attributes.lostDays >= 3) {
       this.event.session.attributes.oxen -= 1;
       if (this.event.session.attributes.oxen === 0) {
@@ -677,7 +692,13 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'Fire': function() {
-    var destroyedItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
+    var destroyedItems = [
+      ["food", 20],
+      ["oxen", 1],
+      ["money", 25],
+      ["parts", 1],
+      ["money", 10]
+    ];
     var itemIndex = Math.floor(Math.random() * destroyedItems.length);
     if (destroyedItems[itemIndex][0] == "food") {
       if (this.event.session.attributes.food > destroyedItems[itemIndex][1]) {
@@ -751,7 +772,13 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'Thief': function() {
-    var stolenItems = [["food", 20],["oxen", 1],["money", 25],["parts", 1],["money", 10]];
+    var stolenItems = [
+      ["food", 20],
+      ["oxen", 1],
+      ["money", 25],
+      ["parts", 1],
+      ["money", 10]
+    ];
     var itemIndex = Math.floor(Math.random() * stolenItems.length);
     if (stolenItems[itemIndex][0] == "food") {
       if (this.event.session.attributes.food > stolenItems[itemIndex][1]) {
@@ -825,7 +852,13 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     }
   },
   'FindItems': function() {
-    var foundItems = [["food", 50],["oxen", 2],["money", 50],["parts", 1],["money", 100]];
+    var foundItems = [
+      ["food", 50],
+      ["oxen", 2],
+      ["money", 50],
+      ["parts", 1],
+      ["money", 100]
+    ];
     var itemIndex = Math.floor(Math.random() * foundItems.length);
     if (foundItems[itemIndex][0] == "food") {
       this.event.session.attributes.food += foundItems[itemIndex][1];
@@ -864,7 +897,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
   },
   'FindBerries': function() {
     this.event.session.attributes.daysWithoutFood = 0;
-    var berries = (Math.floor(Math.random() * (10 - 1 + 1)) + 1)*3;
+    var berries = (Math.floor(Math.random() * (10 - 1 + 1)) + 1) * 3;
     this.event.session.attributes.food += berries;
     this.response.speak(this.event.session.attributes.travelingSFX + goodNewsSFX + "You found wild berries, and you harvested " + berries + " pounds. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
     this.emit(":responseReady");
@@ -891,7 +924,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
     var howLong = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
     this.event.session.attributes.days += howLong;
     this.event.session.attributes.trailDays += howLong;
-    this.event.session.attributes.food -= howLong*(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
+    this.event.session.attributes.food -= howLong * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
     if (howLong === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + badNewsSFX + "You lost the trail. You wasted 1 day. Say OK to continue on the trail.").listen("Say OK to continue on the trail.");
       this.emit(":responseReady");
@@ -1018,6 +1051,7 @@ const eventHandlers = Alexa.CreateStateHandler(GAME_STATES.EVENT, {
 const fortHandlers = Alexa.CreateStateHandler(GAME_STATES.FORT, {
   'WelcomeToFort': function() {
     this.event.session.attributes.tradeAllowed = true;
+    this.event.session.attributes.purchaseChoice = undefined;
     if (this.event.session.attributes.oxen === 1 && this.event.session.attributes.parts === 1) {
       this.response.speak(this.event.session.attributes.travelingSFX + fortSFX + "Welcome to " + this.event.session.attributes.mapLocation + "! It's " + dateFrom1846(this.event.session.attributes.days).toDateString() + ", and you have traveled " + this.event.session.attributes.miles + " miles in " + this.event.session.attributes.trailDays + " days. You currently have " + this.event.session.attributes.food + " pounds of food, " + this.event.session.attributes.oxen + " ox, " + this.event.session.attributes.parts + " spare part, and $" + this.event.session.attributes.money + ". Do you want to buy or trade anything while you're here?").listen("Do you want to buy or trade anything while you're here?");
       this.response.cardRenderer(statusCardTitle.call(this), statusCardContent.call(this));
@@ -1699,7 +1733,7 @@ const changePurchaseHandlers = Alexa.CreateStateHandler(GAME_STATES.CHANGE_PURCH
 // HANDLE HUNTING
 const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
   'ChooseToHunt': function() {
-    this.response.speak(this.event.session.attributes.travelingSFX + wildlifeSFX + "You're in an area with a lot of wildlife. You currently have " + this.event.session.attributes.food + " pounds of food, which will last about " + Math.floor(this.event.session.attributes.food/(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length)) + " days. Do you want to go hunting for more food?").listen("Do you want to go hunting for more food?");
+    this.response.speak(this.event.session.attributes.travelingSFX + wildlifeSFX + "You're in an area with a lot of wildlife. You currently have " + this.event.session.attributes.food + " pounds of food, which will last about " + Math.floor(this.event.session.attributes.food / (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length)) + " days. Do you want to go hunting for more food?").listen("Do you want to go hunting for more food?");
     this.emit(":responseReady");
   },
   'AMAZON.YesIntent': function() {
@@ -1729,8 +1763,8 @@ const huntingHandlers = Alexa.CreateStateHandler(GAME_STATES.HUNT, {
     this.emit(":responseReady");
   },
   'Unhandled': function() {
-      this.response.speak("Do you want to go hunting for more food? Please say yes or no.").listen("Do you want to go hunting for more food? Please say yes or no.");
-      this.emit(":responseReady");
+    this.response.speak("Do you want to go hunting for more food? Please say yes or no.").listen("Do you want to go hunting for more food? Please say yes or no.");
+    this.emit(":responseReady");
   },
 });
 
@@ -1982,7 +2016,7 @@ const columbiaRiverHandlers = Alexa.CreateStateHandler(GAME_STATES.COLUMBIA_RIVE
     } else {
       this.event.session.attributes.food -= (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length) * 5;
     }
-    this.response.speak("Great! You chose to float down the Columbia River. Let's go to the river." + wagonWheels3SFX + "Congratulations! You made it to the Columbia River. Are you ready to float to Oregon City? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left or to the right?").listen("Do you want to paddle to the left, or to the right?");
+    this.response.speak("Great! You chose to float down the Columbia River. Let's go to the river." + wagonWheels3SFX + "Congratulations! You made it to the Columbia River. Are you ready to float to Oregon City? Here we go!" + riverSFX + "There's a large boulder coming up. Do you want to paddle to the left, or to the right?").listen("Do you want to paddle to the left, or to the right?");
     this.emit(":responseReady");
   },
   'NoMoneyColumbiaRiver': function() {
@@ -2220,14 +2254,14 @@ const gameOverHandlers = Alexa.CreateStateHandler(GAME_STATES.GAME_OVER, {
 // GLOBAL GAME FEATURES
 // ====================
 // 1846 CALENDAR
-var dateFrom1846 = function(day){
+var dateFrom1846 = function(day) {
   var date = new Date(1846, 0);
   return new Date(date.setDate(day));
 };
 
 // CAPITALIZE NAMES
 var capitalizeFirstLetter = function(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
 // STATUS CARD TITLE
@@ -2238,51 +2272,51 @@ var statusCardTitle = function() {
 // STATUS CARD CONTENT
 var statusCardContent = function() {
   if (this.event.session.attributes.mapLocation === "Independence") {
-    return "\nCurrent location: " + this.event.session.attributes.mapLocation
-    + "\nDays on the trail: " + this.event.session.attributes.trailDays
-    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
-    + "\nMoney: " + this.event.session.attributes.money
-    + "\nFood: " + this.event.session.attributes.food
-    + "\nOxen: " + this.event.session.attributes.oxen
-    + "\nParts: " + this.event.session.attributes.parts
-    + "\nYour party: " + this.event.session.attributes.peopleHealthy.join(", ");
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation +
+      "\nDays on the trail: " + this.event.session.attributes.trailDays +
+      "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles) +
+      "\nMoney: " + this.event.session.attributes.money +
+      "\nFood: " + this.event.session.attributes.food +
+      "\nOxen: " + this.event.session.attributes.oxen +
+      "\nParts: " + this.event.session.attributes.parts +
+      "\nYour party: " + this.event.session.attributes.peopleHealthy.join(", ");
   } else if (this.event.session.attributes.peopleSick.length === 0) {
-    return "\nCurrent location: " + this.event.session.attributes.mapLocation
-    + "\nDays on the trail: " + this.event.session.attributes.trailDays
-    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
-    + "\nMoney: " + this.event.session.attributes.money
-    + "\nFood: " + this.event.session.attributes.food
-    + "\nOxen: " + this.event.session.attributes.oxen
-    + "\nParts: " + this.event.session.attributes.parts
-    + "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ");
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation +
+      "\nDays on the trail: " + this.event.session.attributes.trailDays +
+      "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles) +
+      "\nMoney: " + this.event.session.attributes.money +
+      "\nFood: " + this.event.session.attributes.food +
+      "\nOxen: " + this.event.session.attributes.oxen +
+      "\nParts: " + this.event.session.attributes.parts +
+      "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ");
   } else if (this.event.session.attributes.peopleHealthy.length === 0) {
-    return "\nCurrent location: " + this.event.session.attributes.mapLocation
-    + "\nDays on the trail: " + this.event.session.attributes.trailDays
-    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
-    + "\nMoney: " + this.event.session.attributes.money
-    + "\nFood: " + this.event.session.attributes.food
-    + "\nOxen: " + this.event.session.attributes.oxen
-    + "\nParts: " + this.event.session.attributes.parts
-    + "\nSick/injured: " + this.event.session.attributes.peopleSick.join(", ");
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation +
+      "\nDays on the trail: " + this.event.session.attributes.trailDays +
+      "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles) +
+      "\nMoney: " + this.event.session.attributes.money +
+      "\nFood: " + this.event.session.attributes.food +
+      "\nOxen: " + this.event.session.attributes.oxen +
+      "\nParts: " + this.event.session.attributes.parts +
+      "\nSick/injured: " + this.event.session.attributes.peopleSick.join(", ");
   } else {
-    return "\nCurrent location: " + this.event.session.attributes.mapLocation
-    + "\nDays on the trail: " + this.event.session.attributes.trailDays
-    + "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles)
-    + "\nMoney: " + this.event.session.attributes.money
-    + "\nFood: " + this.event.session.attributes.food
-    + "\nOxen: " + this.event.session.attributes.oxen
-    + "\nParts: " + this.event.session.attributes.parts
-    + "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ")
-    + "\nSick/injured: " + this.event.session.attributes.peopleSick.join(", ");
+    return "\nCurrent location: " + this.event.session.attributes.mapLocation +
+      "\nDays on the trail: " + this.event.session.attributes.trailDays +
+      "\nMiles: " + this.event.session.attributes.miles + "/" + (1740 + this.event.session.attributes.extraMiles) +
+      "\nMoney: " + this.event.session.attributes.money +
+      "\nFood: " + this.event.session.attributes.food +
+      "\nOxen: " + this.event.session.attributes.oxen +
+      "\nParts: " + this.event.session.attributes.parts +
+      "\nHealthy: " + this.event.session.attributes.peopleHealthy.join(", ") +
+      "\nSick/injured: " + this.event.session.attributes.peopleSick.join(", ");
   }
 };
 
 var getPoints = function() {
   var points = (this.event.session.attributes.peopleHealthy.length * 100) + (this.event.session.attributes.peopleSick.length * 50) + (this.event.session.attributes.oxen * 50) + (this.event.session.attributes.food * 2) + (this.event.session.attributes.parts * 10) + this.event.session.attributes.money - this.event.session.attributes.trailDays - this.event.session.attributes.columbiaRiverDamage;
   if (this.event.session.attributes.profession === "farmer") {
-    points = points*3;
+    points = points * 3;
   } else if (this.event.session.attributes.profession === "carpenter") {
-    points = points*2;
+    points = points * 2;
   }
   this.event.session.attributes.finalscore = points;
   return this.event.session.attributes.finalscore;
@@ -2366,7 +2400,7 @@ var chooseProfessionAgain = function() {
 // SUPPLIES
 const GENERAL_STORE_MESSAGE = "Before leaving, you need to stock up on supplies. Let's go to the general store and buy food, oxen, and spare parts." + fortSFX + " We'll start with food. " + COST_FOOD + " I recommend at least 1,000 pounds.";
 
-var generalStore = function () {
+var generalStore = function() {
   this.event.session.attributes.hasBeenToGeneralStore = true;
   var buyFood = function() {
     this.event.session.attributes.currentlyBuyingWhat = "pounds of food";
@@ -2527,15 +2561,15 @@ var randomEvents = function() {
     if (this.event.session.attributes.fate < 3 && this.event.session.attributes.trailDays % 4 === 0) {
       this.handler.state = GAME_STATES.HUNT;
       this.emitWithState('ChooseToHunt');
-    // SICKNESS/INJURY
+      // SICKNESS/INJURY
     } else if (this.event.session.attributes.fate % 4 === 0 && this.event.session.attributes.trailDays % 4 === 0) {
       this.handler.state = GAME_STATES.SICK;
       this.emitWithState('Alert');
-    // DEATH OF SICK/INJURED
+      // DEATH OF SICK/INJURED
     } else if (this.event.session.attributes.fate === 10 && this.event.session.attributes.trailDays % 2 === 0) {
       this.handler.state = GAME_STATES.EVENT;
       this.emitWithState('Death');
-    // WEATHER
+      // WEATHER
     } else if (this.event.session.attributes.fate === 3 && this.event.session.attributes.trailDays % 2 === 0) {
       if (this.event.session.attributes.days < 121 || (this.event.session.attributes.days >= 305 && this.event.session.attributes.days < 486) || this.event.session.attributes.days >= 671) {
         this.event.session.attributes.lostDays = Math.floor(Math.random() * (7 - 4 + 1)) + 1;
@@ -2550,7 +2584,7 @@ var randomEvents = function() {
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
-    // GREAT AMERICAN DESERT
+      // GREAT AMERICAN DESERT
     } else if (this.event.session.attributes.fate === 9) {
       if (this.event.session.attributes.mapLocation === "Kansas River" || this.event.session.attributes.mapLocation === "Fort Kearny" || this.event.session.attributes.mapLocation === "Chimney Rock") {
         if (this.event.session.attributes.days < 121 || (this.event.session.attributes.days >= 364 && this.event.session.attributes.days < 486)) {
@@ -2569,7 +2603,7 @@ var randomEvents = function() {
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
-    // GOOD THINGS
+      // GOOD THINGS
     } else if (this.event.session.attributes.fate === 7 && this.event.session.attributes.trailDays % 2 === 1) {
       var goodThing = Math.floor(Math.random() * (2 - 1 + 1)) + 1;
       if (goodThing === 1) {
@@ -2587,7 +2621,7 @@ var randomEvents = function() {
         this.handler.state = GAME_STATES.EVENT;
         this.emitWithState('PlayGame');
       }
-    // BAD THINGS
+      // BAD THINGS
     } else if (this.event.session.attributes.fate === 6 && this.event.session.attributes.trailDays % 2 === 1) {
       var badThing = Math.floor(Math.random() * (5 - 1 + 1)) + 1;
       if (badThing === 1) {
@@ -2667,7 +2701,7 @@ var evaluateOffer = function() {
   } else if (this.event.session.attributes.tradeDeal === 5) {
     if (this.event.session.attributes.parts >= 1) {
       this.event.session.attributes.money += 30;
-      this.event.session.attributes.parts --;
+      this.event.session.attributes.parts--;
       this.handler.state = GAME_STATES.FORT;
       this.emitWithState('TradeSuccess');
     } else {
@@ -2733,19 +2767,19 @@ var rest = function() {
   if (this.event.session.attributes.daysOfRest >= 7 && chanceOfRecovery % 2 === 0) {
     this.event.session.attributes.days += this.event.session.attributes.daysOfRest;
     this.event.session.attributes.trailDays += this.event.session.attributes.daysOfRest;
-    this.event.session.attributes.food -= this.event.session.attributes.daysOfRest*(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
+    this.event.session.attributes.food -= this.event.session.attributes.daysOfRest * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
     this.event.session.attributes.howManyToHeal = 3;
     restRecovery.call(this);
   } else if (this.event.session.attributes.daysOfRest >= 5 && chanceOfRecovery % 2 === 0) {
     this.event.session.attributes.days += this.event.session.attributes.daysOfRest;
     this.event.session.attributes.trailDays += this.event.session.attributes.daysOfRest;
-    this.event.session.attributes.food -= this.event.session.attributes.daysOfRest*(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
+    this.event.session.attributes.food -= this.event.session.attributes.daysOfRest * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
     this.event.session.attributes.howManyToHeal = 2;
     restRecovery.call(this);
   } else if (this.event.session.attributes.daysOfRest >= 2 && chanceOfRecovery % 2 === 0) {
     this.event.session.attributes.days += this.event.session.attributes.daysOfRest;
     this.event.session.attributes.trailDays += this.event.session.attributes.daysOfRest;
-    this.event.session.attributes.food -= this.event.session.attributes.daysOfRest*(this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
+    this.event.session.attributes.food -= this.event.session.attributes.daysOfRest * (this.event.session.attributes.peopleHealthy.length + this.event.session.attributes.peopleSick.length);
     this.event.session.attributes.howManyToHeal = 1;
     restRecovery.call(this);
   } else {
@@ -3030,7 +3064,7 @@ var theOregonTrail = function() {
 
   // DAILY CHANGES
   this.event.session.attributes.miles += 15;
-  this.event.session.attributes.days ++;
+  this.event.session.attributes.days++;
   this.event.session.attributes.trailDays++;
   this.event.session.attributes.fate = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
 
