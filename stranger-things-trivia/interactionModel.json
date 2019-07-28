@@ -1,85 +1,86 @@
 {
-  "languageModel": {
-    "intents": [
-      {
-        "name": "AMAZON.CancelIntent",
-        "samples": []
-      },
-      {
-        "name": "AMAZON.HelpIntent",
-        "samples": []
-      },
-      {
-        "name": "AMAZON.NoIntent",
-        "samples": []
-      },
-      {
-        "name": "AMAZON.RepeatIntent",
-        "samples": []
-      },
-      {
-        "name": "AMAZON.StartOverIntent",
-        "samples": []
-      },
-      {
-        "name": "AMAZON.StopIntent",
-        "samples": []
-      },
-      {
-        "name": "AMAZON.YesIntent",
-        "samples": []
-      },
-      {
-        "name": "DontKnowIntent",
-        "samples": [
-          "i don't know",
-          "don't know",
-          "i don't know that one",
-          "dunno",
-          "skip",
-          "i don't know that",
-          "who knows",
-          "i don't know this question",
-          "i have no idea",
-          "next"
-        ],
-        "slots": []
-      },
-      {
-        "name": "GetAnswerIntent",
-        "samples": [
-          "the answer is {Answer}",
-          "my answer is {Answer}",
-          "is it {Answer}",
-          "{Answer} is my answer",
-          "{Answer}",
-          "it's {Answer}"
-        ],
-        "slots": [
-          {
-            "name": "Answer",
-            "type": "AMAZON.NUMBER"
-          }
-        ]
-      },
-      {
-        "name": "Random",
-        "samples": [
-          "whatever you said",
-          "purple",
-          "dog",
-          "cat",
-          "yellow",
-          "i like lamp"
-        ],
-        "slots": [
-          {
-            "name": "literal",
-            "type": "AMAZON.LITERAL"
-          }
-        ]
-      }
-    ],
-    "invocationName": "stranger things trivia"
-  }
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "stranger things trivia",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AnswerIntent",
+                    "slots": [
+                        {
+                            "name": "Answer",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "the answer is {Answer}",
+                        "my answer is {Answer}",
+                        "is it {Answer}",
+                        "{Answer} is my answer",
+                        "{Answer}",
+                        "it's {Answer}"
+                    ]
+                },
+                {
+                    "name": "DontKnowIntent",
+                    "slots": [],
+                    "samples": [
+                        "i don't know",
+                        "don't know",
+                        "i don't know that one",
+                        "dunno",
+                        "skip",
+                        "i don't know that",
+                        "who knows",
+                        "i don't know this question",
+                        "i have no idea",
+                        "no idea",
+                        "no clue",
+                        "next"
+                    ]
+                },
+                {
+                    "name": "AMAZON.StartOverIntent",
+                    "samples": [
+                        "start game",
+                        "new game",
+                        "start",
+                        "start new game"
+                    ]
+                },
+                {
+                    "name": "AMAZON.RepeatIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.YesIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NoIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                }
+            ],
+            "types": []
+        }
+    }
 }
