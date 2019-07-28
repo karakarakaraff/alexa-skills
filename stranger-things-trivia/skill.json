@@ -8,7 +8,7 @@
             "Alexa, open Stranger Things Trivia",
           ],
           "name": "Stranger Things Trivia",
-          "description": "Do you believe you're a Stranger Things expert? See if you've got what it takes to join the party and defeat the evil of the Upside Down. Answer 11 questions, and if you get them all correct, congratulations! You have the truest of sight.\n\nThis skill has over 50 questions covering seasons one and two of Netflix's popular series, Stranger Things. With each game randomly picking 11 questions from the full list, no two games are the same. Enjoy!"
+          "description": "Do you believe you're a Stranger Things expert? See if you've got what it takes to join the party and defeat the evil of the Upside Down. Answer 11 questions, and if you get them all correct, congratulations! You have the truest of sight. This skill has 70 questions covering all three seasons of Netflix's popular series, Stranger Things. With each game randomly picking 11 questions from the full list, no two games are the same. Enjoy!"
         }
       },
       "isAvailableWorldwide": true,
